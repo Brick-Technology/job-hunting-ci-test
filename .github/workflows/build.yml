@@ -39,7 +39,6 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         run: |
           awk '/^##[^#]/{print NR}' CHANGELOG.md | head -n 2 | xargs | tr ' ' ',' | xargs -I {} sed -n {}p  CHANGELOG.md | sed '$d' > ${{ github.workspace }}-CHANGELOG.txt
-          - name: Gen Latest Changelog
 
       - name: Rename dist
         if: startsWith(github.ref, 'refs/tags/')
@@ -47,12 +46,12 @@ jobs:
           mv dist-chrome job-hunting-extension-chrome-${{  github.ref_name }}
           mv dist-firefox job-hunting-extension-firefox-${{  github.ref_name }}
 
-      - name: Zip chrome
+      - name: Zip chrome dist
         uses: montudor/action-zip@v1
         with:
           args: zip -qq -r job-hunting-extension-chrome-${{  github.ref_name }}.zip job-hunting-extension-chrome-${{  github.ref_name }}
 
-      - name: Zip firefox
+      - name: Zip firefox dist
         uses: montudor/action-zip@v1
         with:
           args: zip -qq -r job-hunting-extension-firefox-${{  github.ref_name }}.zip job-hunting-extension-firefox-${{  github.ref_name }}
