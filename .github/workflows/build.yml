@@ -21,25 +21,28 @@ jobs:
         run: |
           npm install
           npm run build-chrome
+          npm run build-firefox
 
-      - name: 部署
+      - name: 部署chrome
         uses: JamesIves/github-pages-deploy-action@4.1.4
         with:
           branch: dist/chrome-${{  github.ref_name }}
           folder: dist-chrome
-  build-firefox-extension:
-    runs-on: ubuntu-latest
-    steps:
-      - name: 读取仓库
-        uses: actions/checkout@v4
 
-      - name: 打包
-        run: |
-          npm install
-          npm run build-firefox
-
-      - name: 部署
+      - name: 部署firefox
         uses: JamesIves/github-pages-deploy-action@4.1.4
         with:
           branch: dist/firefox-${{  github.ref_name }}
           folder: dist-firefox
+      
+      - name: Set outputs
+        id: vars
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          echo ::set-output name=LATEST_CHANGELOG::$(awk '/^##[^#]/{print NR}' CHANGELOG.md | head -n 2 | xargs | tr ' ' ',' | xargs -I {} sed -n {}p  CHANGELOG.md | sed '$d')
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          body: ${{ steps.vars.outputs.LATEST_CHANGELOG }}
