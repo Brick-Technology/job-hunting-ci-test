@@ -183,59 +183,10 @@
                                 <l-marker v-for="(item, index) in jobsFilterEmptyLocation"
                                     :lat-lng="[item.jobLatitude, item.jobLongitude]">
                                     <l-popup ref="popups" :lat-lng="[item.jobLatitude, item.jobLongitude]">
-                                        <el-row>
-                                            <el-text line-clamp="1">职位名：
-                                                <el-link type="primary" :href="item.jobUrl" target="_blank">{{
-                                                    item.jobName
-                                                    }}</el-link></el-text>
-                                        </el-row>
-                                        <el-row>
-                                            <el-text line-clamp="1">发布时间：{{
-                                                datetimeFormat(item.jobFirstPublishDatetime)
-                                                }}</el-text>
-                                        </el-row>
-                                        <el-row>
-                                            <el-text line-clamp="1">薪资：💵{{ item.jobSalaryMin }} - 💵{{
-                                                item.jobSalaryMax
-                                                }}</el-text>
-                                        </el-row>
-                                        <el-row>
-                                            <el-text line-clamp="1">学历：{{ item.jobDegreeName }}</el-text>
-                                        </el-row>
-                                        <el-row>
-                                            <el-text line-clamp="1">招聘平台：{{ item.jobPlatform }}</el-text>
-                                        </el-row>
-                                        <el-row>
-                                            <el-text line-clamp="1">地址：{{ item.jobAddress }}</el-text>
-                                        </el-row>
-                                        <el-row>
-                                            <el-text line-clamp="1">公司名：{{ item.jobCompanyName }}</el-text>
-                                        </el-row>
-                                        <el-row v-if="
-                                            item.companyTagDTOList && item.companyTagDTOList.length > 0
-                                        ">
-                                            <el-text line-clamp="1">公司标签({{ item.companyTagDTOList.length }})：</el-text>
-                                            <el-text class="tagItem" v-for="(item, index) in item.companyTagDTOList">
-                                                <el-tag type="primary">
-                                                    <Icon icon="mdi:tag" />{{ item.tagName }}
-                                                </el-tag>
-                                            </el-text>
-                                        </el-row>
+                                        <MapJobDetail :key="item.jobId" :item="item"></MapJobDetail>
                                     </l-popup>
                                     <l-icon className="icon" :key="item.jobId">
-                                        <div class="mapIcon">
-                                            <el-row>
-                                                <el-text line-clamp="1"> {{ item.jobName }}</el-text>
-                                            </el-row>
-                                            <el-row>
-                                                <el-text line-clamp="1">💵{{ item.jobSalaryMin }} - 💵{{
-                                                    item.jobSalaryMax
-                                                    }}</el-text>
-                                            </el-row>
-                                            <el-row>
-                                                <el-text line-clamp="1">{{ item.jobCompanyName }}</el-text>
-                                            </el-row>
-                                        </div>
+                                        <MapJobIcon :key="item.jobId" :item="item"></MapJobIcon>
                                     </l-icon>
                                 </l-marker>
                             </l-marker-cluster-group>
@@ -288,14 +239,14 @@
                     <el-radio-group v-model="form.publishDateOffset">
                         <el-radio v-for="(item) in publishDateOffsetOptions" :value="item.value" :key="item.value">{{
                             item.label
-                        }}</el-radio>
+                            }}</el-radio>
                     </el-radio-group>
                 </el-form-item>
                 <el-form-item label="排序">
                     <el-radio-group v-model="form.sortMode">
                         <el-radio v-for="(item) in sortModeOptions" :value="item.value" :key="item.value">{{
                             item.label
-                        }}</el-radio>
+                            }}</el-radio>
                     </el-radio-group>
                 </el-form-item>
                 <el-form-item>
@@ -343,6 +294,10 @@ import { JobDTO } from "../../../common/data/dto/jobDTO";
 import { UI_DEFAULT_PAGE_SIZE } from "../../../common/config";
 import JobItemCard from '../../components/JobItemCard.vue';
 import { Icon } from "@iconify/vue";
+import { useJob } from "../../hook/job";
+import MapJobIcon from "../../components/MapJobIcon.vue";
+import MapJobDetail from "../../components/MapJobDetail.vue";
+const { platformFormat, platformLogo } = useJob()
 
 const form = reactive({
     nameKeywordList: [],
@@ -665,14 +620,6 @@ const onOpenCurrentAllJobDetailPage = () => {
 
 .mapWrapper {
     flex: 1;
-}
-
-.mapIcon {
-    width: 200px;
-    background-color: lightgoldenrodyellow;
-    padding: 5px;
-    border-radius: 5px;
-    border: 1px solid yellowgreen;
 }
 
 .middle {

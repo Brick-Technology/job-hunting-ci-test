@@ -51,14 +51,14 @@
       <div>最近查看职位</div>
       <el-scrollbar ref="scrollbar">
         <div class="leftSub" ref="latestJobRef" v-loading="searchLoading">
-            <el-timeline v-if="tableData.length > 0">
-              <el-timeline-item v-for="(item, index) in tableData" :key="index"
-                :timestamp="item.latestBrowseDetailDatetime" v-show="item.latestBrowseDetailDatetime">
-                <JobItemCard :item="item" :key="item.jobId" @map-locate="onJobMapLocate(item)"></JobItemCard>
-              </el-timeline-item>
-            </el-timeline>
-            <el-text v-else>无</el-text>
-      </div>
+          <el-timeline v-if="tableData.length > 0">
+            <el-timeline-item v-for="(item, index) in tableData" :key="index"
+              :timestamp="item.latestBrowseDetailDatetime" v-show="item.latestBrowseDetailDatetime">
+              <JobItemCard :item="item" :key="item.jobId" @map-locate="onJobMapLocate(item)"></JobItemCard>
+            </el-timeline-item>
+          </el-timeline>
+          <el-text v-else>无</el-text>
+        </div>
       </el-scrollbar>
     </div>
     <div class="middle">
@@ -70,57 +70,10 @@
           <l-marker-cluster-group>
             <l-marker v-for="(item, index) in tableData" :lat-lng="[item.jobLatitude, item.jobLongitude]">
               <l-popup ref="popups" :lat-lng="[item.jobLatitude, item.jobLongitude]">
-                <el-row>
-                  <el-text line-clamp="1">职位名：
-                    <el-link type="primary" :href="item.jobUrl" target="_blank">{{ item.jobName }}</el-link></el-text>
-                </el-row>
-                <el-row>
-                  <el-text line-clamp="1">发布时间：{{
-                    datetimeFormat(item.jobFirstPublishDatetime)
-                  }}</el-text>
-                </el-row>
-                <el-row>
-                  <el-text line-clamp="1">薪资：💵{{ item.jobSalaryMin }} - 💵{{
-                    item.jobSalaryMax
-                  }}</el-text>
-                </el-row>
-                <el-row>
-                  <el-text line-clamp="1">学历：{{ item.jobDegreeName }}</el-text>
-                </el-row>
-                <el-row>
-                  <el-text line-clamp="1">招聘平台：{{ item.jobPlatform }}</el-text>
-                </el-row>
-                <el-row>
-                  <el-text line-clamp="1">地址：{{ item.jobAddress }}</el-text>
-                </el-row>
-                <el-row>
-                  <el-text line-clamp="1">公司名：{{ item.jobCompanyName }}</el-text>
-                </el-row>
-                <el-row v-if="
-                  item.companyTagDTOList && item.companyTagDTOList.length > 0
-                ">
-                  <el-text line-clamp="1">公司标签({{ item.companyTagDTOList.length }})：</el-text>
-                  <el-text class="tagItem" v-for="(item, index) in item.companyTagDTOList">
-                    <el-tag type="primary">
-                      <Icon icon="mdi:tag" />{{ item.tagName }}
-                    </el-tag>
-                  </el-text>
-                </el-row>
+                <MapJobDetail :key="item.jobId" :item="item"></MapJobDetail>
               </l-popup>
               <l-icon className="icon" :key="item.jobId">
-                <div class="mapIcon">
-                  <el-row>
-                    <el-text line-clamp="1"> {{ item.jobName }}</el-text>
-                  </el-row>
-                  <el-row>
-                    <el-text line-clamp="1">💵{{ item.jobSalaryMin }} - 💵{{
-                      item.jobSalaryMax
-                    }}</el-text>
-                  </el-row>
-                  <el-row>
-                    <el-text line-clamp="1">{{ item.jobCompanyName }}</el-text>
-                  </el-row>
-                </div>
+                <MapJobIcon :key="item.jobId" :item="item"></MapJobIcon>
               </l-icon>
             </l-marker>
           </l-marker-cluster-group>
@@ -131,6 +84,7 @@
       <el-descriptions direction="vertical" :column="1" size="small" border>
         <el-descriptions-item label="招聘网站">
           <el-row v-for="(item, index) in jobWebsiteList">
+            <img class="logo" :src="item.logo" alt="logo" />
             <el-link :key="index" type="primary" :href="item.url" target="_blank">{{ item.label }}</el-link>
           </el-row>
         </el-descriptions-item>
@@ -181,6 +135,8 @@ import { Icon } from "@iconify/vue";
 import dayjs from "dayjs";
 import { UI_DEFAULT_PAGE_SIZE } from "../../common/config";
 import JobItemCard from "../components/JobItemCard.vue";
+import MapJobIcon from "../components/MapJobIcon.vue";
+import MapJobDetail from "../components/MapJobDetail.vue";
 
 const todayBrowseDetailCountSource = ref(0);
 const todayBrowseDetailCount = useTransition(todayBrowseDetailCountSource, {
@@ -305,13 +261,15 @@ function getSearchParam() {
   return searchParam;
 }
 
+import { logo } from "../assets";
+
 const jobWebsiteList = [
-  { url: "https://www.zhipin.com/web/geek/job", label: "BOSS直聘" },
-  { url: "https://we.51job.com/pc/search ", label: "前程无忧" },
-  { url: "https://sou.zhaopin.com/", label: "智联招聘" },
-  { url: "https://www.lagou.com/wn/zhaopin", label: "拉钩网" },
-  { url: "https://www.liepin.com/zhaopin", label: "猎聘网" },
-  { url: "https://hk.jobsdb.com/", label: "Jobsdb-HK" },
+  { url: "https://www.zhipin.com/web/geek/job", label: "BOSS直聘", logo: logo.boss },
+  { url: "https://we.51job.com/pc/search ", label: "前程无忧", logo: logo.job51 },
+  { url: "https://sou.zhaopin.com/", label: "智联招聘", logo: logo.zhilian },
+  { url: "https://www.lagou.com/wn/zhaopin", label: "拉钩网", logo: logo.lagou },
+  { url: "https://www.liepin.com/zhaopin", label: "猎聘网", logo: logo.liepin },
+  { url: "https://hk.jobsdb.com/", label: "Jobsdb-HK", logo: logo.jobsdb },
 ];
 
 const companyWebsiteList = [
@@ -373,14 +331,6 @@ const tourOpen = ref(false);
   flex: 1;
 }
 
-.mapIcon {
-  width: 200px;
-  background-color: lightgoldenrodyellow;
-  padding: 5px;
-  border-radius: 5px;
-  border: 1px solid yellowgreen;
-}
-
 .divider {
   margin: 16px;
 }
@@ -410,8 +360,8 @@ const tourOpen = ref(false);
   min-width: 200px;
 }
 
-.leftSub{
-  padding:10px;
+.leftSub {
+  padding: 10px;
 }
 
 .middle {
@@ -425,5 +375,11 @@ const tourOpen = ref(false);
   min-width: 200px;
   max-width: 400px;
   overflow: auto;
+}
+
+.logo {
+  width: 20px;
+  height: 20px;
+  padding: 5px;
 }
 </style>

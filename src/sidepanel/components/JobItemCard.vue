@@ -268,16 +268,17 @@
             </div>
             <div class="publish">
                 <div class="timeTag" :style="getTimeTagStyle(item.jobFirstPublishDatetime)" size="small" effect="plain">
-                    <div v-if="item.jobFirstPublishDatetime">
+                    <div class="publishInfo" v-if="item.jobFirstPublishDatetime">
                         <Icon icon="fluent-mdl2:date-time-2" />{{
                             convertTimeOffsetToHumanReadable(item.jobFirstPublishDatetime) }}发布
                     </div>
-                    <div v-else>
+                    <div class="publishInfo" v-else>
                         <Icon icon="mdi:tag" />发布时间未知
                     </div>
                 </div>
                 <div class="platform">
-                    {{ platformFormat(item.jobPlatform) }}
+                    <img class="logo" :src="platformLogo(item.jobPlatform)" alt="logo" />{{
+                        platformFormat(item.jobPlatform) }}
                 </div>
             </div>
         </div>
@@ -292,7 +293,7 @@ import dayjs from "dayjs";
 import { useJob } from "../hook/job";
 import { getUrlByTagAndCompanyName } from "../../common"
 
-const { platformFormat } = useJob()
+const { platformFormat, platformLogo } = useJob()
 
 const props = defineProps({
     item: JobDTO,
@@ -373,7 +374,13 @@ const datetimeFormat = computed(() => {
     justify-content: space-between;
 
     .platform {
+        display: flex;
+        align-items: center;
         color: gray;
+    }
+    .publishInfo{
+        display:flex;
+        align-items:center;
     }
 }
 
@@ -407,7 +414,7 @@ const datetimeFormat = computed(() => {
 .info {
     display: flex;
     justify-content: space-between;
-    width:300px;
+    width: 300px;
 }
 
 .jobName {
@@ -447,6 +454,11 @@ const datetimeFormat = computed(() => {
     right: -7px;
     top: -17px;
     color: darkcyan;
+}
+.logo {
+    width: 15px;
+    height: 15px;
+    padding:2px;
 }
 </style>
 

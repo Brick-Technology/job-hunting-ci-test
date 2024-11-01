@@ -5,7 +5,10 @@ import {
     PLATFORM_LAGOU,
     PLATFORM_LIEPIN,
     PLATFORM_ZHILIAN,
+    PLATFORM_JOBSDB,
 } from "../../common";
+
+import { logo } from "../assets";
 
 export function useJob() {
 
@@ -28,7 +31,28 @@ export function useJob() {
         };
     });
 
-    return { platformFormat }
+    const platformLogo = computed(() => {
+        return function (value: string) {
+            switch (value) {
+                case PLATFORM_BOSS:
+                    return logo.boss;
+                case PLATFORM_51JOB:
+                    return logo.job51;
+                case PLATFORM_LAGOU:
+                    return logo.lagou;
+                case PLATFORM_LIEPIN:
+                    return logo.liepin;
+                case PLATFORM_ZHILIAN:
+                    return logo.zhilian;
+                case PLATFORM_JOBSDB:
+                    return logo.jobsdb;
+                default:
+                    return "";
+            }
+        };
+    });
+
+    return { platformFormat,platformLogo }
 
 }
 
