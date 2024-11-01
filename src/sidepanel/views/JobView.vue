@@ -682,9 +682,6 @@ function getSearchParam() {
     searchParam.firstPublishEndDatetime = dayjs(
       jobSearchFirstPublishDatetime.value[1]
     );
-  } else {
-    searchParam.startDatetime = null;
-    searchParam.endDatetime = null;
   }
   if (mapMode.value && mapSearchMode.value) {
     let latLngBounds = map.value.leafletObject.getBounds();

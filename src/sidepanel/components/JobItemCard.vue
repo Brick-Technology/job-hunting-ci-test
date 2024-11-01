@@ -407,6 +407,7 @@ const datetimeFormat = computed(() => {
 .info {
     display: flex;
     justify-content: space-between;
+    width:300px;
 }
 
 .jobName {
