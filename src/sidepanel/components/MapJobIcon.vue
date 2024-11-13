@@ -1,5 +1,5 @@
 <template>
-    <div class="mapIcon">
+    <div class="mapIcon" :title="`${item.jobDescription}`">
         <el-row class="jobNameWrapper">
             <img class="logo" :src="platformLogo(item.jobPlatform)" alt="logo" />
             <el-text line-clamp="1"> {{ item.jobName }}</el-text>

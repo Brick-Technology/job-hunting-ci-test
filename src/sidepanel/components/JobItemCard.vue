@@ -1,5 +1,5 @@
 <template>
-    <div class="main">
+    <div class="main" :title="`${item.jobDescription}`">
         <div v-if="item.isCreateByToday" class="newBadge">
             <el-tooltip effect="customized" content="今日新发现" placement="top-start">
                 <Icon icon="foundation:burst-new" width="45" height="45" />
@@ -277,6 +277,9 @@
                     </div>
                 </div>
                 <div class="platform">
+                    <div class="bossInfo" :title="`${item.bossName}【${item.bossPosition}`">
+                        {{ item.bossName }}【{{ item.bossPosition }}】
+                    </div>
                     <img class="logo" :src="platformLogo(item.jobPlatform)" alt="logo" />{{
                         platformFormat(item.jobPlatform) }}
                 </div>
@@ -378,9 +381,10 @@ const datetimeFormat = computed(() => {
         align-items: center;
         color: gray;
     }
-    .publishInfo{
-        display:flex;
-        align-items:center;
+
+    .publishInfo {
+        display: flex;
+        align-items: center;
     }
 }
 
@@ -455,10 +459,18 @@ const datetimeFormat = computed(() => {
     top: -17px;
     color: darkcyan;
 }
+
 .logo {
     width: 15px;
     height: 15px;
-    padding:2px;
+    padding: 2px;
+}
+
+.bossInfo {
+    max-width: 150px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 </style>
 

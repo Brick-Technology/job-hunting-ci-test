@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## WIP
+
+### ✏️ Changed
+
+1. (SidePanel)职位卡片显示招聘人信息和招聘详情。
+1. (SidePanel)地图图标和详情气泡显示招聘详情。
+
 ## 1.29.1(2024-11-01)
 
 ### 🐛 Fixed
