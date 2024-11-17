@@ -177,6 +177,12 @@
     <img src="docs\introduction\sidepanel_admin_company_tag.jpg" alt="sidepanel_admin_company_tag" width="1000px"/>
 </div>
 
+#### 职位标签管理
+
+<div style="margin-top:30px">
+    <img src="docs\introduction\sidepanel_admin_job_tag.jpg" alt="sidepanel_admin_job_tag" width="1000px"/>
+</div>
+
 #### 系统设置
 
 <div style="margin-top:30px">
