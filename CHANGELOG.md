@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## WIP
+
+### 🔨 Dependency
+
+1. Update @sqlite.org/sqlite-wasm 3.47.0-build1
+
 ## 1.30.0(2024-11-17)
 
 ### ⭐ Added

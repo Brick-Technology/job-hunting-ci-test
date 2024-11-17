@@ -106,8 +106,8 @@ importers:
         specifier: ^15.2.3
         version: 15.2.3(rollup@4.21.2)
       '@sqlite.org/sqlite-wasm':
-        specifier: 3.46.0-build2
-        version: 3.46.0-build2
+        specifier: 3.47.0-build1
+        version: 3.47.0-build1
       '@types/chrome':
         specifier: ^0.0.270
         version: 0.0.270
@@ -554,8 +554,8 @@ packages:
     resolution: {integrity: sha512-TV7t8GKYaJWsn00tFDqBw8+Uqmr8A0fRU1tvTQhyZzGv0sJCGRQL3JGMI3ucuKo3XIZdUP+Lx7/gh2t3lewy7g==}
     engines: {node: '>=14.16'}
 
-  '@sqlite.org/sqlite-wasm@3.46.0-build2':
-    resolution: {integrity: sha512-10s/u/Main1RGO+jjzK+mgC/zh1ls1CEnq3Dujr03TwvzLg+j4FAohOmlYkQj8KQOj1vGR9cuB9F8tVBTwVGVA==}
+  '@sqlite.org/sqlite-wasm@3.47.0-build1':
+    resolution: {integrity: sha512-n2lLez+PwcN+WQdgRIm6OCaGvQUHOx+kEmlL7pq0G4xuK+NaKxnbF4wI6XhfZ4HbyG2sla1Qt4ImaD6hpwoMtg==}
     hasBin: true
 
   '@sxzz/popperjs-es@2.11.7':
@@ -3500,7 +3500,7 @@ snapshots:
 
   '@sindresorhus/is@5.6.0': {}
 
-  '@sqlite.org/sqlite-wasm@3.46.0-build2': {}
+  '@sqlite.org/sqlite-wasm@3.47.0-build1': {}
 
   '@sxzz/popperjs-es@2.11.7': {}
 
