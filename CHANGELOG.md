@@ -1,10 +1,14 @@
 # CHANGELOG
 
-## WIP
+## 1.30.1(2024-11-17)
 
 ### 🔨 Dependency
 
 1. Update @sqlite.org/sqlite-wasm 3.47.0-build1
+
+### 🔗 Build
+
+1. build脚本使用pnpm进行依赖包安装和构建运行。
 
 ## 1.30.0(2024-11-17)
 
