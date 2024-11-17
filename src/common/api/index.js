@@ -41,6 +41,9 @@ import { SearchDataSharePartnerDTO } from "../data/dto/searchDataSharePartnerDTO
 import { StatisticDataSharePartnerDTO } from "../data/dto/statisticDataSharePartnerDTO";
 import { StatisticTaskBO } from "../data/bo/statisticTaskBO";
 import { StatisticTaskDTO } from "../data/dto/statisticTaskDTO";
+import { JobTagSearchBO } from "../data/bo/jobTagSearchBO";
+import { JobTagSearchDTO } from "../data/dto/jobTagSearchDTO";
+
 
 export const JobApi = {
   /**
@@ -167,6 +170,85 @@ export const JobApi = {
     return result.data;
   },
 
+
+  /**
+    * 
+    * @param {JobTagBO} param
+    */
+  jobTagAddOrUpdate: async function (param,
+    { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
+    return invoke(this.jobTagAddOrUpdate.name, param, {
+      invokeEnv: invokeEnv,
+    });
+  },
+
+  /**
+   * 
+   * @param {JobTagBO[]} param
+   */
+  jobTagBatchAddOrUpdateWithTransaction: async function (param,
+    { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
+    return invoke(this.jobTagBatchAddOrUpdateWithTransaction.name, param, {
+      invokeEnv: invokeEnv,
+    });
+  },
+
+  /**
+  * 
+  * @param {string} param jobId
+  */
+  jobTagGetAllDTOByJobId: async function (param,
+    { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
+    let result = await invoke(this.jobTagGetAllDTOByJobId.name, param, {
+      invokeEnv: invokeEnv,
+    });
+    return result.data;
+  },
+
+  /**
+  * 
+  * @param {string[]} param jobId
+  */
+  jobTagGetAllDTOByJobIds: async function (param,
+    { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
+    let result = await invoke(this.jobTagGetAllDTOByJobIds.name, param, {
+      invokeEnv: invokeEnv,
+    });
+    return result.data;
+  },
+
+  /**
+ *
+ * @param {JobTagSearchBO} param
+ *
+ * @returns JobTagSearchDTO[]
+ */
+  jobTagSearch: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
+    let result = await invoke(this.jobTagSearch.name, param, {
+      invokeEnv: invokeEnv,
+    });
+    return result.data;
+  },
+
+  /**
+   * 
+   * @param {string[]} param ids
+   */
+  jobTagDeleteByJobIds: async function (param,
+    { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
+    return invoke(this.jobTagDeleteByJobIds.name, param, {
+      invokeEnv: invokeEnv,
+    });
+  },
+
+  /**
+   * 
+   * @returns JobTagStatisticDTO
+   */
+  jobTagStatistic: async function () {
+    let result = await invoke(this.jobTagStatistic.name, {});
+    return result.data;
+  },
 };
 
 export const CompanyApi = {
