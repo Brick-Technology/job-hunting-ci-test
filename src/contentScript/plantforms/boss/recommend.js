@@ -58,7 +58,6 @@ function mutationJobContainerRemove() {
     });
 }
 
-
 function mutationJobContainerLoadingFinish(node, total, data) {
     return new Promise((resolve, reject) => {
         const observer = new MutationObserver(function (childList, obs) {
@@ -88,7 +87,7 @@ function getJobItemDetailUrlFunction(dom) {
 function getListByNode(node, startIndex) {
     const children = node?.children;
     return function getListItem(index) {
-        return children?.[index + startIndex];
+        return children?.[index + startIndex].querySelector(".job-card-box");
     };
 }
 
