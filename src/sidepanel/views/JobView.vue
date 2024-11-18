@@ -342,29 +342,37 @@
 </template>
 
 <script lang="ts" setup>
+import { Icon } from "@iconify/vue";
 import {
-  onMounted,
-  ref,
-  computed,
-  provide,
-  nextTick,
-  onUnmounted,
-  watch,
-} from "vue";
+  LIcon,
+  LMap,
+  LMarker,
+  LPopup,
+  LTileLayer
+} from "@vue-leaflet/vue-leaflet";
 import { useTransition } from "@vueuse/core";
-import { JobApi } from "../../common/api/index.js";
-import { SearchJobBO } from "../../common/data/bo/searchJobBO.js";
 import dayjs from "dayjs";
-import { utils, writeFileXLSX } from "xlsx";
-import { use } from "echarts/core";
-import { CanvasRenderer } from "echarts/renderers";
 import { BarChart } from "echarts/charts";
 import {
   GridComponent,
-  TooltipComponent,
   LegendComponent,
+  TooltipComponent,
 } from "echarts/components";
+import { use } from "echarts/core";
+import { CanvasRenderer } from "echarts/renderers";
+import "leaflet/dist/leaflet.css";
+import {
+  computed,
+  nextTick,
+  onMounted,
+  onUnmounted,
+  ref,
+  watch
+} from "vue";
 import VChart from "vue-echarts";
+import { LMarkerClusterGroup } from "vue-leaflet-markercluster";
+import "vue-leaflet-markercluster/dist/style.css";
+import { utils, writeFileXLSX } from "xlsx";
 import {
   PLATFORM_51JOB,
   PLATFORM_BOSS,
@@ -372,26 +380,12 @@ import {
   PLATFORM_LIEPIN,
   PLATFORM_ZHILIAN,
 } from "../../common";
-import "leaflet/dist/leaflet.css";
-import {
-  LMap,
-  LIcon,
-  LTileLayer,
-  LMarker,
-  LControlLayers,
-  LTooltip,
-  LPopup,
-  LPolyline,
-  LPolygon,
-  LRectangle,
-} from "@vue-leaflet/vue-leaflet";
-import { LMarkerClusterGroup } from "vue-leaflet-markercluster";
-import "vue-leaflet-markercluster/dist/style.css";
-import { wgs84ToGcj02 } from "@pansy/lnglat-transform";
-import { Icon } from "@iconify/vue";
+import { JobApi } from "../../common/api/index.js";
 import { UI_DEFAULT_PAGE_SIZE } from "../../common/config";
-import MapJobIcon from "../components/MapJobIcon.vue";
+import { SearchJobBO } from "../../common/data/bo/searchJobBO.js";
+import { jobDataToExcelJSONArray } from "../../common/excel";
 import MapJobDetail from "../components/MapJobDetail.vue";
+import MapJobIcon from "../components/MapJobIcon.vue";
 
 use([
   CanvasRenderer,
@@ -571,33 +565,7 @@ const sortChange = function (column) {
 
 const searchResultExport = async () => {
   let list = tableData.value;
-  let result = [];
-  for (let i = 0; i < list.length; i++) {
-    let item = list[i];
-    result.push({
-      职位自编号: item.jobId,
-      发布平台: item.jobPlatform,
-      职位访问地址: item.jobUrl,
-      职位: item.jobName,
-      公司: item.jobCompanyName,
-      地区: item.jobLocationName,
-      地址: item.jobAddress,
-      经度: item.jobLongitude,
-      纬度: item.jobLatitude,
-      职位描述: item.jobDescription,
-      学历: item.jobDegreeName,
-      所需经验: item.jobYear,
-      最低薪资: item.jobSalaryMin,
-      最高薪资: item.jobSalaryMax,
-      几薪: item.jobSalaryTotalMonth,
-      首次发布时间: item.jobFirstPublishDatetime,
-      招聘人: item.bossName,
-      招聘公司: item.bossCompanyName,
-      招聘者职位: item.bossPosition,
-      首次扫描日期: item.createDatetime,
-      记录更新日期: item.updateDatetime,
-    });
-  }
+  let result = jobDataToExcelJSONArray(list);
   const ws = utils.json_to_sheet(result);
   const wb = utils.book_new();
   utils.book_append_sheet(wb, ws, "Data");

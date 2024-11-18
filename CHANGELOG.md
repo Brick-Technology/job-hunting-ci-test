@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## WIP
+
+### 🐛 Fixed
+
+1. (Sidepanel)修复职位页导出功能的内容格式。
+2. (Sidepanel)修复数据同步的职位发布时间处理逻辑。
+
 ## 1.30.1(2024-11-17)
 
 ### 🔨 Dependency

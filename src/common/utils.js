@@ -185,12 +185,20 @@ export function getDomain(url) {
   return url;
 }
 
+export function isValidDate(value){
+  if(value){
+    return dayjs(value).isValid();
+  }else{
+    return false;
+  }
+}
+
 export function convertDateStringToDateObject(text) {
   return dayjs(text).isValid() ? dayjs(text).toDate() : null;
 }
 
-export function dateToStr(date) {
-  return date ? dayjs(date).format("YYYY-MM-DD HH:mm:ss") : null;
+export function dateToStr(date,pattern) {
+  return isValidDate(date) ? dayjs(date).format(pattern??"YYYY-MM-DD HH:mm:ss") : null;
 }
 
 export function convertPureJobDetailUrl(link) {

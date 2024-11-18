@@ -2,7 +2,7 @@ import { Job } from "../../common/data/domain/job";
 import { Message } from "../../common/api/message";
 import dayjs from "dayjs";
 import { JobDTO } from "../../common/data/dto/jobDTO";
-import { toHump, convertEmptyStringToNull, genIdFromText, isNotEmpty } from "../../common/utils";
+import { toHump, convertEmptyStringToNull, genIdFromText, isNotEmpty, dateToStr } from "../../common/utils";
 import { StatisticJobBrowseDTO } from "../../common/data/dto/statisticJobBrowseDTO";
 import { StatisticJobSearchGroupByAvgSalaryDTO } from "../../common/data/dto/statisticJobSearchGroupByAvgSalaryDTO";
 import { SearchJobBO } from "../../common/data/bo/searchJobBO";
@@ -403,7 +403,7 @@ export const JobService = {
   },
 };
 
-export async function _getByIds(ids){
+export async function _getByIds(ids) {
   return SERVICE_INSTANCE._getByIds(ids);
 }
 
@@ -539,11 +539,7 @@ async function _insertOrUpdateJob(param, now, { update = true } = {}) {
             $job_salary_total_month: convertEmptyStringToNull(
               param.jobSalaryTotalMonth
             ),
-            $job_first_publish_datetime: dayjs(
-              param.jobFirstPublishDatetime
-            ).isValid()
-              ? dayjs(param.jobFirstPublishDatetime).format("YYYY-MM-DD HH:mm:ss")
-              : null,
+            $job_first_publish_datetime: dateToStr(param.jobFirstPublishDatetime),
             $boss_name: convertEmptyStringToNull(param.bossName),
             $boss_company_name: convertEmptyStringToNull(param.bossCompanyName),
             $boss_position: convertEmptyStringToNull(param.bossPosition),
@@ -580,11 +576,7 @@ async function _insertOrUpdateJob(param, now, { update = true } = {}) {
               $job_salary_total_month: convertEmptyStringToNull(
                 param.jobSalaryTotalMonth
               ),
-              $job_first_publish_datetime: dayjs(
-                param.jobFirstPublishDatetime
-              ).isValid()
-                ? dayjs(param.jobFirstPublishDatetime).format("YYYY-MM-DD HH:mm:ss")
-                : null,
+              $job_first_publish_datetime: dateToStr(param.jobFirstPublishDatetime),
               $boss_name: convertEmptyStringToNull(param.bossName),
               $boss_company_name: convertEmptyStringToNull(param.bossCompanyName),
               $boss_position: convertEmptyStringToNull(param.bossPosition),
@@ -632,11 +624,7 @@ async function _insertOrUpdateJob(param, now, { update = true } = {}) {
         $job_salary_total_month: convertEmptyStringToNull(
           param.jobSalaryTotalMonth
         ),
-        $job_first_publish_datetime: dayjs(
-          param.jobFirstPublishDatetime
-        ).isValid()
-          ? dayjs(param.jobFirstPublishDatetime).format("YYYY-MM-DD HH:mm:ss")
-          : null,
+        $job_first_publish_datetime: dateToStr(param.jobFirstPublishDatetime),
         $boss_name: convertEmptyStringToNull(param.bossName),
         $boss_company_name: convertEmptyStringToNull(param.bossCompanyName),
         $boss_position: convertEmptyStringToNull(param.bossPosition),
