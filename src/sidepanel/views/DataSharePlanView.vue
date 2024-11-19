@@ -13,30 +13,20 @@
                                 }}/{{ DEFAULT_DATA_REPO }}</a></div>
                     </div>
                     <div class="statusWrapperItem">
-                        <span class="group">今天<el-tooltip content="上传记录数"><span>
+                        <span class="group">今天(总计):<el-tooltip content="上传记录数"><span>
                                     <Icon icon="material-symbols:cloud-upload" /><span class="number">{{
-                                        uploadRecordTotalCountToday }}</span>
+                                        uploadRecordTotalCountToday ?? '-' }}({{
+                                            uploadRecordTotalCountAll ?? '-' }})</span>
                                 </span></el-tooltip>
                             <el-tooltip content="下载文件数"><span>
                                     <Icon icon="material-symbols:cloud-download" /><span class="number">{{
-                                        downloadFileTotalCountToday }}</span>
+                                        downloadFileTotalCountToday ?? '-' }}({{
+                                            downloadFileTotalCountAll ?? '-' }})</span>
                                 </span></el-tooltip>
                             <el-tooltip content="合并记录数"><span>
                                     <Icon icon="material-symbols:merge" /><span class="number">{{
-                                        mergeRecordTotalCountToday }}</span>
-                                </span></el-tooltip>
-                        </span>
-                        <span class="group">历史<el-tooltip content="上传记录数"><span>
-                                    <Icon icon="material-symbols:cloud-upload" /><span class="number">{{
-                                        uploadRecordTotalCountAll }}</span>
-                                </span></el-tooltip>
-                            <el-tooltip content="下载文件数"><span>
-                                    <Icon icon="material-symbols:cloud-download" /><span class="number">{{
-                                        downloadFileTotalCountAll }}</span>
-                                </span></el-tooltip>
-                            <el-tooltip content="合并记录数"><span>
-                                    <Icon icon="material-symbols:merge" /><span class="number">{{
-                                        mergeRecordTotalCountAll }}</span>
+                                        mergeRecordTotalCountToday ?? '-' }}({{
+                                            mergeRecordTotalCountAll ?? '-' }})</span>
                                 </span></el-tooltip>
                         </span>
                         <span class="group">伙伴数：
@@ -69,7 +59,6 @@
                     <PartnerList></PartnerList>
                 </el-tab-pane>
             </el-tabs>
-
         </div>
         <div class="content" v-else>
             <swiper-container navigation="true" centered-slides="true" :autoplay-delay="5000"
@@ -118,22 +107,21 @@
     </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, ref, watch, onUnmounted } from "vue";
 import { Icon } from '@iconify/vue';
 import { register } from 'swiper/element/bundle';
+import { onMounted, onUnmounted, ref, watch } from "vue";
 register();
 
-import { Option } from "./data/tsparticlesOption";
-import { ConfigApi, AuthApi, UserApi, DataSharePartnerApi, TaskApi } from "../../common/api"
-import { GITHUB_URL, CONFIG_KEY_DATA_SHARE_PLAN, DEFAULT_DATA_REPO } from "../../common/config";
-import { DataSharePlanConfigDTO } from "../../common/data/dto/dataSharePlanConfigDTO";
+import dayjs from "dayjs";
+import { AuthApi, ConfigApi, DataSharePartnerApi, TaskApi, UserApi } from "../../common/api";
+import { CONFIG_KEY_DATA_SHARE_PLAN, DEFAULT_DATA_REPO, GITHUB_URL } from "../../common/config";
+import { StatisticTaskBO } from "../../common/data/bo/statisticTaskBO";
 import { Config } from "../../common/data/domain/config";
+import { DataSharePlanConfigDTO } from "../../common/data/dto/dataSharePlanConfigDTO";
 import { errorLog } from "../../common/log";
+import { Option } from "./data/tsparticlesOption";
 import PartnerList from "./dataSharePlan/PartnerList.vue";
 import TaskList from "./dataSharePlan/TaskList.vue";
-import { StatisticDataSharePartnerDTO } from "../../common/data/dto/statisticDataSharePartnerDTO";
-import dayjs from "dayjs";
-import { StatisticTaskBO } from "../../common/data/bo/statisticTaskBO";
 
 const enableDataSharePlan = ref(false);
 const tourOpen = ref(false);
@@ -148,12 +136,12 @@ let refreshIntervalId = null;
 
 const dataSharePartnerCount = ref(0);
 
-const uploadRecordTotalCountToday = ref(0);
-const downloadFileTotalCountToday = ref(0);
-const mergeRecordTotalCountToday = ref(0);
-const uploadRecordTotalCountAll = ref(0);
-const downloadFileTotalCountAll = ref(0);
-const mergeRecordTotalCountAll = ref(0);
+const uploadRecordTotalCountToday = ref(null);
+const downloadFileTotalCountToday = ref(null);
+const mergeRecordTotalCountToday = ref(null);
+const uploadRecordTotalCountAll = ref(null);
+const downloadFileTotalCountAll = ref(null);
+const mergeRecordTotalCountAll = ref(null);
 
 onMounted(async () => {
     try {

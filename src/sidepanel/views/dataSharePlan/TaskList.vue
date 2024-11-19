@@ -44,7 +44,7 @@
             <div class="content">
                 <el-scrollbar ref="scrollbar" class="tableScrollbar" v-loading="searchLoading">
                     <el-table :data="tableData" stripe>
-                        <el-table-column label="编号" width="120" show-overflow-tooltip>
+                        <el-table-column label="编号" show-overflow-tooltip>
                             <template #default="scope">
                                 <el-text line-clamp="1">
                                     {{ scope.row.id }}
@@ -58,10 +58,58 @@
                                 </el-text>
                             </template>
                         </el-table-column>
+                        <el-table-column label="任务摘要" show-overflow-tooltip min-width="200">
+                            <template #default="scope">
+                                <div v-if="scope.row.detail">
+                                    <el-col v-if="isDownloadType(scope.row.detail.type)">
+                                        <div>
+                                            <Icon icon="mdi:git-repository" />仓库：{{ scope.row.detail.username }}/{{
+                                                scope.row.detail.reponame
+                                            }}
+                                        </div>
+                                        <div>
+                                            <Icon icon="fluent-mdl2:date-time" />日期：{{ datetimeFormat(
+                                                scope.row.detail.datetime) }}
+                                        </div>
+                                    </el-col>
+                                    <el-col v-if="isUploadType(scope.row.detail.type)">
+                                        <div>
+                                            <Icon icon="mdi:git-repository" />仓库：{{ scope.row.detail.username }}/{{
+                                                scope.row.detail.reponame
+                                            }}
+                                        </div>
+                                        <div>
+                                            <Icon icon="fluent-mdl2:date-time" />日期：{{ datetimeFormat(
+                                                scope.row.detail.startDatetime) }}-{{ datetimeFormat(
+                                                scope.row.detail.endDatetime) }}
+                                        </div>
+                                        <div>
+                                            <Icon icon="mdi:database-arrow-up" />数据量：{{ scope.row.detail.dataCount ?? 0
+                                            }}
+                                        </div>
+                                    </el-col>
+                                    <el-col v-if="isMergeType(scope.row.detail.type)">
+                                        <div>
+                                            <Icon icon="mdi:git-repository" />仓库：{{ scope.row.detail.username }}/{{
+                                                scope.row.detail.reponame
+                                            }}
+                                        </div>
+                                        <div>
+                                            <Icon icon="stash:data-date" />日期：{{ datetimeFormat(
+                                                scope.row.detail.datetime) }}
+                                        </div>
+                                        <div>
+                                            <Icon icon="mdi:database-plus" />数据量：{{ scope.row.detail.dataCount ?? 0 }}
+                                        </div>
+                                    </el-col>
+                                </div>
+                            </template>
+                        </el-table-column>
                         <el-table-column label="状态" width="120" show-overflow-tooltip>
                             <template #default="scope">
                                 <el-text line-clamp="1" :type="getColorForStatus(scope.row.status)">
-                                    {{ statusFormat(scope.row.status) }}
+                                    <Icon :icon="getIconStringForStatus(scope.row.status)" /> {{
+                                    statusFormat(scope.row.status) }}
                                 </el-text>
                             </template>
                         </el-table-column>
@@ -79,33 +127,11 @@
                                 </el-text>
                             </template>
                         </el-table-column>
-                        <el-table-column label="执行信息" show-overflow-tooltip width="120">
+                        <el-table-column label="执行信息" show-overflow-tooltip>
                             <template #default="scope">
                                 <el-text line-clamp="1">
                                     {{ scope.row.errorReason }}
                                 </el-text>
-                            </template>
-                        </el-table-column>
-                        <el-table-column label="任务摘要" show-overflow-tooltip>
-                            <template #default="scope">
-                                <div v-if="scope.row.detail">
-                                    <el-text v-if="isDownloadType(scope.row.detail.type)" line-clamp="1">
-                                        下载 {{ scope.row.detail.username }}({{ scope.row.detail.reponame
-                                        }})于{{ datetimeFormat(
-                                            scope.row.detail.datetime) }}的数据文件
-                                    </el-text>
-                                    <el-text v-if="isUploadType(scope.row.detail.type)" line-clamp="1">
-                                        上传 {{ datetimeFormat(
-                                            scope.row.detail.startDatetime) }}至{{ datetimeFormat(
-                                            scope.row.detail.endDatetime) }}共{{ scope.row.detail.dataCount }}条数据到 {{
-                                            scope.row.detail.username }}({{ scope.row.detail.reponame }})
-                                    </el-text>
-                                    <el-text v-if="isMergeType(scope.row.detail.type)" line-clamp="1">
-                                        合并 来自{{
-                                            scope.row.detail.username }}({{ scope.row.detail.reponame }}) {{ datetimeFormat(
-                                            scope.row.detail.datetime) }}共{{ scope.row.detail.dataCount }}条数据
-                                    </el-text>
-                                </div>
                             </template>
                         </el-table-column>
                         <el-table-column label="创建时间" width="180" show-overflow-tooltip>
@@ -135,25 +161,34 @@
     </el-tabs>
 </template>
 <script lang="ts" setup>
+import { Icon } from '@iconify/vue';
+import dayjs from "dayjs";
 import {
-    onMounted,
-    ref,
     computed,
+    onMounted,
     reactive,
+    ref,
     toRaw,
-} from 'vue'
+} from 'vue';
+import {
+    TASK_STATUS_CANCEL,
+    TASK_STATUS_ERROR,
+    TASK_STATUS_FINISHED,
+    TASK_STATUS_FINISHED_BUT_ERROR,
+    TASK_STATUS_READY, TASK_STATUS_RUNNING,
+    TASK_TYPE_COMPANY_DATA_DOWNLOAD,
+    TASK_TYPE_COMPANY_DATA_MERGE,
+    TASK_TYPE_COMPANY_DATA_UPLOAD,
+    TASK_TYPE_COMPANY_TAG_DATA_DOWNLOAD,
+    TASK_TYPE_COMPANY_TAG_DATA_MERGE,
+    TASK_TYPE_COMPANY_TAG_DATA_UPLOAD,
+    TASK_TYPE_JOB_DATA_DOWNLOAD,
+    TASK_TYPE_JOB_DATA_MERGE,
+    TASK_TYPE_JOB_DATA_UPLOAD
+} from "../../../common";
+import { TaskApi } from "../../../common/api";
 import { UI_DEFAULT_PAGE_SIZE } from "../../../common/config";
 import { SearchTaskBO } from "../../../common/data/bo/searchTaskBO";
-import { TaskApi } from "../../../common/api";
-import {
-    TASK_STATUS_READY, TASK_STATUS_RUNNING, TASK_STATUS_FINISHED,
-    TASK_STATUS_FINISHED_BUT_ERROR, TASK_STATUS_ERROR, TASK_STATUS_CANCEL,
-    TASK_TYPE_JOB_DATA_UPLOAD, TASK_TYPE_COMPANY_DATA_UPLOAD, TASK_TYPE_COMPANY_TAG_DATA_UPLOAD,
-    TASK_TYPE_JOB_DATA_DOWNLOAD, TASK_TYPE_COMPANY_DATA_DOWNLOAD, TASK_TYPE_COMPANY_TAG_DATA_DOWNLOAD,
-    TASK_TYPE_JOB_DATA_MERGE, TASK_TYPE_COMPANY_DATA_MERGE, TASK_TYPE_COMPANY_TAG_DATA_MERGE
-} from "../../../common";
-import TagInput from "../../components/TagInput.vue";
-import dayjs from "dayjs";
 
 const scrollbar = ref();
 const tableData = ref([]);
@@ -259,10 +294,27 @@ const getColorForStatus = computed(() => {
                 return "warning";
             case TASK_STATUS_ERROR:
                 return "danger";
-            case TASK_STATUS_ERROR:
-                return "info";
             default:
                 return "info";
+        }
+    };
+});
+
+const getIconStringForStatus = computed(() => {
+    return function (value: string) {
+        switch (value) {
+            case TASK_STATUS_READY:
+                return "arcticons:ready-for";
+            case TASK_STATUS_RUNNING:
+                return "mdi:play";
+            case TASK_STATUS_FINISHED:
+                return "mdi:success-circle";
+            case TASK_STATUS_FINISHED_BUT_ERROR:
+                return "mdi:alert-circle-success";
+            case TASK_STATUS_ERROR:
+                return "ix:error-filled";
+            default:
+                return "";
         }
     };
 });
