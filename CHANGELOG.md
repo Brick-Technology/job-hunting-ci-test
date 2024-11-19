@@ -2,10 +2,15 @@
 
 ## WIP
 
+### 🐛 Fixed
+
+1. (Sidepanel)修复记录上传记录数查询。
+
 ### ✏️ Changed
 
-1. (Sidepanel)修复公司数据增量上传逻辑。
-2. (Sidepanel)为数据文件增加数据结构版本号。
+1. (Sidepanel)修改公司数据增量上传逻辑。
+2. (Sidepanel)修改数据上传错误处理逻辑。
+3. (Sidepanel)为数据文件增加数据结构版本号。
 
 ## 1.30.2(2024-11-18)
 

@@ -192,7 +192,7 @@ export const TaskService = {
             let endDatetime = dateToStr(param.endDatetime);
 
             //upload total
-            const uploadTotalSql = `SELECT SUM(data_count) AS count FROM task_data_upload ${genUpdatetimeCondition(startDatetime, endDatetime)}`;
+            const uploadTotalSql = `SELECT SUM(t2.data_count) AS count FROM task AS t1 LEFT JOIN task_data_upload AS t2 ON t1.data_id = t2.id ${genUpdatetimeCondition({ updateDatetimeColumn: "t1.update_datetime", startDatetime, endDatetime, otherConditionSql: ` AND t1.status = 'FINISHED' AND t1.type IN ('JOB_DATA_UPLOAD','COMPANY_DATA_UPLOAD','COMPANY_TAG_DATA_UPLOAD')` })}`;
             let uploadRecordTotalCount = [];
             (await getDb()).exec({
                 sql: uploadTotalSql,
@@ -200,9 +200,9 @@ export const TaskService = {
                 resultRows: uploadRecordTotalCount,
             });
             result.uploadRecordTotalCount = uploadRecordTotalCount[0].count;
-            
+
             //download total
-            const downloadTotalSql = `SELECT COUNT(*) AS count FROM task ${genUpdatetimeCondition(startDatetime, endDatetime, ` AND status = 'FINISHED' AND type IN ('JOB_DATA_DOWNLOAD','COMPANY_DATA_DOWNLOAD','COMPANY_TAG_DATA_DOWNLOAD')`)} `;
+            const downloadTotalSql = `SELECT COUNT(*) AS count FROM task ${genUpdatetimeCondition({ startDatetime, endDatetime, otherConditionSql: ` AND status = 'FINISHED' AND type IN ('JOB_DATA_DOWNLOAD','COMPANY_DATA_DOWNLOAD','COMPANY_TAG_DATA_DOWNLOAD')` })} `;
             let downloadFileTotalCount = [];
             (await getDb()).exec({
                 sql: downloadTotalSql,
@@ -212,7 +212,7 @@ export const TaskService = {
             result.downloadFileTotalCount = downloadFileTotalCount[0].count;
 
             //merge total
-            const mergeTotalSql = `SELECT SUM(data_count) AS count FROM task_data_merge ${genUpdatetimeCondition(startDatetime, endDatetime)}`;
+            const mergeTotalSql = `SELECT SUM(data_count) AS count FROM task_data_merge ${genUpdatetimeCondition({ startDatetime, endDatetime })}`;
             let mergeRecordTotalCount = [];
             (await getDb()).exec({
                 sql: mergeTotalSql,
@@ -231,17 +231,17 @@ export const TaskService = {
     },
 };
 
-function genUpdatetimeCondition(startDatetime, endDatetime, otherConditionSql) {
+function genUpdatetimeCondition({ startDatetime, endDatetime, otherConditionSql, updateDatetimeColumn }) {
     let whereCondition = "";
     if (startDatetime) {
         whereCondition +=
-            " AND update_datetime >= '" +
+            ` AND ${updateDatetimeColumn ?? "update_datetime"} >= '` +
             dayjs(startDatetime).format("YYYY-MM-DD HH:mm:ss") +
             "'";
     }
     if (endDatetime) {
         whereCondition +=
-            " AND update_datetime < '" +
+            ` AND ${updateDatetimeColumn ?? "update_datetime"} < '` +
             dayjs(endDatetime).format("YYYY-MM-DD HH:mm:ss") +
             "'";
     }

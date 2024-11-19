@@ -429,12 +429,12 @@ async function uploadData({ userName, repoName, dirPath, dataTypeName, dataList,
         let zipData = await zipFileToBase64(dataTypeName, excelData);
         let filePath = `${dirPath}/${dataTypeName}.zip`;
         try {
-            let result = await GithubApi.createFileContent(userName, repoName, filePath, zipData, "upload job data", { getTokenFunction: getToken, setTokenFunction: setToken, });
+            await GithubApi.createFileContent(userName, repoName, filePath, zipData, "upload job data", { getTokenFunction: getToken, setTokenFunction: setToken, });
             infoLog(`[Task Data Upload ${dataTypeName}] create file ${filePath} success`);
-            return result;
         } catch (e) {
             if (e == EXCEPTION.CREATION_FAILED) {
                 infoLog(`[Task Data Upload ${dataTypeName}] create file ${filePath} failure`);
+                return `upload file ${filePath} failure`;
             } else {
                 throw e;
             }
@@ -607,7 +607,7 @@ async function uploadDataByDataId(dataId, dataTypeName, getDataFunction, jsonObj
     let endDatetime = taskDataUpload.endDatetime;
     let dirPath = getPathByDatetime({ endDatetime });
     await createRepoIfNotExists({ userName, repoName });
-    await uploadData({
+    return await uploadData({
         userName, repoName, dirPath,
         dataTypeName,
         dataList: (await getDataFunction({ startDatetime, endDatetime })).items,
