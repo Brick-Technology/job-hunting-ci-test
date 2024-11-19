@@ -288,6 +288,25 @@ export const TaskService = {
             );
         }
     },
+    /**
+     *
+     * @param {Message} message
+     * @param {TaskStatisticBO} param
+     */
+    taskStatisticStatus: async function (message, param) {
+        try {
+            let startDatetime = dateToStr(param.startDatetime);
+            let endDatetime = dateToStr(param.endDatetime);
+            let sql = `SELECT status AS name, STRFTIME('%Y-%m-%d', create_datetime) AS datetime,IFNULL(COUNT(status),0) AS total FROM task ${genDatetimeCondition({ startDatetime, endDatetime, datetimeColumn: "create_datetime" })} GROUP BY status,datetime ORDER BY name;`;
+            let result = await taskStatistic({ sql });
+            postSuccessMessage(message, result);
+        } catch (e) {
+            postErrorMessage(
+                message,
+                "[worker] taskStatisticMerge error : " + e.message
+            );
+        }
+    },
 };
 
 async function taskStatistic({ sql }) {

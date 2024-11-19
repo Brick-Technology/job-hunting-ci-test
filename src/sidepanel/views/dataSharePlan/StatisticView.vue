@@ -10,6 +10,9 @@
             </el-row>
             <el-row>
                 <el-col :xs="24" :sm="12" :md="12" :lg="8" :xl="8" :span="24">
+                    <TaskDataCountChart title="任务执行" class="chart" v-model="chartTaskStatus" />
+                </el-col>
+                <el-col :xs="24" :sm="12" :md="12" :lg="8" :xl="8" :span="24">
                     <TaskDataCountChart title="数据上传" class="chart" v-model="chartUploadData" />
                 </el-col>
                 <el-col :xs="24" :sm="12" :md="12" :lg="8" :xl="8" :span="24">
@@ -35,6 +38,25 @@ const model = defineModel()
 const chartUploadData = ref();
 const chartDownloadData = ref();
 const chartMergeData = ref();
+const chartTaskStatus = ref();
+
+let STATUS_NAME_OBJECT = {
+    "READY": "准备",
+    "RUNNING": "运行中",
+    "FINISHED": "完成",
+    "FINISHED_BUT_ERROR": "异常完成",
+    "ERROR": "错误",
+    "CANCEL": "取消",
+}
+
+let STATUS_COLOR_OBJECT = {
+    "READY": "#73c0de",
+    "RUNNING": "#5470c6",
+    "FINISHED": "#91cc75",
+    "FINISHED_BUT_ERROR": "#fac858",
+    "ERROR": "#ee6666",
+    "CANCEL": "#111111",
+}
 
 let UPLOAD_NAME_OBJECT = {
     "JOB_DATA_UPLOAD": "职位数据",
@@ -76,16 +98,21 @@ onUnmounted(() => {
 const refresh = async () => {
     let startDate = dayjs(form.datetimeRange[0]);
     let endDate = dayjs(form.datetimeRange[1]);
+    chartTaskStatus.value = convertToChartData({ startDate, endDate, queryResult: await TaskApi.taskStatisticStatus({ startDate, endDate }), convertNameFunction: convertStatusName, defaultNameArray: Object.keys(STATUS_NAME_OBJECT), defaultColorObject: STATUS_COLOR_OBJECT });
     chartUploadData.value = convertToChartData({ startDate, endDate, queryResult: await TaskApi.taskStatisticUpload({ startDate, endDate }), convertNameFunction: convertUploadName, defaultNameArray: Object.keys(UPLOAD_NAME_OBJECT) });
     chartDownloadData.value = convertToChartData({ startDate, endDate, queryResult: await TaskApi.taskStatisticDownload({ startDate, endDate }), convertNameFunction: null });
     chartMergeData.value = convertToChartData({ startDate, endDate, queryResult: await TaskApi.taskStatisticMerge({ startDate, endDate }), convertNameFunction: null });
+}
+
+const convertStatusName = (name) => {
+    return STATUS_NAME_OBJECT[name] ?? name;
 }
 
 const convertUploadName = (name) => {
     return UPLOAD_NAME_OBJECT[name] ?? name;
 }
 
-const convertToChartData = ({ startDate, endDate, queryResult, convertNameFunction, defaultNameArray }) => {
+const convertToChartData = ({ startDate, endDate, queryResult, convertNameFunction, defaultNameArray, defaultColorObject }) => {
     let rangeDate = genRangeDate(startDate, endDate);
     rangeDate.sort();
     let nameArray = null;
@@ -119,7 +146,7 @@ const convertToChartData = ({ startDate, endDate, queryResult, convertNameFuncti
         rangeDate.forEach(date => {
             data.push((dateTotalMap && dateTotalMap.has(date) ? dateTotalMap.get(date) : 0))
         });
-        seriesData.push({ "name": convertNameFunction ? convertNameFunction(name) : name, data });
+        seriesData.push({ "name": convertNameFunction ? convertNameFunction(name) : name, data, color: defaultColorObject ? defaultColorObject[name] : null });
     });
     return {
         dateData: rangeDate,

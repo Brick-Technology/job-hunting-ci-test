@@ -771,6 +771,15 @@ export const TaskApi = {
     let result = await invoke(this.taskStatisticMerge.name, param, { invokeEnv: invokeEnv });
     return result.data;
   },
+  /**
+  * 
+  * @param TaskStatisticBO param 
+  * @returns []
+  */
+  taskStatisticStatus: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
+    let result = await invoke(this.taskStatisticStatus.name, param, { invokeEnv: invokeEnv });
+    return result.data;
+  },
 
 }
 

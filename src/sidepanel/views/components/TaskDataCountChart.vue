@@ -64,12 +64,12 @@ onMounted(() => {
 
 watch(model, async (newValue, oldValue) => {
     if (JSON.stringify(newValue) !== JSON.stringify(oldValue)) {
-        renderTraffic();
+        render();
     }
 }
 )
 
-const renderTraffic = async () => {
+const render = async () => {
     loading.value = true;
     let modelValue = model.value;
     if (modelValue) {
@@ -82,6 +82,7 @@ const renderTraffic = async () => {
                 label: {
                     show: true
                 },
+                color:item.color,
                 emphasis: {
                     focus: 'series'
                 },
