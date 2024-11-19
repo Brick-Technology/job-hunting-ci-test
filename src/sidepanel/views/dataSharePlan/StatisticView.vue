@@ -23,11 +23,12 @@
     </div>
 </template>
 <script setup lang="ts">
-import { onMounted, ref, reactive } from "vue";
+import { onMounted, ref, reactive, onUnmounted } from "vue";
 import TaskDataCountChart from "../components/TaskDataCountChart.vue";
 import { TaskApi } from "../../../common/api";
 import dayjs from "dayjs";
 import { genRangeDate } from "../../../common/utils";
+import { TASK_CHART_DEFAULT_RANGE_DAY } from "../../../common/config";
 
 const model = defineModel()
 
@@ -35,15 +36,13 @@ const chartUploadData = ref();
 const chartDownloadData = ref();
 const chartMergeData = ref();
 
-const CHART_RANGE_DAY = 14;
-
 const onClickSearch = async () => {
     refresh();
 };
 
 const reset = async () => {
     let now = dayjs().startOf('day');
-    let startDate = dayjs(now.subtract(CHART_RANGE_DAY, "day")).toDate();
+    let startDate = dayjs(now.subtract(TASK_CHART_DEFAULT_RANGE_DAY, "day")).toDate();
     let endDate = dayjs(now).toDate();
     form.datetimeRange[0] = startDate;
     form.datetimeRange[1] = endDate;
@@ -54,8 +53,18 @@ const form = reactive({
     datetimeRange: [],
 })
 
+let refreshIntervalId = null;
+
 onMounted(async () => {
     reset();
+    refreshIntervalId = setInterval(refresh, 5000);
+});
+
+onUnmounted(() => {
+    if (refreshIntervalId) {
+        clearInterval(refreshIntervalId);
+        refreshIntervalId = null;
+    }
 });
 
 const refresh = async () => {
@@ -114,5 +123,6 @@ const convertToChartData = ({ startDate, endDate, queryResult, convertNameFuncti
 <style lang="css" scoped>
 .chart {
     padding: 10px;
+    height: 400px;
 }
 </style>

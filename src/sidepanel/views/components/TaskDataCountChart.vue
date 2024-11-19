@@ -97,7 +97,6 @@ const renderTraffic = async () => {
 </script>
 <style lang="css" scoped>
 .main {
-    height: 400px;
     box-sizing: border-box;
     border: 1px solid #d0d7de;
     padding: 10px;
