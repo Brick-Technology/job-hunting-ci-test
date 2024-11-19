@@ -185,10 +185,10 @@ export function getDomain(url) {
   return url;
 }
 
-export function isValidDate(value){
-  if(value){
+export function isValidDate(value) {
+  if (value) {
     return dayjs(value).isValid();
-  }else{
+  } else {
     return false;
   }
 }
@@ -197,8 +197,19 @@ export function convertDateStringToDateObject(text) {
   return dayjs(text).isValid() ? dayjs(text).toDate() : null;
 }
 
-export function dateToStr(date,pattern) {
-  return isValidDate(date) ? dayjs(date).format(pattern??"YYYY-MM-DD HH:mm:ss") : null;
+export function dateToStr(date, pattern) {
+  return isValidDate(date) ? dayjs(date).format(pattern ?? "YYYY-MM-DD HH:mm:ss") : null;
+}
+
+export function genRangeDate(startDatetime, endDatetime) {
+  let startDate = dayjs(startDatetime)
+  let endDate = dayjs(endDatetime);
+  let result = [];
+  let dayCount = endDate.diff(startDate, "day");
+  for (let i = 0; i <= dayCount; i++) {
+    result.push(endDate.subtract(i, "day").format("YYYY-MM-DD"));
+  }
+  return result;
 }
 
 export function convertPureJobDetailUrl(link) {

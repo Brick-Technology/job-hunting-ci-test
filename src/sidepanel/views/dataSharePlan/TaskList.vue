@@ -1,5 +1,8 @@
 <template>
     <el-tabs type="card" class="tabs">
+        <el-tab-pane class="tab_panel" label="统计">
+            <StatisticView></StatisticView>
+        </el-tab-pane>
         <el-tab-pane class="tab_panel" label="任务列表">
             <div class="search">
                 <div>
@@ -58,6 +61,14 @@
                                 </el-text>
                             </template>
                         </el-table-column>
+                        <el-table-column label="状态" width="120" show-overflow-tooltip>
+                            <template #default="scope">
+                                <el-text line-clamp="1" :type="getColorForStatus(scope.row.status)">
+                                    <Icon :icon="getIconStringForStatus(scope.row.status)" /> {{
+                                    statusFormat(scope.row.status) }}
+                                </el-text>
+                            </template>
+                        </el-table-column>
                         <el-table-column label="任务摘要" show-overflow-tooltip min-width="200">
                             <template #default="scope">
                                 <div v-if="scope.row.detail">
@@ -103,14 +114,6 @@
                                         </div>
                                     </el-col>
                                 </div>
-                            </template>
-                        </el-table-column>
-                        <el-table-column label="状态" width="120" show-overflow-tooltip>
-                            <template #default="scope">
-                                <el-text line-clamp="1" :type="getColorForStatus(scope.row.status)">
-                                    <Icon :icon="getIconStringForStatus(scope.row.status)" /> {{
-                                    statusFormat(scope.row.status) }}
-                                </el-text>
                             </template>
                         </el-table-column>
                         <el-table-column label="执行耗时" width="120" show-overflow-tooltip>
@@ -189,6 +192,8 @@ import {
 import { TaskApi } from "../../../common/api";
 import { UI_DEFAULT_PAGE_SIZE } from "../../../common/config";
 import { SearchTaskBO } from "../../../common/data/bo/searchTaskBO";
+import StatisticView from "./StatisticView.vue";
+
 
 const scrollbar = ref();
 const tableData = ref([]);

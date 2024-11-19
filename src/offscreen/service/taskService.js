@@ -18,6 +18,8 @@ import { StatisticTaskDTO } from "../../common/data/dto/statisticTaskDTO";
 import { postSuccessMessage, postErrorMessage } from "../util";
 import { getDb } from "../database";
 import { dateToStr } from "../../common/utils";
+import { TaskStatisticBO } from "../../common/data/bo/taskStatisticBO";
+import { ChartStackedDTO } from "../../common/data/dto/chartStackedDTO";
 
 const SERVICE_INSTANCE = new BaseService("task", "id",
     () => {
@@ -192,7 +194,7 @@ export const TaskService = {
             let endDatetime = dateToStr(param.endDatetime);
 
             //upload total
-            const uploadTotalSql = `SELECT IFNULL(SUM(t2.data_count),0) AS count FROM task AS t1 LEFT JOIN task_data_upload AS t2 ON t1.data_id = t2.id ${genUpdatetimeCondition({ updateDatetimeColumn: "t1.update_datetime", startDatetime, endDatetime, otherConditionSql: ` AND t1.status = 'FINISHED' AND t1.type IN ('JOB_DATA_UPLOAD','COMPANY_DATA_UPLOAD','COMPANY_TAG_DATA_UPLOAD')` })}`;
+            const uploadTotalSql = `SELECT IFNULL(SUM(t2.data_count),0) AS count FROM task AS t1 LEFT JOIN task_data_upload AS t2 ON t1.data_id = t2.id ${genDatetimeCondition({ datetimeColumn: "t1.update_datetime", startDatetime, endDatetime, otherConditionSql: ` AND t1.status = 'FINISHED' AND t1.type IN ('JOB_DATA_UPLOAD','COMPANY_DATA_UPLOAD','COMPANY_TAG_DATA_UPLOAD')` })}`;
             let uploadRecordTotalCount = [];
             (await getDb()).exec({
                 sql: uploadTotalSql,
@@ -202,7 +204,7 @@ export const TaskService = {
             result.uploadRecordTotalCount = uploadRecordTotalCount[0].count;
 
             //download total
-            const downloadTotalSql = `SELECT IFNULL(COUNT(*),0) AS count FROM task ${genUpdatetimeCondition({ startDatetime, endDatetime, otherConditionSql: ` AND status = 'FINISHED' AND type IN ('JOB_DATA_DOWNLOAD','COMPANY_DATA_DOWNLOAD','COMPANY_TAG_DATA_DOWNLOAD')` })} `;
+            const downloadTotalSql = `SELECT IFNULL(COUNT(*),0) AS count FROM task ${genDatetimeCondition({ startDatetime, endDatetime, otherConditionSql: ` AND status = 'FINISHED' AND type IN ('JOB_DATA_DOWNLOAD','COMPANY_DATA_DOWNLOAD','COMPANY_TAG_DATA_DOWNLOAD')` })} `;
             let downloadFileTotalCount = [];
             (await getDb()).exec({
                 sql: downloadTotalSql,
@@ -212,7 +214,7 @@ export const TaskService = {
             result.downloadFileTotalCount = downloadFileTotalCount[0].count;
 
             //merge total
-            const mergeTotalSql = `SELECT IFNULL(SUM(data_count),0) AS count FROM task_data_merge ${genUpdatetimeCondition({ startDatetime, endDatetime })}`;
+            const mergeTotalSql = `SELECT IFNULL(SUM(data_count),0) AS count FROM task_data_merge ${genDatetimeCondition({ startDatetime, endDatetime })}`;
             let mergeRecordTotalCount = [];
             (await getDb()).exec({
                 sql: mergeTotalSql,
@@ -229,19 +231,111 @@ export const TaskService = {
             );
         }
     },
+    /**
+     *
+     * @param {Message} message
+     * @param {TaskStatisticBO} param
+     */
+    taskStatisticUpload: async function (message, param) {
+        try {
+            let startDatetime = dateToStr(param.startDatetime);
+            let endDatetime = dateToStr(param.endDatetime);
+            let sql = `SELECT t1.type AS name,STRFTIME('%Y-%m-%d', t2.update_datetime) AS datetime,IFNULL(SUM(data_count),0) AS total FROM task_data_upload AS t1 LEFT JOIN task AS t2 ON t1.id = t2.data_id WHERE t2.status = 'FINISHED' ${genDatetimeConditionOnJoin({ startDatetime, endDatetime, datetimeColumn: "t2.update_datetime" })} GROUP BY name,datetime,t1.type ORDER BY name,datetime ASC;`;
+            let result = await taskStatistic({ sql });
+            postSuccessMessage(message, result);
+        } catch (e) {
+            postErrorMessage(
+                message,
+                "[worker] taskStatisticUpload error : " + e.message
+            );
+        }
+    },
+    /**
+     *
+     * @param {Message} message
+     * @param {TaskStatisticBO} param
+     */
+    taskStatisticDownload: async function (message, param) {
+        try {
+            let startDatetime = dateToStr(param.startDatetime);
+            let endDatetime = dateToStr(param.endDatetime);
+            let sql = `SELECT username AS name,STRFTIME('%Y-%m-%d', datetime) AS datetime,IFNULL(COUNT(*),0) AS total FROM task_data_download AS t1 LEFT JOIN task AS t2 ON t1.id = t2.data_id WHERE t2.status = 'FINISHED' ${genDatetimeConditionOnJoin({ startDatetime, endDatetime, datetimeColumn: "datetime" })} GROUP BY name,datetime ORDER BY name,datetime ASC;`;
+            let result = await taskStatistic({ sql });
+            postSuccessMessage(message, result);
+        } catch (e) {
+            postErrorMessage(
+                message,
+                "[worker] taskStatisticDownload error : " + e.message
+            );
+        }
+    },
+    /**
+     *
+     * @param {Message} message
+     * @param {TaskStatisticBO} param
+     */
+    taskStatisticMerge: async function (message, param) {
+        try {
+            let startDatetime = dateToStr(param.startDatetime);
+            let endDatetime = dateToStr(param.endDatetime);
+            let sql = `SELECT username AS name,STRFTIME('%Y-%m-%d', datetime) AS datetime,IFNULL(SUM(data_count),0) AS total FROM task_data_merge ${genDatetimeCondition({ startDatetime, endDatetime, datetimeColumn: "datetime" })} GROUP BY name,datetime ORDER BY name,datetime ASC;`;
+            let result = await taskStatistic({ sql });
+            postSuccessMessage(message, result);
+        } catch (e) {
+            postErrorMessage(
+                message,
+                "[worker] taskStatisticMerge error : " + e.message
+            );
+        }
+    },
 };
 
-function genUpdatetimeCondition({ startDatetime, endDatetime, otherConditionSql, updateDatetimeColumn }) {
+async function taskStatistic({ sql }) {
+    let result = [];
+    let resultRows = [];
+    (await getDb()).exec({
+        sql,
+        rowMode: "object",
+        resultRows
+    });
+    resultRows.forEach(item => {
+        result.push(Object.assign(new ChartStackedDTO(), item));
+    });
+    return result;
+}
+
+function genDatetimeConditionOnJoin({ startDatetime, endDatetime, otherConditionSql, datetimeColumn }) {
     let whereCondition = "";
     if (startDatetime) {
         whereCondition +=
-            ` AND ${updateDatetimeColumn ?? "update_datetime"} >= '` +
+            ` AND ${datetimeColumn ?? "update_datetime"} >= '` +
             dayjs(startDatetime).format("YYYY-MM-DD HH:mm:ss") +
             "'";
     }
     if (endDatetime) {
         whereCondition +=
-            ` AND ${updateDatetimeColumn ?? "update_datetime"} < '` +
+            ` AND ${datetimeColumn ?? "update_datetime"} < '` +
+            dayjs(endDatetime).format("YYYY-MM-DD HH:mm:ss") +
+            "'";
+    }
+    if (otherConditionSql) {
+        whereCondition += otherConditionSql;
+    }
+    return whereCondition;
+}
+
+
+function genDatetimeCondition({ startDatetime, endDatetime, otherConditionSql, datetimeColumn }) {
+    let whereCondition = "";
+    if (startDatetime) {
+        whereCondition +=
+            ` AND ${datetimeColumn ?? "update_datetime"} >= '` +
+            dayjs(startDatetime).format("YYYY-MM-DD HH:mm:ss") +
+            "'";
+    }
+    if (endDatetime) {
+        whereCondition +=
+            ` AND ${datetimeColumn ?? "update_datetime"} < '` +
             dayjs(endDatetime).format("YYYY-MM-DD HH:mm:ss") +
             "'";
     }

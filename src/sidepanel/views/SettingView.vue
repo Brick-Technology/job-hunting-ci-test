@@ -510,7 +510,6 @@ const saveJobTagData = async (data) => {
   let targetList = await getMergeDataListForJobTag(result, async (ids) => {
     return await JobApi.jobTagGetAllDTOByJobIds(ids);
   })
-  console.log(targetList)
   await JobApi.jobTagBatchAddOrUpdateWithTransaction(targetList);
   return targetList;
 }

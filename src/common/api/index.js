@@ -43,6 +43,7 @@ import { StatisticTaskBO } from "../data/bo/statisticTaskBO";
 import { StatisticTaskDTO } from "../data/dto/statisticTaskDTO";
 import { JobTagSearchBO } from "../data/bo/jobTagSearchBO";
 import { JobTagSearchDTO } from "../data/dto/jobTagSearchDTO";
+import { TaskStatisticBO } from "../data/bo/taskStatisticBO";
 
 
 export const JobApi = {
@@ -735,12 +736,39 @@ export const TaskApi = {
     return result.data;
   },
   /**
- * 
- * @param StatisticTaskBO param 
- * @returns StatisticTaskDTO
- */
+   * 
+   * @param StatisticTaskBO param 
+   * @returns StatisticTaskDTO
+   */
   statisticTask: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
     let result = await invoke(this.statisticTask.name, param, { invokeEnv: invokeEnv });
+    return result.data;
+  },
+  /**
+   * 
+   * @param TaskStatisticBO param 
+   * @returns []
+   */
+  taskStatisticUpload: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
+    let result = await invoke(this.taskStatisticUpload.name, param, { invokeEnv: invokeEnv });
+    return result.data;
+  },
+  /**
+   * 
+   * @param TaskStatisticBO param 
+   * @returns []
+   */
+  taskStatisticDownload: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
+    let result = await invoke(this.taskStatisticDownload.name, param, { invokeEnv: invokeEnv });
+    return result.data;
+  },
+  /**
+  * 
+  * @param TaskStatisticBO param 
+  * @returns []
+  */
+  taskStatisticMerge: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
+    let result = await invoke(this.taskStatisticMerge.name, param, { invokeEnv: invokeEnv });
     return result.data;
   },
 
