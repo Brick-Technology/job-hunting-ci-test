@@ -9,6 +9,7 @@
 ### 🐛 Fixed
 
 1. (Sidepanel)修复记录上传记录数查询。
+1. (Sidepanel)修复数据文件下载大于1MB文件下载失败的问题。
 
 ### ✏️ Changed
 

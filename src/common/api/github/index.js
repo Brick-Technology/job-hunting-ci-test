@@ -142,7 +142,14 @@ export const GithubApi = {
     return await fetchJson(`${GITHUB_URL_API}/repos/${owner}/${repo}/contents${path}`, { "message": msg, "content": base64Data }, { method: "PUT", getTokenFunction, setTokenFunction });
   },
   async listRepoContents(owner, repo, path, { getTokenFunction, setTokenFunction }) {
-    return await fetchJson(`${GITHUB_URL_API}/repos/${owner}/${repo}/contents${path}`, null, { method: "GET", getTokenFunction, setTokenFunction });
+    return await fetchJson(`${GITHUB_URL_API}/repos/${owner}/${repo}/contents${path}?t=${new Date().getTime()}`, null, { method: "GET", getTokenFunction, setTokenFunction });
+  },
+  async getRepoRawFile(owner, repo, path, { getTokenFunction, setTokenFunction }) {
+    return await fetchJson(`${GITHUB_URL_API}/repos/${owner}/${repo}/contents${path}?t=${new Date().getTime()}`, null, {
+      method: "GET", getTokenFunction, setTokenFunction, headers: {
+        "Accept": "application/vnd.github.raw+json"
+      }
+    });
   },
 }
 
@@ -165,7 +172,7 @@ function getUrlAndPageNum(urls, keyword) {
   return { url, pageNum }
 }
 
-function genQueryRepositoryHQL({ first, after, last, before,repo }) {
+function genQueryRepositoryHQL({ first, after, last, before, repo }) {
   return {
     query: `
     {
@@ -231,7 +238,11 @@ function genQueryCommentHQL({ first, after, last, before, id }) {
   };
 }
 
-async function fetchJson(url, data, { method, responseHeaderCallback, skipLogin, getTokenFunction, setTokenFunction } = { method: "POST", skipLogin: false }) {
+function isRaw(header) {
+  return header && header["Accept"] == "application/vnd.github.raw+json";
+}
+
+async function fetchJson(url, data, { method, responseHeaderCallback, skipLogin, getTokenFunction, setTokenFunction, headers } = { method: "POST", skipLogin: false }) {
   try {
     let oauthDTO = null;
     if (getTokenFunction) {
@@ -242,14 +253,19 @@ async function fetchJson(url, data, { method, responseHeaderCallback, skipLogin,
     if (!oauthDTO && !skipLogin) {
       throw EXCEPTION.NO_LOGIN;
     }
-    let response = await fetchJsonReturnResponse(url, data, { method, skipLogin, getTokenFunction });
+    let response = await fetchJsonReturnResponse(url, data, { method, skipLogin, getTokenFunction, headers });
     let status = response.status;
     if (isStatusNoError(response)) {
-      const jsonResult = await response.json();
-      if (responseHeaderCallback) {
-        return responseHeaderCallback(jsonResult, response.headers);
+      let result = null;
+      if (isRaw(headers)) {
+        result = await response.arrayBuffer();
+      } else {
+        result = await response.json();
       }
-      return jsonResult;
+      if (responseHeaderCallback) {
+        return responseHeaderCallback(result, response.headers);
+      }
+      return result;
     } else if (status == 401 && oauthDTO?.refreshToken) {
       infoLog("start refresh token");
       //遇到401和拥有refresh token时，进行refresh token
@@ -296,7 +312,16 @@ async function fetchJson(url, data, { method, responseHeaderCallback, skipLogin,
           //再次发出请求
           response = await fetchJsonReturnResponse(url, data, { method, getTokenFunction });
           if (isStatusNoError(response)) {
-            return await response.json();
+            let result = null;
+            if (isRaw(headers)) {
+              result = await response.arrayBuffer();
+            } else {
+              result = await response.json();
+            }
+            if (responseHeaderCallback) {
+              return responseHeaderCallback(result, response.headers);
+            }
+            return result;
           } else {
             infoLog("continue error");
             throw `unknown error,status code = ${response.status}`
@@ -333,7 +358,7 @@ async function fetchJsonWithToken(url, data, { method, token, responseHeaderCall
   }
 }
 
-async function fetchJsonReturnResponse(url, data, { method, token, skipLogin, getTokenFunction } = { method: "POST", skipLogin: false }) {
+async function fetchJsonReturnResponse(url, data, { method, token, skipLogin, getTokenFunction, headers } = { method: "POST", skipLogin: false }) {
   let targetToken = token;
   if (!targetToken) {
     let oauthDTO = null;
@@ -347,15 +372,18 @@ async function fetchJsonReturnResponse(url, data, { method, token, skipLogin, ge
   if (!targetToken && !skipLogin) {
     throw EXCEPTION.NO_LOGIN;
   }
-  let headers = {
+  let targetHeaders = {
     "Content-Type": "application/json",
   };
+  if (headers) {
+    targetHeaders = { ...targetHeaders, ...headers };
+  }
   if (targetToken) {
-    headers["Authorization"] = `Bearer ${targetToken}`;
+    targetHeaders["Authorization"] = `Bearer ${targetToken}`;
   }
   let option = {
     method,
-    headers,
+    headers: targetHeaders,
   };
   if (data) {
     option.body = JSON.stringify(data);

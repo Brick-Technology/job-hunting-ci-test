@@ -227,7 +227,7 @@ export const companyDataToExcelJSONArray = (list) => {
     return result;
 }
 
-export const companyExcelDataToObjectArray = (data) => {
+export const companyExcelDataToObjectArray = (data, datetime) => {
     let companyBOList = [];
     for (let i = 0; i < data.length; i++) {
         let dataItem = data[i];
@@ -254,8 +254,8 @@ export const companyExcelDataToObjectArray = (data) => {
         item.sourcePlatform = dataItem['数据来源平台'];
         item.sourceRecordId = dataItem['数据来源记录编号'];
         item.sourceRefreshDatetime = convertDateStringToDateObject(dataItem['数据来源更新时间']);
-        item.createDatetime = convertDateStringToDateObject(dataItem['记录创建日期']);
-        item.updateDatetime = convertDateStringToDateObject(dataItem['记录更新日期']);
+        item.createDatetime = convertDateStringToDateObject(dataItem['记录创建日期']) ?? convertDateStringToDateObject(datetime);
+        item.updateDatetime = convertDateStringToDateObject(dataItem['记录更新日期']) ?? convertDateStringToDateObject(datetime);
         companyBOList.push(item);
     }
     return companyBOList;

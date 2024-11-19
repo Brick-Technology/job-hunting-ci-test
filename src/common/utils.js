@@ -194,7 +194,7 @@ export function isValidDate(value) {
 }
 
 export function convertDateStringToDateObject(text) {
-  return dayjs(text).isValid() ? dayjs(text).toDate() : null;
+  return isValidDate(text) ? dayjs(text).toDate() : null;
 }
 
 export function dateToStr(date, pattern) {

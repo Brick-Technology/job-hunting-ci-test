@@ -37,6 +37,7 @@ import { TaskDataMerge } from "../../common/data/domain/taskDataMerge";
 import { getMergeDataListForCompany, getMergeDataListForJob, getMergeDataListForCompanyTag } from "../../common/service/dataSyncService";
 import JSZip from "jszip";
 import { SearchDataSharePartnerBO } from "../../common/data/bo/searchDataSharePartnerBO";
+import { bytesToBase64 } from "../../common/utils/base64";
 
 dayjs.extend(minMax);
 export const TaskService = {
@@ -482,7 +483,7 @@ export async function createRepoIfNotExists({ userName, repoName }) {
 async function mergeDataByDataId(dataId, taskType, dataTypeName, fileHeader, excelDataToObjectArrayFunction, dataInsertFunction) {
     debugLog(`[TASK DATA MERGE] Task dataId = ${dataId},taskType = ${taskType}`);
     const taskDataMerge = await TaskDataMergeApi.taskDataMergeGetById(dataId, { invokeEnv: BACKGROUND });
-    debugLog(`[TASK DATA MERGE] taskDataMerge dataId = ${taskDataMerge.dataId}`);
+    debugLog(`[TASK DATA MERGE] taskDataMerge dataId = ${taskDataMerge.dataId},username = ${taskDataMerge.username},reponame = ${taskDataMerge.reponame},datetime = ${taskDataMerge.datetime}`);
     const file = await FileApi.fileGetById(taskDataMerge.dataId, { invokeEnv: BACKGROUND });
     debugLog(`[TASK DATA MERGE] file id = ${file.id},name = ${file.name}`);
     let base64Content = file.content;
@@ -491,13 +492,13 @@ async function mergeDataByDataId(dataId, taskType, dataTypeName, fileHeader, exc
     let validResultObject = validImportData(utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 }), fileHeader);
     if (!validResultObject.validResult) {
         debugLog(`[TASK DATA MERGE] valid file name = ${file.name}, id = ${file.id} failure`);
-        return `职位文件校验失败，缺少数据列(${validResultObject.lackColumn.length}):${validResultObject.lackColumn.join(",")}`;
+        return `文件校验失败，缺少数据列(${validResultObject.lackColumn.length}):${validResultObject.lackColumn.join(",")}`;
     }
     debugLog(`[TASK DATA MERGE] valid file name = ${file.name}, id = ${file.id} success`);
     const data = utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 2 });
     try {
         await DBApi.dbBeginTransaction({}, { invokeEnv: BACKGROUND });
-        let count = await dataInsertFunction(excelDataToObjectArrayFunction(data));
+        let count = await dataInsertFunction(excelDataToObjectArrayFunction(data, taskDataMerge.datetime));
         taskDataMerge.dataCount = count;
         await TaskDataMergeApi.taskDataMergeAddOrUpdate(taskDataMerge, { invokeEnv: BACKGROUND });
         await DBApi.dbCommitTransaction({}, { invokeEnv: BACKGROUND });
@@ -542,7 +543,15 @@ async function downloadDataByDataId(dataId, dataTypeName, taskType) {
                 file.name = content.name;
                 file.sha = content.sha;
                 file.encoding = content.encoding;
-                file.content = content.content;
+                if (file.encoding == "none") {
+                    //https://docs.github.com/zh/rest/repos/contents#get-repository-content
+                    //Between 1-100 MB: Only the raw or object custom media types are supported. Both will work as normal, except that when using the object media type, the content field will be an empty string and the encoding field will be "none". To get the contents of these larger files, use the raw media type.
+                    const rawData = await GithubApi.getRepoRawFile(userName, repoName, path, { getTokenFunction: getToken, setTokenFunction: setToken, });
+                    file.encoding = "base64"
+                    file.content = bytesToBase64(new Uint8Array(rawData, 0, rawData.byteLength));
+                } else {
+                    file.content = content.content;
+                }
                 file.size = content.size;
                 file.type = content.type;
                 const savedFile = await FileApi.fileAddOrUpdate(file, { invokeEnv: BACKGROUND });
