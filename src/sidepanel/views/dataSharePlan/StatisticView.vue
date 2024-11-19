@@ -36,6 +36,12 @@ const chartUploadData = ref();
 const chartDownloadData = ref();
 const chartMergeData = ref();
 
+let UPLOAD_NAME_OBJECT = {
+    "JOB_DATA_UPLOAD": "职位数据",
+    "COMPANY_DATA_UPLOAD": "公司数据",
+    "COMPANY_TAG_DATA_UPLOAD": "公司标签数据",
+}
+
 const onClickSearch = async () => {
     refresh();
 };
@@ -70,32 +76,34 @@ onUnmounted(() => {
 const refresh = async () => {
     let startDate = dayjs(form.datetimeRange[0]);
     let endDate = dayjs(form.datetimeRange[1]);
-    chartUploadData.value = convertToChartData({ startDate, endDate, queryResult: await TaskApi.taskStatisticUpload({ startDate, endDate }), convertNameFunction: convertUploadName });
+    chartUploadData.value = convertToChartData({ startDate, endDate, queryResult: await TaskApi.taskStatisticUpload({ startDate, endDate }), convertNameFunction: convertUploadName, defaultNameArray: Object.keys(UPLOAD_NAME_OBJECT) });
     chartDownloadData.value = convertToChartData({ startDate, endDate, queryResult: await TaskApi.taskStatisticDownload({ startDate, endDate }), convertNameFunction: null });
     chartMergeData.value = convertToChartData({ startDate, endDate, queryResult: await TaskApi.taskStatisticMerge({ startDate, endDate }), convertNameFunction: null });
-}
-
-let UPLOAD_NAME_OBJECT = {
-    "JOB_DATA_UPLOAD": "职位数据",
-    "COMPANY_DATA_UPLOAD": "公司数据",
-    "COMPANY_TAG_DATA_UPLOAD": "公司标签数据",
 }
 
 const convertUploadName = (name) => {
     return UPLOAD_NAME_OBJECT[name] ?? name;
 }
 
-const convertToChartData = ({ startDate, endDate, queryResult, convertNameFunction }) => {
+const convertToChartData = ({ startDate, endDate, queryResult, convertNameFunction, defaultNameArray }) => {
     let rangeDate = genRangeDate(startDate, endDate);
     rangeDate.sort();
+    let nameArray = null;
     let nameMap = new Map();
+    if (defaultNameArray) {
+        defaultNameArray.forEach(name => {
+            if (!nameMap.has(name)) {
+                nameMap.set(name, null);
+            }
+        });
+    }
     queryResult.forEach(item => {
         if (!nameMap.has(item.name)) {
             nameMap.set(item.name, null);
         }
     });
+    nameArray = Array.from(nameMap.keys());
     let seriesData = [];
-    let nameArray = Array.from(nameMap.keys());
     let nameAndDateTotalMapMap = new Map();
     nameArray.forEach(name => {
         let map = new Map();
