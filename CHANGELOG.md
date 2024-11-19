@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## WIP
+
+### ✏️ Changed
+
+1. (Sidepanel)修复公司数据增量上传逻辑。
+2. (Sidepanel)为数据文件增加数据结构版本号。
+
 ## 1.30.2(2024-11-18)
 
 ### 🐛 Fixed

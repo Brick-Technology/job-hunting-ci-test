@@ -2,7 +2,7 @@ import { Message } from "../../common/api/message";
 import { postSuccessMessage, postErrorMessage } from "../util";
 import { getDb, getOne } from "../database";
 import { Company } from "../../common/data/domain/company";
-import { convertEmptyStringToNull, isNotEmpty } from "../../common/utils";
+import { convertEmptyStringToNull, isNotEmpty,dateToStr } from "../../common/utils";
 import dayjs from "dayjs";
 import { SearchCompanyBO } from "../../common/data/bo/searchCompanyBO";
 import { SearchCompanyDTO } from "../../common/data/dto/searchCompanyDTO";
@@ -300,11 +300,7 @@ async function _addOrUpdateCompany(param) {
         $source_url: convertEmptyStringToNull(param.sourceUrl),
         $source_platform: convertEmptyStringToNull(param.sourcePlatform),
         $source_record_id: convertEmptyStringToNull(param.sourceRecordId),
-        $source_refresh_datetime: dayjs(
-          param.sourceRefreshDatetime
-        ).isValid()
-          ? dayjs(param.sourceRefreshDatetime).format("YYYY-MM-DD HH:mm:ss")
-          : null,
+        $source_refresh_datetime: dateToStr(param.sourceRefreshDatetime),
         $update_datetime: dayjs(now).format("YYYY-MM-DD HH:mm:ss"),
       },
     });
@@ -347,13 +343,9 @@ async function _addOrUpdateCompany(param) {
         $source_url: convertEmptyStringToNull(param.sourceUrl),
         $source_platform: convertEmptyStringToNull(param.sourcePlatform),
         $source_record_id: convertEmptyStringToNull(param.sourceRecordId),
-        $source_refresh_datetime: dayjs(
-          param.sourceRefreshDatetime
-        ).isValid()
-          ? dayjs(param.sourceRefreshDatetime).format("YYYY-MM-DD HH:mm:ss")
-          : null,
-        $create_datetime: dayjs(now).format("YYYY-MM-DD HH:mm:ss"),
-        $update_datetime: dayjs(now).format("YYYY-MM-DD HH:mm:ss"),
+        $source_refresh_datetime: dateToStr(param.sourceRefreshDatetime),
+        $create_datetime: dayjs(param.createDatetime ?? now).format("YYYY-MM-DD HH:mm:ss"),
+        $update_datetime: dayjs(param.updateDatetime ?? now).format("YYYY-MM-DD HH:mm:ss"),
       },
     });
   }

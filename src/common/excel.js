@@ -4,7 +4,30 @@ import { CompanyTagBO } from "../common/data/bo/companyTagBO";
 import { genIdFromText, convertDateStringToDateObject } from "../common/utils"
 import { JobTagBO } from "../common/data/bo/jobTagBO";
 
-export const validImportData = (data, validArray) => {
+const HEADER_VERSION_PREFIX = "__VERSION_";
+
+export const validImportData = (data, allVersionValidArray) => {
+    let dataVersion = 0;
+    //查找数据文件版本，找不到则按初版处理
+    if (data.length > 0) {
+        let headerRowArray = data[0];
+        for (let i = 0; i < headerRowArray.length; i++) {
+            let header = headerRowArray[i];
+            if (header.startsWith(HEADER_VERSION_PREFIX)) {
+                let numberString = header.replaceAll(HEADER_VERSION_PREFIX, "");
+                let number = Number.parseInt(numberString);
+                if (Number.isInteger(number)) {
+                    dataVersion = number;
+                    break;
+                }
+            }
+        }
+    }
+    //如果超过当前程序版本所支持的数据版本，则按初版处理
+    if (dataVersion > allVersionValidArray.length) {
+        dataVersion = 0;
+    }
+    let validArray = allVersionValidArray[dataVersion];
     let colCount = 0;
     let lackColumnMap = new Map();
     for (let i = 0; i < validArray.length; i++) {
@@ -23,35 +46,41 @@ export const validImportData = (data, validArray) => {
     return { validResult: colCount == validArray.length, lackColumn: lackColumnMap.keys().toArray() };
 }
 
+const fillDataVersion = (obj, header) => {
+    obj[`${HEADER_VERSION_PREFIX}${header.length - 1}`] = null;
+}
+
 export const JOB_FILE_HEADER = [
-    "职位自编号",
-    "发布平台",
-    "职位访问地址",
-    "职位",
-    "公司",
-    "公司是否为全称",
-    "地区",
-    "地址",
-    "经度",
-    "纬度",
-    "职位描述",
-    "学历",
-    "所需经验",
-    "最低薪资",
-    "最高薪资",
-    "首次发布时间",
-    "招聘人",
-    "招聘公司",
-    "招聘者职位",
-    "首次扫描日期",
-    "记录更新日期",
+    [
+        "职位自编号",
+        "发布平台",
+        "职位访问地址",
+        "职位",
+        "公司",
+        "公司是否为全称",
+        "地区",
+        "地址",
+        "经度",
+        "纬度",
+        "职位描述",
+        "学历",
+        "所需经验",
+        "最低薪资",
+        "最高薪资",
+        "首次发布时间",
+        "招聘人",
+        "招聘公司",
+        "招聘者职位",
+        "首次扫描日期",
+        "记录更新日期",
+    ]
 ];
 
 export const jobDataToExcelJSONArray = (list) => {
     let result = [];
     for (let i = 0; i < list.length; i++) {
         let item = list[i];
-        result.push({
+        let obj = {
             职位自编号: item.jobId,
             发布平台: item.jobPlatform,
             职位访问地址: item.jobUrl,
@@ -74,7 +103,9 @@ export const jobDataToExcelJSONArray = (list) => {
             招聘者职位: item.bossPosition,
             首次扫描日期: item.createDatetime,
             记录更新日期: item.updateDatetime,
-        });
+        };
+        fillDataVersion(obj, JOB_FILE_HEADER);
+        result.push(obj);
     }
     return result;
 }
@@ -112,34 +143,60 @@ export const jobExcelDataToObjectArray = (data) => {
 }
 
 export const COMPANY_FILE_HEADER = [
-    "公司",
-    "公司描述",
-    "成立时间",
-    "经营状态",
-    "法人",
-    "统一社会信用代码",
-    "官网",
-    "社保人数",
-    "自身风险数",
-    "关联风险数",
-    "地址",
-    "经营范围",
-    "纳税人识别号",
-    "所属行业",
-    "工商注册号",
-    "经度",
-    "纬度",
-    "数据来源地址",
-    "数据来源平台",
-    "数据来源记录编号",
-    "数据来源更新时间",
+    [
+        "公司",
+        "公司描述",
+        "成立时间",
+        "经营状态",
+        "法人",
+        "统一社会信用代码",
+        "官网",
+        "社保人数",
+        "自身风险数",
+        "关联风险数",
+        "地址",
+        "经营范围",
+        "纳税人识别号",
+        "所属行业",
+        "工商注册号",
+        "经度",
+        "纬度",
+        "数据来源地址",
+        "数据来源平台",
+        "数据来源记录编号",
+        "数据来源更新时间",
+    ], [
+        "公司",
+        "公司描述",
+        "成立时间",
+        "经营状态",
+        "法人",
+        "统一社会信用代码",
+        "官网",
+        "社保人数",
+        "自身风险数",
+        "关联风险数",
+        "地址",
+        "经营范围",
+        "纳税人识别号",
+        "所属行业",
+        "工商注册号",
+        "经度",
+        "纬度",
+        "数据来源地址",
+        "数据来源平台",
+        "数据来源记录编号",
+        "数据来源更新时间",
+        "记录创建日期",
+        "记录更新日期",
+    ]
 ];
 
 export const companyDataToExcelJSONArray = (list) => {
     let result = [];
     for (let i = 0; i < list.length; i++) {
         let item = list[i];
-        result.push({
+        let obj = {
             公司: item.companyName,
             公司描述: item.companyDesc,
             成立时间: item.companyStartDate,
@@ -161,7 +218,11 @@ export const companyDataToExcelJSONArray = (list) => {
             数据来源平台: item.sourcePlatform,
             数据来源记录编号: item.sourceRecordId,
             数据来源更新时间: item.sourceRefreshDatetime,
-        });
+            记录创建日期: item.createDatetime,
+            记录更新日期: item.updateDatetime,
+        };
+        fillDataVersion(obj, COMPANY_FILE_HEADER);
+        result.push(obj);
     }
     return result;
 }
@@ -193,24 +254,30 @@ export const companyExcelDataToObjectArray = (data) => {
         item.sourcePlatform = dataItem['数据来源平台'];
         item.sourceRecordId = dataItem['数据来源记录编号'];
         item.sourceRefreshDatetime = convertDateStringToDateObject(dataItem['数据来源更新时间']);
+        item.createDatetime = convertDateStringToDateObject(dataItem['记录创建日期']);
+        item.updateDatetime = convertDateStringToDateObject(dataItem['记录更新日期']);
         companyBOList.push(item);
     }
     return companyBOList;
 }
 
 export const COMPANY_TAG_FILE_HEADER = [
-    "公司",
-    "标签",
+    [
+        "公司",
+        "标签",
+    ]
 ];
 
 export const companyTagDataToExcelJSONArray = (list) => {
     let result = [];
     for (let i = 0; i < list.length; i++) {
         let item = list[i];
-        result.push({
+        let obj = {
             公司: item.companyName,
             标签: item.tagNameArray.join(","),
-        });
+        };
+        fillDataVersion(obj, COMPANY_TAG_FILE_HEADER);
+        result.push(obj);
     }
     return result;
 }
@@ -227,10 +294,10 @@ export const companyTagExcelDataToObjectArray = (data) => {
     return companyTagBOList;
 }
 
-export const JOB_TAG_FILE_HEADER = [
+export const JOB_TAG_FILE_HEADER = [[
     "职位编号",
     "标签",
-];
+]];
 
 export const jobTagDataToExcelJSONArray = (list) => {
     let result = [];

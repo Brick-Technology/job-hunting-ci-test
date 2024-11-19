@@ -371,44 +371,39 @@
 </template>
 
 <script lang="ts" setup>
+import { useTransition } from "@vueuse/core";
+import dayjs from "dayjs";
 import {
-  onMounted,
-  ref,
   computed,
-  reactive,
   nextTick,
+  onMounted,
   onUnmounted,
+  reactive,
+  ref,
   watch,
 } from "vue";
-import { useTransition } from "@vueuse/core";
 import { CompanyApi, TagApi } from "../../common/api/index";
-import dayjs from "dayjs";
-import TagInput from "../components/TagInput.vue";
-import { SearchCompanyBO } from "../../common/data/bo/searchCompanyBO";
 import { CompanyTagBO } from "../../common/data/bo/companyTagBO";
+import { SearchCompanyBO } from "../../common/data/bo/searchCompanyBO";
+import TagInput from "../components/TagInput.vue";
 
-import { ElTable, ElMessage } from "element-plus";
-import { utils, writeFileXLSX } from "xlsx";
-import { genIdFromText } from "../../common/utils";
-import type { FormInstance, FormRules } from "element-plus";
-import "leaflet/dist/leaflet.css";
+import { Icon } from "@iconify/vue";
 import {
-  LMap,
   LIcon,
-  LTileLayer,
+  LMap,
   LMarker,
-  LControlLayers,
-  LTooltip,
   LPopup,
-  LPolyline,
-  LPolygon,
-  LRectangle,
+  LTileLayer
 } from "@vue-leaflet/vue-leaflet";
+import type { FormInstance, FormRules } from "element-plus";
+import { ElMessage, ElTable } from "element-plus";
+import "leaflet/dist/leaflet.css";
 import { LMarkerClusterGroup } from "vue-leaflet-markercluster";
 import "vue-leaflet-markercluster/dist/style.css";
-import { wgs84ToGcj02 } from "@pansy/lnglat-transform";
-import { Icon } from "@iconify/vue";
+import { utils, writeFileXLSX } from "xlsx";
 import { UI_DEFAULT_PAGE_SIZE } from "../../common/config";
+import { companyDataToExcelJSONArray } from "../../common/excel";
+import { genIdFromText } from "../../common/utils";
 
 const todayAddCountSource = ref(0);
 const todayAddCount = useTransition(todayAddCountSource, {
@@ -560,33 +555,7 @@ const refreshStatistic = async () => {
 
 const onExportHandle = () => {
   let list = tableData.value;
-  let result = [];
-  for (let i = 0; i < list.length; i++) {
-    let item = list[i];
-    result.push({
-      公司: item.companyName,
-      公司描述: item.companyDesc,
-      成立时间: item.companyStartDate,
-      经营状态: item.companyStatus,
-      法人: item.companyLegalPerson,
-      统一社会信用代码: item.companyUnifiedCode,
-      官网: item.companyWebSite,
-      社保人数: item.companyInsuranceNum,
-      自身风险数: item.companySelfRisk,
-      关联风险数: item.companyUnionRisk,
-      地址: item.companyAddress,
-      经营范围: item.companyScope,
-      纳税人识别号: item.companyTaxNo,
-      所属行业: item.companyIndustry,
-      工商注册号: item.companyLicenseNumber,
-      经度: item.companyLongitude,
-      纬度: item.companyLatitude,
-      数据来源地址: item.sourceUrl,
-      数据来源平台: item.sourcePlatform,
-      数据来源记录编号: item.sourceRecordId,
-      数据来源更新时间: item.sourceRefreshDatetime,
-    });
-  }
+  let result = companyDataToExcelJSONArray(list);
   const ws = utils.json_to_sheet(result);
   const wb = utils.book_new();
   utils.book_append_sheet(wb, ws, "Data");
