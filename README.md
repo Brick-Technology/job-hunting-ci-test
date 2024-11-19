@@ -120,6 +120,10 @@
 </div>
 
 <div style="margin-top:30px">
+    <img src="docs\introduction\chrome_extension_data_share_statistic.jpg" alt="chrome_extension_data_share_statistic" width="600px"/>
+</div>
+
+<div style="margin-top:30px">
     <img src="docs\introduction\chrome_extension_data_share_task.png" alt="chrome_extension_data_share_task" width="600px"/>
 </div>
 
