@@ -14,7 +14,7 @@ import { _getCompanyDTOByIds } from "./companyService";
 import { BaseService } from "./baseService";
 import { _getAllJobTagDTOByJobIds } from "./jobTagService";
 import { ChartBasicDTO } from "../../common/data/dto/chartBasicDTO";
-import { JobStatisticGrouByPublishDateBO, TYPE_ENUM_MONTH, TYPE_ENUM_WEEK, TYPE_ENUM_DAY, TYPE_ENUM_HOUR } from "../../common/data/bo/JobStatisticGrouByPublishDateBO";
+import { JobStatisticGrouByPublishDateBO, TYPE_ENUM_MONTH, TYPE_ENUM_WEEK, TYPE_ENUM_DAY, TYPE_ENUM_HOUR } from "../../common/data/bo/jobStatisticGrouByPublishDateBO";
 
 const JOB_VISIT_TYPE_SEARCH = "SEARCH";
 const JOB_VISIT_TYPE_DETAIL = "DETAIL";
