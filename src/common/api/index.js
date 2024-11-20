@@ -250,6 +250,29 @@ export const JobApi = {
     let result = await invoke(this.jobTagStatistic.name, {});
     return result.data;
   },
+
+  /**
+  * 
+  * @param {*} param 
+  * @returns []
+  */
+  jobStatisticGrouByPublishDate: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
+    let result = await invoke(this.jobStatisticGrouByPublishDate
+      .name, param, { invokeEnv: invokeEnv });
+    return result.data;
+  },
+
+  /**
+  * 
+  * @param {*} param 
+  * @returns []
+  */
+  jobStatisticGrouByPlatform: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
+    let result = await invoke(this.jobStatisticGrouByPlatform
+      .name, param, { invokeEnv: invokeEnv });
+    return result.data;
+  },
+
 };
 
 export const CompanyApi = {
@@ -401,6 +424,29 @@ export const CompanyApi = {
   deleteCompanyTagByCompanyIds: async function (param) {
     return await invoke(this.deleteCompanyTagByCompanyIds.name, param);
   },
+
+  /**
+  * 
+  * @param {*} param 
+  * @returns []
+  */
+  companyStatisticGrouByStartDate: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
+    let result = await invoke(this.companyStatisticGrouByStartDate
+      .name, param, { invokeEnv: invokeEnv });
+    return result.data;
+  },
+
+  /**
+  * 
+  * @param {*} param 
+  * @returns []
+  */
+  companyStatisticGrouByInsurance: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
+    let result = await invoke(this.companyStatisticGrouByInsurance
+      .name, param, { invokeEnv: invokeEnv });
+    return result.data;
+  },
+
 };
 
 export const TagApi = {

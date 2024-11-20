@@ -30,121 +30,137 @@
     </el-tour>
   </el-divider>
   <div class="content">
-    <el-tabs tab-position="left" class="tabs">
-      <el-tab-pane class="tab_panel">
+    <el-tabs tab-position="left" class="tabs" v-model="selectTabName">
+      <el-tab-pane :name="TAB_ENUM_FAVORITE" class="tab_panel">
         <template #label>
           <div class="menuItem" ref="favoriteMenuRef">
             <span>职位偏好</span>
             <Icon icon="fluent-emoji-flat:red-heart" width="25" height="25" />
           </div>
         </template>
-        <FavoriteJobView></FavoriteJobView>
+        <FavoriteJobView v-if="selectTabName == TAB_ENUM_FAVORITE" </FavoriteJobView>
       </el-tab-pane>
-      <el-tab-pane class="tab_panel">
+      <el-tab-pane :name="TAB_ENUM_HISTORY" class="tab_panel">
+        <template #label>
+          <div class="menuItem" ref="favoriteMenuRef">
+            <span>浏览历史</span>
+            <Icon icon="material-symbols:history" width="25" height="25" />
+          </div>
+        </template>
+        <LatestBrowseJobView v-if="selectTabName == TAB_ENUM_HISTORY"></LatestBrowseJobView>
+      </el-tab-pane>
+      <el-tab-pane :name="TAB_ENUM_AUTOMATE" class="tab_panel">
         <template #label>
           <div class="menuItem" ref="automateMenuRef">
             <span>自动化</span>
             <Icon icon="tabler:robot" width="25" height="25" />
           </div>
         </template>
-        <AutomateView></AutomateView>
+        <AutomateView v-if="selectTabName == TAB_ENUM_AUTOMATE"></AutomateView>
       </el-tab-pane>
     </el-tabs>
   </div>
 </template>
-<script lang="ts" setup>
-import {
-  onMounted,
-  ref,
-  onUnmounted,
-} from "vue";
-import FavoriteJobView from "./assistant/FavoriteJobView.vue";
-import AutomateView from "./assistant/AutomateView.vue";
-import { Icon } from "@iconify/vue";
-import { useTransition } from "@vueuse/core";
-import { AssistantApi } from "../../common/api/index";
+  <script lang="ts" setup>
+  import {
+    onMounted,
+    ref,
+    onUnmounted,
+  } from "vue";
+  import FavoriteJobView from "./assistant/FavoriteJobView.vue";
+  import AutomateView from "./assistant/AutomateView.vue";
+  import { Icon } from "@iconify/vue";
+  import { useTransition } from "@vueuse/core";
+  import { AssistantApi } from "../../common/api/index";
+  import LatestBrowseJobView from "./assistant/LatestBrowseJobView.vue";
 
-const loading = ref(false);
-const tourOpen = ref(false);
+  const TAB_ENUM_FAVORITE = "TAB_ENUM_FAVORITE";
+  const TAB_ENUM_HISTORY = "TAB_ENUM_HISTORY";
+  const TAB_ENUM_AUTOMATE = "TAB_ENUM_AUTOMATE";
 
-const statisticRef = ref();
-const favoriteMenuRef = ref();
-const automateMenuRef = ref();
+  const selectTabName = ref(TAB_ENUM_FAVORITE);
 
-const todayFaviousJobCountSource = ref(0);
-const todayFaviousJobCount = useTransition(todayFaviousJobCountSource, {
-  duration: 1000,
-});
-const totalFaviousJobSource = ref(0);
-const totalFaviousJob = useTransition(totalFaviousJobSource, {
-  duration: 1000,
-});
+  const loading = ref(false);
+  const tourOpen = ref(false);
 
-let refreshIntervalId = null;
+  const statisticRef = ref();
+  const favoriteMenuRef = ref();
+  const automateMenuRef = ref();
 
-onMounted(async () => {
-  await refresh();
-  refreshIntervalId = setInterval(refresh, 10000);
-})
+  const todayFaviousJobCountSource = ref(0);
+  const todayFaviousJobCount = useTransition(todayFaviousJobCountSource, {
+    duration: 1000,
+  });
+  const totalFaviousJobSource = ref(0);
+  const totalFaviousJob = useTransition(totalFaviousJobSource, {
+    duration: 1000,
+  });
 
-const refresh = async () => {
-  loading.value = true;
-  let result = await AssistantApi.assistantStatistic();
-  todayFaviousJobCountSource.value = result.todayFaviousJobCount
-  totalFaviousJobSource.value = result.totalFaviousJob
-  loading.value = false;
-};
+  let refreshIntervalId = null;
 
-onUnmounted(() => {
-  if (refreshIntervalId) {
-    clearInterval(refreshIntervalId);
-    refreshIntervalId = null;
-  }
-});
+  onMounted(async () => {
+    await refresh();
+    refreshIntervalId = setInterval(refresh, 10000);
+  })
+
+  const refresh = async () => {
+    loading.value = true;
+    let result = await AssistantApi.assistantStatistic();
+    todayFaviousJobCountSource.value = result.todayFaviousJobCount
+    totalFaviousJobSource.value = result.totalFaviousJob
+    loading.value = false;
+  };
+
+  onUnmounted(() => {
+    if (refreshIntervalId) {
+      clearInterval(refreshIntervalId);
+      refreshIntervalId = null;
+    }
+  });
 
 
 </script>
 
-<style scoped>
-.statistic {
-  .el-col {
-    text-align: center;
+  <style scoped>
+  .statistic {
+    .el-col {
+      text-align: center;
+    }
+
+    padding-top: 10px;
   }
 
-  padding-top: 10px;
-}
+  .content {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    overflow: hidden;
+    width: 100%;
+  }
 
-.content {
-  display: flex;
-  flex-direction: row;
-  flex: 1;
-  overflow: hidden;
-  width: 100%;
-}
+  .divider {
+    margin: 16px;
+  }
 
-.divider {
-  margin: 16px;
-}
+  .icon {
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+  }
 
-.icon {
-  cursor: pointer;
-  width: 24px;
-  height: 24px;
-}
+  .tabs {
+    display: flex;
+    height: 100%;
+    width: 100%;
+  }
 
-.tabs {
-  display: flex;
-  height: 100%;
-  width: 100%;
-}
+  .tab_panel {
+    height: 100%;
+    width: 100%;
+  }
 
-.tab_panel {
-  height: 100%;
-  width: 100%;
-}
-
-.menuItem {
-  display: flex;
-  align-items: center;
-}
+  .menuItem {
+    display: flex;
+    align-items: center;
+  }
 </style>

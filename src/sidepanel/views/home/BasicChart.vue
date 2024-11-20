@@ -1,7 +1,9 @@
 <template>
     <div>
         <div class="main">
-            <div class="title">{{ props.title }}</div>
+            <div class="title">
+                <Icon v-if="props.titleIcon" class="icon" :icon="props.titleIcon" />{{ props.title }}
+            </div>
             <v-chart :loading="loading" autoresize :option="option" />
         </div>
     </div>
@@ -19,6 +21,9 @@ import { use } from "echarts/core";
 import { CanvasRenderer } from "echarts/renderers";
 import { onMounted, ref, watch } from "vue";
 import VChart from "vue-echarts";
+import { Icon } from "@iconify/vue";
+import * as echarts from 'echarts';
+import { convertToAbbreviation } from "../../../common/utils";
 
 use([
     CanvasRenderer,
@@ -30,42 +35,45 @@ use([
     BarChart,
 ]);
 
-const props = defineProps(["title"]);
+const props = defineProps(["title", "titleIcon", "xTitleRotate"]);
 
 const loading = ref(false);
 
 const option = ref({
-    tooltip: {
-        trigger: 'axis',
-        axisPointer: {
-            // Use axis to trigger tooltip
-            type: 'shadow' // 'shadow' as default; can also be 'line' or 'shadow'
-        }
+    xAxis: {
+        type: 'category',
+        data: [],
+        axisLabel: { rotate: props.xTitleRotate ?? 0 }
     },
-    legend: {},
-    grid: {
-        left: '3%',
-        right: '4%',
-        bottom: '3%',
-        containLabel: true
+    yAxis: {
+        type: 'value',
+        axisLabel: {
+            formatter: function (value, index) {
+                return convertToAbbreviation(value);
+            }
+        }
     },
     dataZoom: [
         {
-            id: 'dataZoomY',
-            type: 'slider',
-            yAxisIndex: [0],
-            filterMode: 'empty'
+            type: 'inside'
         }
     ],
-    xAxis: {
-        type: 'value'
-    },
-    yAxis: {
-        type: 'category',
-        data: []
+    tooltip: {
+        show: true,
     },
     series: [
+        {
+            data: [],
+            type: 'bar',
+            itemStyle: {
+                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                    { offset: 0, color: '#83bff6' },
+                    { offset: 0.5, color: '#188df0' },
+                    { offset: 1, color: '#188df0' }
+                ])
+            },
 
+        },
     ]
 });
 
@@ -85,24 +93,8 @@ const render = async () => {
     loading.value = true;
     let modelValue = model.value;
     if (modelValue) {
-        let seriesArray = [];
-        modelValue.seriesData.forEach(item => {
-            seriesArray.push({
-                name: item.name,
-                type: 'bar',
-                stack: 'total',
-                label: {
-                    show: true
-                },
-                color: item.color,
-                emphasis: {
-                    focus: 'series'
-                },
-                data: item.data
-            });
-        });
-        option.value.yAxis.data = modelValue.dateData;
-        option.value.series = seriesArray;
+        option.value.xAxis.data = modelValue.nameArray;
+        option.value.series[0].data = modelValue.dataArray;
         loading.value = false;
     }
 }
@@ -118,6 +110,13 @@ const render = async () => {
     .title {
         font-size: 16px;
         font-weight: 600;
+        display: flex;
+        align-items: flex-end;
+    }
+
+    .icon {
+        font-size: 25px;
+        padding-right: 5px;
     }
 }
 </style>

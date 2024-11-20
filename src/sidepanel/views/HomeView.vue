@@ -23,22 +23,6 @@
           <el-text>显示职位，公司，公司标签的数量</el-text>
         </el-row>
       </el-tour-step>
-      <el-tour-step :target="latestJobRef?.$el" title="最近查看职位" placement="right">
-        <el-row>
-          <el-text>1.显示最近查看的职位</el-text>
-        </el-row>
-        <el-row>
-          <el-text>2.点击标题，跳转到详情页</el-text>
-        </el-row>
-        <el-row>
-          <el-text>3.点击定位，移动到地图上当前的职位</el-text>
-        </el-row>
-      </el-tour-step>
-      <el-tour-step :target="map?.$el" title="职位定位地图">
-        <el-row>
-          <el-text>将含有位置坐标的职位显示到地图上</el-text>
-        </el-row>
-      </el-tour-step>
       <el-tour-step :target="websiteRef" title="网站" placement="left">
         <el-row>
           <el-text>各类网站的快速导航</el-text>
@@ -47,38 +31,8 @@
     </el-tour>
   </el-divider>
   <div class="content">
-    <div class="left">
-      <div>最近查看职位</div>
-      <el-scrollbar ref="scrollbar">
-        <div class="leftSub" ref="latestJobRef" v-loading="searchLoading">
-          <el-timeline v-if="tableData.length > 0">
-            <el-timeline-item v-for="(item, index) in tableData" :key="index"
-              :timestamp="item.latestBrowseDetailDatetime" v-show="item.latestBrowseDetailDatetime">
-              <JobItemCard :item="item" :key="item.jobId" @map-locate="onJobMapLocate(item)"></JobItemCard>
-            </el-timeline-item>
-          </el-timeline>
-          <el-text v-else>无</el-text>
-        </div>
-      </el-scrollbar>
-    </div>
     <div class="middle">
-      <div class="mapWrapper">
-        <l-map id="map" ref="map" v-model:zoom="zoom">
-          <l-tile-layer
-            url="http://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}"
-            :subdomains="['1', '2', '3', '4']"></l-tile-layer>
-          <l-marker-cluster-group>
-            <l-marker v-for="(item, index) in tableData" :lat-lng="[item.jobLatitude, item.jobLongitude]">
-              <l-popup ref="popups" :lat-lng="[item.jobLatitude, item.jobLongitude]">
-                <MapJobDetail :key="item.jobId" :item="item"></MapJobDetail>
-              </l-popup>
-              <l-icon className="icon" :key="item.jobId">
-                <MapJobIcon :key="item.jobId" :item="item"></MapJobIcon>
-              </l-icon>
-            </l-marker>
-          </l-marker-cluster-group>
-        </l-map>
-      </div>
+      <StatisticView></StatisticView>
     </div>
     <div ref="websiteRef" class="right">
       <el-descriptions direction="vertical" :column="1" size="small" border>
@@ -99,44 +53,54 @@
           </el-row>
         </el-descriptions-item>
       </el-descriptions>
+
+      <div class="latestBrowseTitle">最近查看</div>
+      <el-scrollbar class="latestBrowseWrapper" ref="scrollbar">
+        <div class="leftSub" ref="latestJobRef" v-loading="searchLoading">
+          <el-timeline v-if="tableData.length > 0">
+            <el-timeline-item v-for="(item, index) in tableData" :key="index"
+              :timestamp="item.latestBrowseDetailDatetime" v-show="item.latestBrowseDetailDatetime">
+              <div class="historyJobItem">
+                <div class="jobItem">
+                  <div class="jobItemName">
+                    <el-link :href="item.jobUrl" target="_blank" type="primary">{{ item.jobName }}</el-link>
+                  </div>
+                  <div class="jobItemSalary">{{ item.jobSalaryMin }}-{{ item.jobSalaryMax }}</div>
+                </div>
+                <div>
+                  <div>{{ item.jobCompanyName }}</div>
+                  <div>{{ item.jobAddress }}</div>
+                </div>
+              </div>
+            </el-timeline-item>
+          </el-timeline>
+          <el-text v-else>无</el-text>
+        </div>
+      </el-scrollbar>
+      <div class="latestBrowseFooter">
+        <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize"
+          :page-sizes="[10, 20, 50, 100, 200, 500, 1000]" :small="small" :disabled="disabled" :background="background"
+          layout="prev, pager, next" :total="total" @size-change="handleSizeChange"
+          @current-change="handleCurrentChange" />
+      </div>
     </div>
+
   </div>
-  <el-row>
-    <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize"
-      :page-sizes="[10, 20, 50, 100, 200, 500, 1000]" :small="small" :disabled="disabled" :background="background"
-      layout="total, sizes, prev, pager, next" :total="total" @size-change="handleSizeChange"
-      @current-change="handleCurrentChange" />
-  </el-row>
 </template>
 <script lang="ts" setup>
-import { ref, onMounted, computed, onUnmounted } from "vue";
-import { useTransition } from "@vueuse/core";
-import { JobApi, CompanyApi } from "../../common/api/index.js";
-import { SearchJobBO } from "../../common/data/bo/searchJobBO";
-import L from "leaflet";
-globalThis.L = L;
-import "leaflet/dist/leaflet.css";
-import {
-  LMap,
-  LIcon,
-  LTileLayer,
-  LMarker,
-  LControlLayers,
-  LTooltip,
-  LPopup,
-  LPolyline,
-  LPolygon,
-  LRectangle,
-} from "@vue-leaflet/vue-leaflet";
-import { LMarkerClusterGroup } from "vue-leaflet-markercluster";
-import "vue-leaflet-markercluster/dist/style.css";
-import { wgs84ToGcj02 } from "@pansy/lnglat-transform";
 import { Icon } from "@iconify/vue";
+import { wgs84ToGcj02 } from "@pansy/lnglat-transform";
+import { useTransition } from "@vueuse/core";
 import dayjs from "dayjs";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import { computed, onMounted, onUnmounted, ref } from "vue";
+import "vue-leaflet-markercluster/dist/style.css";
+import { CompanyApi, JobApi } from "../../common/api/index.js";
 import { UI_DEFAULT_PAGE_SIZE } from "../../common/config";
-import JobItemCard from "../components/JobItemCard.vue";
-import MapJobIcon from "../components/MapJobIcon.vue";
-import MapJobDetail from "../components/MapJobDetail.vue";
+import { SearchJobBO } from "../../common/data/bo/searchJobBO";
+globalThis.L = L;
+import StatisticView from "./home/StatisticView.vue";
 
 const todayBrowseDetailCountSource = ref(0);
 const todayBrowseDetailCount = useTransition(todayBrowseDetailCountSource, {
@@ -169,26 +133,6 @@ onMounted(async () => {
   await refresh();
   await search();
   refreshIntervalId = setInterval(refresh, 10000);
-  //自动展开popup
-  // popups.value.forEach(item => {
-  //     item.leafletObject.options.autoClose = false;
-  // });
-  // popups.value.forEach(item => {
-  //     item.leafletObject.openOn(map.value.leafletObject);
-  // });
-  if (popups.value.length > 0) {
-    map.value.leafletObject.fitBounds(popups.value.map((item) => item.latLng));
-  } else {
-    map.value.leafletObject.setView([39.906217, 116.3912757], 4);
-  }
-  if (popups.value && popups.value.length > 0) {
-    let firstPopup = popups.value[0];
-    firstPopup.leafletObject.openOn(map.value.leafletObject);
-    //TODO clean the timeout
-    setTimeout(() => {
-      map.value.leafletObject.flyTo(firstPopup.latLng);
-    }, 300);
-  }
 });
 
 onUnmounted(() => {
@@ -288,26 +232,6 @@ const companyInfoWebsiteList = [
   { url: "https://xwqy.gsxt.gov.cn", label: "个体私营" },
 ];
 
-const map = ref();
-const zoom = ref(10);
-const idAndPopupIndexMap = computed(() => {
-  let result = new Map();
-  let filtered = tableData.value.filter(
-    (item) => item.jobLatitude && item.jobLongitude
-  );
-  filtered.forEach((element, index) => {
-    result.set(element.jobId, index);
-  });
-  return result;
-});
-const onJobMapLocate = (item) => {
-  let popUpIndex = idAndPopupIndexMap.value.get(item.jobId);
-  let popUpObject = popups.value[popUpIndex];
-  popUpObject.leafletObject.openOn(map.value.leafletObject);
-  map.value.leafletObject.flyTo(popUpObject.latLng, 14);
-};
-const popups = ref([]);
-
 const statisticRef = ref();
 const latestJobRef = ref();
 const websiteRef = ref();
@@ -322,13 +246,6 @@ const tourOpen = ref(false);
   }
 
   padding-top: 10px;
-}
-
-.el-row {}
-
-.mapWrapper {
-  display: flex;
-  flex: 1;
 }
 
 .divider {
@@ -375,11 +292,76 @@ const tourOpen = ref(false);
   min-width: 200px;
   max-width: 400px;
   overflow: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .logo {
   width: 20px;
   height: 20px;
   padding: 5px;
+}
+
+.historyJobItem {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid yellowgreen;
+  font-size: 12px;
+  overflow-x: clip;
+  width: 250px;
+}
+
+.jobItem {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.jobItemName {
+  width: 150px;
+}
+
+.jobItemSalary {
+  width: 70px;
+  text-align: right;
+}
+
+.latestBrowseTitle {
+  padding: 10px;
+  border: 1px solid #f5f7fa;
+  border-top: 0;
+  border-bottom: 0;
+}
+
+.latestBrowseWrapper {
+  flex: 1;
+  border: 1px solid #f5f7fa;
+  border-top: 0;
+  border-bottom: 0;
+  min-height: 300px;
+}
+
+.latestBrowse {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  border: 1px solid #f5f7fa;
+  border-top: 0;
+}
+
+.latestBrowseFooter {
+  display: flex;
+  justify-content: end;
+  border: 1px solid #f5f7fa;
+  border-top: 0;
+}
+</style>
+
+<style lang="scss">
+.el-timeline {
+  padding: 0;
 }
 </style>

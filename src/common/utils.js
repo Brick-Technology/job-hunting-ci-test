@@ -233,3 +233,16 @@ export function paramsToObject(entries) {
   }
   return result;
 }
+
+// Function to convert a long number to an abbreviated string using Intl.NumberFormat
+export function convertToAbbreviation(number) {
+  // Create a new Intl.NumberFormat object with options
+  const formatter = new Intl.NumberFormat('en', {
+      notation: 'compact',
+      compactDisplay: 'short',
+      maximumSignificantDigits: 3
+  });
+  
+  // Format the number and return the result
+  return formatter.format(number);
+}

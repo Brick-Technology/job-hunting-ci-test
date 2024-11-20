@@ -13,6 +13,8 @@ import { _getAllCompanyTagDTOByCompanyIds } from "./companyTagService";
 import { _getCompanyDTOByIds } from "./companyService";
 import { BaseService } from "./baseService";
 import { _getAllJobTagDTOByJobIds } from "./jobTagService";
+import { ChartBasicDTO } from "../../common/data/dto/chartBasicDTO";
+import { JobStatisticGrouByPublishDateBO, TYPE_ENUM_MONTH, TYPE_ENUM_WEEK, TYPE_ENUM_DAY, TYPE_ENUM_HOUR } from "../../common/data/bo/JobStatisticGrouByPublishDateBO";
 
 const JOB_VISIT_TYPE_SEARCH = "SEARCH";
 const JOB_VISIT_TYPE_DETAIL = "DETAIL";
@@ -401,7 +403,72 @@ export const JobService = {
   jobGetByIds: async function (message, param) {
     SERVICE_INSTANCE.getByIds(message, param);
   },
+
+  /**
+     *
+     * @param {Message} message
+     * @param {JobStatisticGrouByPublishDateBO} param
+     */
+  jobStatisticGrouByPublishDate: async function (message, param) {
+    try {
+      let sql = `SELECT STRFTIME('${convertEnum(param.type)}', job_first_publish_datetime) AS name,COUNT(*) AS total FROM job WHERE job_first_publish_datetime NOT NULL GROUP BY name;`;
+      let result = await jobStatistic({ sql });
+      postSuccessMessage(message, result);
+    } catch (e) {
+      postErrorMessage(
+        message,
+        "[worker] jobStatisticGrouByPublishDate error : " + e.message
+      );
+    }
+  },
+
+    /**
+     *
+     * @param {Message} message
+     * @param {*} param
+     */
+    jobStatisticGrouByPlatform: async function (message, param) {
+      try {
+        let sql = `SELECT job_platform AS name,COUNT(*) AS total FROM job GROUP BY name;`;
+        let result = await jobStatistic({ sql });
+        postSuccessMessage(message, result);
+      } catch (e) {
+        postErrorMessage(
+          message,
+          "[worker] jobStatisticGrouByPlatform error : " + e.message
+        );
+      }
+    },
+
 };
+
+const convertEnum = (value) => {
+  if (TYPE_ENUM_MONTH == value) {
+    return "%m";
+  } else if (TYPE_ENUM_WEEK == value) {
+    return "%w";
+  } else if (TYPE_ENUM_DAY == value) {
+    return "%d";
+  } else if (TYPE_ENUM_HOUR == value) {
+    return "%H";
+  } else {
+    throw `unknow type = ${value}`
+  }
+}
+
+async function jobStatistic({ sql }) {
+  let result = [];
+  let resultRows = [];
+  (await getDb()).exec({
+    sql,
+    rowMode: "object",
+    resultRows
+  });
+  resultRows.forEach(item => {
+    result.push(Object.assign(new ChartBasicDTO(), item));
+  });
+  return result;
+}
 
 export async function _getByIds(ids) {
   return SERVICE_INSTANCE._getByIds(ids);

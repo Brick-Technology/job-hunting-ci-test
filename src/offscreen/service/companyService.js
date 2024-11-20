@@ -1,17 +1,17 @@
-import { Message } from "../../common/api/message";
-import { postSuccessMessage, postErrorMessage } from "../util";
-import { getDb, getOne } from "../database";
-import { Company } from "../../common/data/domain/company";
-import { convertEmptyStringToNull, isNotEmpty,dateToStr } from "../../common/utils";
 import dayjs from "dayjs";
-import { SearchCompanyBO } from "../../common/data/bo/searchCompanyBO";
-import { SearchCompanyDTO } from "../../common/data/dto/searchCompanyDTO";
-import { CompanyDTO } from "../../common/data/dto/companyDTO";
-import { StatisticCompanyDTO } from "../../common/data/dto/statisticCompanyDTO";
-import { toHump, toLine } from "../../common/utils";
-import { _getAllCompanyTagDTOByCompanyIds } from "./companyTagService";
+import { Message } from "../../common/api/message";
 import { CompanyBO } from "../../common/data/bo/companyBO";
+import { SearchCompanyBO } from "../../common/data/bo/searchCompanyBO";
+import { Company } from "../../common/data/domain/company";
+import { ChartBasicDTO } from "../../common/data/dto/chartBasicDTO";
+import { CompanyDTO } from "../../common/data/dto/companyDTO";
+import { SearchCompanyDTO } from "../../common/data/dto/searchCompanyDTO";
+import { StatisticCompanyDTO } from "../../common/data/dto/statisticCompanyDTO";
+import { convertEmptyStringToNull, dateToStr, isNotEmpty, toHump, toLine } from "../../common/utils";
+import { getDb, getOne } from "../database";
+import { postErrorMessage, postSuccessMessage } from "../util";
 import { BaseService } from "./baseService";
+import { _getAllCompanyTagDTOByCompanyIds } from "./companyTagService";
 
 const SERVICE_INSTANCE = new BaseService("company", "company_id",
   () => {
@@ -246,7 +246,115 @@ export const CompanyService = {
   companyGetByIds: async function (message, param) {
     SERVICE_INSTANCE.getByIds(message, param);
   },
+
+  /**
+     *
+     * @param {Message} message
+     * @param {*} param
+     */
+  companyStatisticGrouByStartDate: async function (message, param) {
+    try {
+      let sql = `SELECT 
+          t2.level AS name,
+          COUNT(t2.level) AS total
+        FROM
+          (
+          SELECT
+            (CASE
+              WHEN t1.offsetValue<1 THEN '<1'
+              WHEN t1.offsetValue >= 1
+              AND t1.offsetValue<3 THEN '1-3'
+              WHEN t1.offsetValue >= 3
+              AND t1.offsetValue<5 THEN '3-5'
+              WHEN t1.offsetValue >= 5
+              AND t1.offsetValue<10 THEN '5-10'
+              WHEN t1.offsetValue >= 10
+              AND t1.offsetValue<20 THEN '10-20'
+              ELSE '>20'
+            END) AS level
+          FROM
+            (
+            SELECT
+              (STRFTIME('%Y', 'now') - STRFTIME('%Y', company_start_date)) AS offsetValue
+            FROM
+              company
+            ) AS t1
+        ) AS t2
+        GROUP BY
+          name;`;
+      let result = await companyStatistic({ sql });
+      postSuccessMessage(message, result);
+    } catch (e) {
+      postErrorMessage(
+        message,
+        "[worker] companyStatisticGrouByStartDate error : " + e.message
+      );
+    }
+  },
+
+  /**
+   * 统计社保人数
+   * @param {Message} message
+   * @param {*} param
+   */
+  companyStatisticGrouByInsurance: async function (message, param) {
+    try {
+      let sql = `SELECT 
+          t2.level AS name,
+          COUNT(t2.level) AS total
+        FROM
+          (
+          SELECT
+            (CASE
+              WHEN t1.offsetValue IS NULL THEN '-'
+              WHEN t1.offsetValue<10 THEN '<10'
+              WHEN t1.offsetValue >= 10
+              AND t1.offsetValue<20 THEN '10-20'
+              WHEN t1.offsetValue >= 20
+              AND t1.offsetValue<50 THEN '20-50'
+              WHEN t1.offsetValue >= 50
+              AND t1.offsetValue<100 THEN '50-100'
+              WHEN t1.offsetValue >= 100
+              AND t1.offsetValue<500 THEN '100-500'
+              WHEN t1.offsetValue >= 500
+              AND t1.offsetValue<1000 THEN '500-1000'
+              ELSE '>1000'
+            END) AS level
+          FROM
+            (
+            SELECT
+              company_insurance_num AS offsetValue
+            FROM
+              company
+            ) AS t1
+        ) AS t2
+        GROUP BY
+          name;
+      `;
+      let result = await companyStatistic({ sql });
+      postSuccessMessage(message, result);
+    } catch (e) {
+      postErrorMessage(
+        message,
+        "[worker] companyStatisticGrouByInsurance error : " + e.message
+      );
+    }
+  },
 };
+
+async function companyStatistic({ sql }) {
+  let result = [];
+  let resultRows = [];
+  (await getDb()).exec({
+    sql,
+    rowMode: "object",
+    resultRows
+  });
+  resultRows.forEach(item => {
+    result.push(Object.assign(new ChartBasicDTO(), item));
+  });
+  return result;
+}
 
 /**
  * 

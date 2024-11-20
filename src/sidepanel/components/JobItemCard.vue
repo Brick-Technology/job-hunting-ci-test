@@ -306,7 +306,8 @@
             </div>
             <div class="address">
                 <div class="label">{{ item.jobAddress }}</div>
-                <el-link v-if="item.jobLongitude && item.jobLatitude" type="primary" @click="emits('mapLocate')">
+                <el-link v-if="item.jobLongitude && item.jobLatitude && !props.hiddenLocator" type="primary"
+                    @click="emits('mapLocate')">
                     <Icon icon="mdi:location" />定位
                 </el-link>
             </div>
@@ -344,6 +345,7 @@ const { platformFormat, platformLogo } = useJob()
 
 const props = defineProps({
     item: JobDTO,
+    hiddenLocator: Boolean,
 });
 const emits = defineEmits(["mapLocate"]);
 const item = ref({});
