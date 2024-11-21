@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## WIP
+
+### 🐛 Fixed
+
+1. (ContentScript)修复重复渲染的问题（BOSS直聘）。
+2. (ContentScript)修复公司名为空时外包（教育机构）的判断逻辑。
+
 ## 1.32.0(2024-11-21)
 
 ### ⭐ Added
@@ -27,7 +34,7 @@
 ### 🐛 Fixed
 
 1. (Sidepanel)修复记录上传记录数查询。
-1. (Sidepanel)修复数据文件下载大于1MB文件下载失败的问题。
+2. (Sidepanel)修复数据文件下载大于1MB文件下载失败的问题。
 
 ### ✏️ Changed
 

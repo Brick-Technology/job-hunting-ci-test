@@ -551,5 +551,9 @@ const data = [
 ];
 
 export function isTraining(brandName) {
-  return data.filter((item) => (item.includes(brandName) || brandName.includes(item))).length > 0;
+  if (brandName) {
+    return data.filter((item) => (item.includes(brandName) || brandName.includes(item))).length > 0;
+  } else {
+    return false;
+  }
 }
