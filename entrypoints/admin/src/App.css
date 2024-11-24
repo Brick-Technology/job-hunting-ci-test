@@ -1,0 +1,15 @@
+.root {
+  height: 100%;
+}
+.logoWrapper{
+
+}
+
+.loadingLogo{
+  height:300px;
+}
+
+.logo {
+  height:50px;
+  margin:10px;
+}

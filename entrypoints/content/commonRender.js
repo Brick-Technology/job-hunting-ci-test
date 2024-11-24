@@ -33,7 +33,7 @@ import {
 } from "./commonDataHandler";
 import { httpFetchGetText, httpFetchJson } from "../../common/api/common";
 
-import { logoBase64 } from "./assets/logo";
+import { logoResource } from "./assets/logo";
 import $ from "jquery";
 import { CompanyApi, TagApi, AuthApi, UserApi, JobApi } from "../../common/api";
 import { GithubApi } from "../../common/api/github";
@@ -694,8 +694,8 @@ function createJobTag(item) {
 }
 
 export function createLogo() {
-  let logo = document.createElement("img");
-  logo.src = "data:image/png;base64," + logoBase64;
+  let logo = document.createElement("div");
+  logo.innerHTML = logoResource;
   logo.classList.add("__logo_in_function_panel");
   return logo;
 }

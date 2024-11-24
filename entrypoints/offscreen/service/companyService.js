@@ -212,6 +212,14 @@ export const CompanyService = {
         .startOf("day")
         .add(1, "day")
         .format("YYYY-MM-DD HH:mm:ss");
+      let yesterdayStart = now
+        .startOf("day")
+        .add(2, "day")
+        .format("YYYY-MM-DD HH:mm:ss");
+      let yesterdayEnd = now
+        .startOf("day")
+        .add(1, "day")
+        .format("YYYY-MM-DD HH:mm:ss");
       let todayAddQueryResult = [];
       (await getDb()).exec({
         sql: `SELECT COUNT(*) AS count FROM company WHERE create_datetime >= $startDatetime AND create_datetime < $endDatetime`,
@@ -222,6 +230,16 @@ export const CompanyService = {
           $endDatetime: todayEnd,
         }
       });
+      let yesterdayAddQueryResult = [];
+      (await getDb()).exec({
+        sql: `SELECT COUNT(*) AS count FROM company WHERE create_datetime >= $startDatetime AND create_datetime < $endDatetime`,
+        rowMode: "object",
+        resultRows: yesterdayAddQueryResult,
+        bind: {
+          $startDatetime: yesterdayStart,
+          $endDatetime: yesterdayEnd,
+        }
+      });
       let totalCompanyQueryResult = [];
       (await getDb()).exec({
         sql: `SELECT COUNT(*) AS count FROM company`,
@@ -229,6 +247,7 @@ export const CompanyService = {
         resultRows: totalCompanyQueryResult,
       });
       result.todayAddCount = todayAddQueryResult[0].count;
+      result.yesterdayAddCount = yesterdayAddQueryResult[0].count;
       result.totalCompany = totalCompanyQueryResult[0].count;
       postSuccessMessage(message, result);
     } catch (e) {

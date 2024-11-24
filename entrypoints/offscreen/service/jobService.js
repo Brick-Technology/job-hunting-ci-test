@@ -331,6 +331,14 @@ export const JobService = {
         .startOf("day")
         .add(1, "day")
         .format("YYYY-MM-DD HH:mm:ss");
+      let yesterdayStart = now
+        .startOf("day")
+        .add(2, "day")
+        .format("YYYY-MM-DD HH:mm:ss");
+      let yesterdayEnd = now
+        .startOf("day")
+        .add(1, "day")
+        .format("YYYY-MM-DD HH:mm:ss");
       const SQL_QUERY_JOB_BOWSE_HISTORY_COUNT_TODAY =
         "SELECT COUNT(*) AS count FROM job_browse_history WHERE job_visit_datetime >= $startDatetime AND job_visit_datetime < $endDatetime AND job_visit_type = $visitType";
       let browseCountToday = [];
@@ -344,6 +352,17 @@ export const JobService = {
           $visitType: JOB_VISIT_TYPE_SEARCH
         },
       });
+      let browseCountYesterday = [];
+      (await getDb()).exec({
+        sql: SQL_QUERY_JOB_BOWSE_HISTORY_COUNT_TODAY,
+        rowMode: "object",
+        resultRows: browseCountYesterday,
+        bind: {
+          $startDatetime: yesterdayStart,
+          $endDatetime: yesterdayEnd,
+          $visitType: JOB_VISIT_TYPE_SEARCH
+        },
+      });
       let browseCountDetailToday = [];
       (await getDb()).exec({
         sql: SQL_QUERY_JOB_BOWSE_HISTORY_COUNT_TODAY,
@@ -352,6 +371,17 @@ export const JobService = {
         bind: {
           $startDatetime: todayStart,
           $endDatetime: todayEnd,
+          $visitType: JOB_VISIT_TYPE_DETAIL
+        },
+      });
+      let browseCountDetailYesterday = [];
+      (await getDb()).exec({
+        sql: SQL_QUERY_JOB_BOWSE_HISTORY_COUNT_TODAY,
+        rowMode: "object",
+        resultRows: browseCountDetailYesterday,
+        bind: {
+          $startDatetime: yesterdayStart,
+          $endDatetime: yesterdayEnd,
           $visitType: JOB_VISIT_TYPE_DETAIL
         },
       });
@@ -375,6 +405,27 @@ export const JobService = {
           $visitType: JOB_VISIT_TYPE_DETAIL
         },
       });
+      const SQL_QUERY_JOB_TODAY_COUNT = "SELECT COUNT(*) AS count FROM job WHERE create_datetime >= $startDatetime AND create_datetime < $endDatetime;";
+      let jobTodayCount = [];
+      (await getDb()).exec({
+        sql: SQL_QUERY_JOB_TODAY_COUNT,
+        rowMode: "object",
+        resultRows: jobTodayCount,
+        bind: {
+          $startDatetime: todayStart,
+          $endDatetime: todayEnd,
+        }
+      });
+      let jobYesterdayCount = [];
+      (await getDb()).exec({
+        sql: SQL_QUERY_JOB_TODAY_COUNT,
+        rowMode: "object",
+        resultRows: jobYesterdayCount,
+        bind: {
+          $startDatetime: yesterdayStart,
+          $endDatetime: yesterdayEnd,
+        }
+      });
       const SQL_QUERY_JOB_COUNT_TOTAL = "SELECT COUNT(*) AS count FROM job;";
       let jobTotalCount = [];
       (await getDb()).exec({
@@ -383,9 +434,13 @@ export const JobService = {
         resultRows: jobTotalCount,
       });
       result.todayBrowseCount = browseCountToday[0].count;
+      result.yesterdayBrowseCount = browseCountYesterday[0].count;
       result.totalBrowseCount = browseTotalCount[0].count;
       result.todayBrowseDetailCount = browseCountDetailToday[0].count;
+      result.yesterdayBrowseDetailCount = browseCountDetailYesterday[0].count;
       result.totalBrowseDetailCount = browseTotalDetailCount[0].count;
+      result.todayJob = jobTodayCount[0].count;
+      result.yesterdayJob = jobYesterdayCount[0].count;
       result.totalJob = jobTotalCount[0].count;
       postSuccessMessage(message, result);
     } catch (e) {
@@ -422,23 +477,23 @@ export const JobService = {
     }
   },
 
-    /**
-     *
-     * @param {Message} message
-     * @param {*} param
-     */
-    jobStatisticGrouByPlatform: async function (message, param) {
-      try {
-        let sql = `SELECT job_platform AS name,COUNT(*) AS total FROM job GROUP BY name;`;
-        let result = await jobStatistic({ sql });
-        postSuccessMessage(message, result);
-      } catch (e) {
-        postErrorMessage(
-          message,
-          "[worker] jobStatisticGrouByPlatform error : " + e.message
-        );
-      }
-    },
+  /**
+   *
+   * @param {Message} message
+   * @param {*} param
+   */
+  jobStatisticGrouByPlatform: async function (message, param) {
+    try {
+      let sql = `SELECT job_platform AS name,COUNT(*) AS total FROM job GROUP BY name;`;
+      let result = await jobStatistic({ sql });
+      postSuccessMessage(message, result);
+    } catch (e) {
+      postErrorMessage(
+        message,
+        "[worker] jobStatisticGrouByPlatform error : " + e.message
+      );
+    }
+  },
 
 };
 

@@ -58,7 +58,7 @@ export default defineBackground(() => {
 
   chrome.action.onClicked.addListener(() => {
     chrome.tabs.create({
-      url: "src/sidepanel/index.html",
+      url: "admin.html",
     });
   });
 

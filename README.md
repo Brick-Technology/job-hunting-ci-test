@@ -1,5 +1,5 @@
 <p align="center">
-    <img width="180" src="docs\logo.png" alt="Vite logo">
+    <img width="180" src="docs\logo.svg" alt="Vite logo">
 </p>
 
 # Job Hunting - 一款协助找工作的浏览器插件
@@ -272,3 +272,4 @@
 4. <https://maimai.cn/article/detail?fid=1662335089&efid=I0IjMo8A_37C2pHoqU2HjA> **_求职必备技能：教你如何扒了公司的底裤_**
 5. <https://github.com/it-job-blacklist/996ICU.job.blacklist_company> **_主要城市996公司名单，互联网企业黑名单，找工作防止掉坑_**
 6. <http://www.blackdir.com> **_IT黑名单_**
+7. <https://www.reshot.com> **Free Icons & IllustrationsDesign freely with instant downloads and commercial licenses.**

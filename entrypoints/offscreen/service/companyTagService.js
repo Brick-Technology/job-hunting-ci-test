@@ -268,11 +268,46 @@ export const CompanyTagService = {
     statisticCompanyTag: async function (message, param) {
         try {
             let result = new StatisticCompanyTagDTO();
+            let now = dayjs();
+            let todayStart = now.startOf("day").format("YYYY-MM-DD HH:mm:ss");
+            let todayEnd = now
+                .startOf("day")
+                .add(1, "day")
+                .format("YYYY-MM-DD HH:mm:ss");
+            let yesterdayStart = now
+                .startOf("day")
+                .add(2, "day")
+                .format("YYYY-MM-DD HH:mm:ss");
+            let yesterdayEnd = now
+                .startOf("day")
+                .add(1, "day")
+                .format("YYYY-MM-DD HH:mm:ss");
             let totalTagQueryResult = [];
             (await getDb()).exec({
                 sql: `SELECT COUNT(*) AS count FROM tag`,
                 rowMode: "object",
                 resultRows: totalTagQueryResult,
+            });
+            const tagQuerySql = `SELECT COUNT(*) AS count FROM tag WHERE create_datetime >= $startDatetime AND create_datetime < $endDatetime`;
+            let todayTagQueryResult = [];
+            (await getDb()).exec({
+                sql: tagQuerySql,
+                rowMode: "object",
+                resultRows: todayTagQueryResult,
+                bind: {
+                    $startDatetime: todayStart,
+                    $endDatetime: todayEnd,
+                },
+            });
+            let yesterdayTagQueryResult = [];
+            (await getDb()).exec({
+                sql: tagQuerySql,
+                rowMode: "object",
+                resultRows: yesterdayTagQueryResult,
+                bind: {
+                    $startDatetime: yesterdayStart,
+                    $endDatetime: yesterdayEnd,
+                },
             });
             let totalCompanyTagRecordQueryResult = [];
             (await getDb()).exec({
@@ -280,14 +315,39 @@ export const CompanyTagService = {
                 rowMode: "object",
                 resultRows: totalCompanyTagRecordQueryResult,
             });
+            const tagCompanyQuerySql = `SELECT COUNT(DISTINCT company_id) AS count FROM company_tag WHERE create_datetime >= $startDatetime AND create_datetime < $endDatetime;`;
+            let todayTagCompanyQueryResult = [];
+            (await getDb()).exec({
+                sql: tagCompanyQuerySql,
+                rowMode: "object",
+                resultRows: todayTagCompanyQueryResult,
+                bind: {
+                    $startDatetime: todayStart,
+                    $endDatetime: todayEnd,
+                },
+            });
+            let yesterdayTagCompanyQueryResult = [];
+            (await getDb()).exec({
+                sql: tagCompanyQuerySql,
+                rowMode: "object",
+                resultRows: yesterdayTagCompanyQueryResult,
+                bind: {
+                    $startDatetime: yesterdayStart,
+                    $endDatetime: yesterdayEnd,
+                },
+            });
             let totalTagCompanyQueryResult = [];
             (await getDb()).exec({
                 sql: `SELECT COUNT(DISTINCT company_id) AS count FROM company_tag`,
                 rowMode: "object",
                 resultRows: totalTagCompanyQueryResult,
             });
+            result.todayTag = todayTagQueryResult[0].count;
+            result.yesterdayTag = yesterdayTagQueryResult[0].count;
             result.totalTag = totalTagQueryResult[0].count;
             result.totalCompanyTagRecord = totalCompanyTagRecordQueryResult[0].count;
+            result.todayTagCompany = todayTagCompanyQueryResult[0].count;
+            result.yesterdayTagCompany = yesterdayTagCompanyQueryResult[0].count;
             result.totalTagCompany = totalTagCompanyQueryResult[0].count;
             postSuccessMessage(message, result);
         } catch (e) {
