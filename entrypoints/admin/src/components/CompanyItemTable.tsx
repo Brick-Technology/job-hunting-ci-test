@@ -1,6 +1,6 @@
 import { Descriptions, DescriptionsProps, Tag, Typography } from "antd";
 import { useJob } from "../hooks/job";
-import { CompanyData } from "./CompanyData";
+import { CompanyData } from "../data/CompanyData";
 import Link from "antd/es/typography/Link";
 import { QuestionCircleOutlined } from "@ant-design/icons";
 const { platformLogo, platformFormat } = useJob();
@@ -198,7 +198,7 @@ const JobItemTable: React.FC<CompanytemTableProps> = (props) => {
     {
       key: "companyTagList",
       label: "标签",
-      span: "filled",
+      span: 3,
       children: (
         <>
           {companyTagList

@@ -12,6 +12,7 @@ import dayjs from "dayjs";
 import { _getCompanyDTOByIds } from "./companyService";
 import { genNotLikeSql, genLikeSql, handleAndReturnWhereSql, genDatetimeConditionSql, genValueConditionSql } from "./sqlUtil";
 import { _fillSearchResultExtraInfo } from "./jobService";
+import { genIdFromText } from "../../../common/utils";
 
 const KEY_JOB_FAVIOUS_SETTING = "KEY_JOB_FAVIOUS_SETTING";
 
@@ -44,6 +45,7 @@ export const AssistantService = {
             let sqlQueryCountSubSql = sqlQuery;
             sqlQuery += orderBy;
             sqlQuery += limit;
+            console.log(sqlQuery)
             let items = [];
             let total = 0;
             let queryRows = [];
@@ -200,7 +202,7 @@ function genFilterSQL(sql, param, createDateStartDate, createDateEndDate) {
             if (index > 0) {
                 whereCondition += " AND ";
             }
-            whereCondition += " t1.companyTagIdArray NOT LIKE '%" + item + "%' ";
+            whereCondition += " t1.companyTagIdArray NOT LIKE '%" + genIdFromText(item) + "%' ";
         });
         whereCondition += " )";
         whereCondition += ` OR t1.companyTagIdArray IS NULL`;

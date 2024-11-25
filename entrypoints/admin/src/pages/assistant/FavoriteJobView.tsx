@@ -1,16 +1,29 @@
-import { AssistantApi } from "@/common/api";
+import { AssistantApi, TagApi } from "@/common/api";
 import { SearchFaviousJobBO } from "@/common/data/bo/searchFaviousJobBO";
-import { Descriptions, Flex, Modal, Pagination, Splitter } from "antd";
+import {
+  Descriptions,
+  Flex,
+  FloatButton,
+  Modal,
+  Pagination,
+  Spin,
+  Splitter,
+} from "antd";
 import React from "react";
 import JobItemCard from "../../components/JobItemCard";
 
 import Link from "antd/es/typography/Link";
-import { JobData } from "../../components/JobData";
+import { JobData } from "../../data/JobData";
 import styles from "./FavoriteJobView.module.css";
 import JobItemTable from "../../components/JobItemTable";
 import CompanyItemTable from "../../components/CompanyItemTable";
-import { CompanyData } from "../../components/CompanyData";
+import { CompanyData } from "../../data/CompanyData";
 import dayjs from "dayjs";
+import { SearchOutlined } from "@ant-design/icons";
+import FavoriteJobSettingView from "./FavoriteJobSettingView";
+import { FavoriteJobSettingData } from "../../data/FavoriteJobSettingData";
+import type { DraggableData, DraggableEvent } from "react-draggable";
+import Draggable from "react-draggable";
 
 const FavoriteJobView: React.FC = () => {
   const [data, setData] = useState([]);
@@ -19,44 +32,98 @@ const FavoriteJobView: React.FC = () => {
   const [jobModalData, setJobModalData] = useState<JobData>();
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
   const [companyModalData, setCompanyModalData] = useState<CompanyData>();
+  const [isFavoriteJobSettingModalOpen, setIsFavoriteJobSettingModalOpen] =
+    useState(false);
+  const [favoriteJobSetting, setFavoriteJobSetting] =
+    useState<FavoriteJobSettingData>();
+
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [loading, setLoading] = React.useState<boolean>(false);
+  const [whitelist, setWhitelist] = useState([]);
+
+  const [disabled, setDisabled] = useState(true);
+  const [bounds, setBounds] = useState({
+    left: 0,
+    top: 0,
+    bottom: 0,
+    right: 0,
+  });
+  const draggleRef = useRef<HTMLDivElement>(null);
+
+  const onStart = (_event: DraggableEvent, uiData: DraggableData) => {
+    const { clientWidth, clientHeight } = window.document.documentElement;
+    const targetRect = draggleRef.current?.getBoundingClientRect();
+    if (!targetRect) {
+      return;
+    }
+    setBounds({
+      left: -targetRect.left + uiData.x,
+      right: clientWidth - (targetRect.right - uiData.x),
+      top: -targetRect.top + uiData.y,
+      bottom: clientHeight - (targetRect.bottom - uiData.y),
+    });
+  };
 
   const getSearchParam = () => {
     let searchParam = new SearchFaviousJobBO();
-    searchParam.pageNum = 1;
-    searchParam.pageSize = 20;
-    // searchParam.nameKeywordList = toRaw(form.nameKeywordList).flatMap(item => item.value);
-    // searchParam.nameDislikeKeywordList = toRaw(form.nameDislikeKeywordList).flatMap(item => item.value);
-    // searchParam.salary = Number.parseInt(toRaw(form.salary));
-    // searchParam.addressKeywordList = toRaw(form.addressKeywordList).flatMap(item => item.value);
-    // searchParam.descKeywordList = toRaw(form.descKeywordList).flatMap(item => item.value);
-    // searchParam.descDislikeKeywordList = toRaw(form.descDislikeKeywordList).flatMap(item => item.value);
-    // searchParam.dislikeCompanyTagList = toRaw(form.dislikeCompanyTagList).flatMap(item => item.code);
-    // searchParam.likeJobTagList = toRaw(form.likeJobTagList).flatMap(item => item.code);
-    // searchParam.dislikeJobTagList = toRaw(form.dislikeJobTagList).flatMap(item => item.code);
-    // searchParam.publishDateOffset = toRaw(form.publishDateOffset);
-    // searchParam.bossPositionDislikeKeywordList = toRaw(form.bossPositionDislikeKeywordList).flatMap(item => item.value);
-    searchParam.orderByColumn =
-      "createDatetime DESC, jobFirstPublishDatetime DESC";
+    searchParam.pageNum = page;
+    searchParam.pageSize = pageSize;
+    Object.assign(searchParam, favoriteJobSetting);
+    if (searchParam.sortMode == 1) {
+      searchParam.orderByColumn =
+        "jobFirstPublishDatetime DESC, createDatetime DESC";
+    } else {
+      searchParam.orderByColumn =
+        "createDatetime DESC, jobFirstPublishDatetime DESC";
+    }
     searchParam.orderBy = "";
     return searchParam;
   };
 
-  useEffect(
-    () => {
-      const search = async () => {
+  useEffect(() => {
+    const getWhitelist = async () => {
+      let allTags = await TagApi.getAllTag();
+      let tagItems = [];
+      allTags.forEach((item) => {
+        tagItems.push({ value: item.tagName, code: item.tagId });
+      });
+      setWhitelist(tagItems);
+    };
+    getWhitelist();
+  }, []);
+
+  useEffect(() => {
+    const getSetting = async () => {
+      let favoriteJobSetting =
+        await AssistantApi.assistantGetJobFaviousSetting();
+      setFavoriteJobSetting(favoriteJobSetting);
+    };
+
+    getSetting();
+  }, []);
+
+  useEffect(() => {
+    setLoading(true);
+    const search = async () => {
+      try {
         let searchResult = await AssistantApi.assistantSearchFaviousJob(
           getSearchParam()
         );
         setTotal(parseInt(searchResult.total));
         setData(searchResult.items);
-      };
-      search();
-      return () => {};
-    },
-    [
-      //这里的值改变时，会执行上面return的匿名函数
-    ]
-  );
+      } finally {
+        setLoading(false);
+      }
+    };
+    search();
+    return () => {};
+  }, [
+    //这里的值改变时，会执行上面return的匿名函数
+    page,
+    pageSize,
+    favoriteJobSetting,
+  ]);
 
   const onCardClickHandle = (data: JobData) => {
     setJobModalData(data);
@@ -78,7 +145,17 @@ const FavoriteJobView: React.FC = () => {
     setCompanyModalData(null);
   };
 
-  const convertToJobData = (item: any) => {
+  const onFavoriteJobSettingClickHandle = (data: any) => {
+    setCompanyModalData(data);
+    setIsFavoriteJobSettingModalOpen(true);
+  };
+
+  const handleFavoriteJobSettingModalCancel = () => {
+    setIsFavoriteJobSettingModalOpen(false);
+    setCompanyModalData(null);
+  };
+
+  const convertToJobData = (item: any): JobData => {
     const {
       companyStatus,
       companyStartDate,
@@ -107,7 +184,7 @@ const FavoriteJobView: React.FC = () => {
         companyTagList: item.companyTagDTOList,
         url: item.companyDTO?.sourceUrl,
         status: companyStatus,
-        startDate: dayjs(companyStartDate),
+        startDate: dayjs(companyStartDate).toDate(),
         industry: companyIndustry,
         unifiedCode: companyUnifiedCode,
         taxNo: companyTaxNo,
@@ -137,6 +214,13 @@ const FavoriteJobView: React.FC = () => {
 
   return (
     <>
+      <FloatButton
+        type="primary"
+        icon={<SearchOutlined />}
+        onClick={() => {
+          onFavoriteJobSettingClickHandle(null);
+        }}
+      ></FloatButton>
       <Flex vertical className={styles.main}>
         <Flex
           flex={1}
@@ -153,14 +237,16 @@ const FavoriteJobView: React.FC = () => {
               style={{ overflow: "hidden" }}
             >
               <Flex wrap className={styles.itemList}>
-                {data.map((item, index) => (
-                  <JobItemCard
-                    key={index}
-                    data={convertToJobData(item)}
-                    className={styles.item}
-                    onCardClick={onCardClickHandle}
-                  ></JobItemCard>
-                ))}
+                <Spin spinning={loading} delay={300}>
+                  {data.map((item, index) => (
+                    <JobItemCard
+                      key={index}
+                      data={convertToJobData(item)}
+                      className={styles.item}
+                      onCardClick={onCardClickHandle}
+                    ></JobItemCard>
+                  ))}
+                </Spin>
               </Flex>
             </Splitter.Panel>
             <Splitter.Panel collapsible>
@@ -169,12 +255,20 @@ const FavoriteJobView: React.FC = () => {
           </Splitter>
         </Flex>
         <Flex>
-          <Pagination
-            className={styles.pagging}
-            total={total}
-            showSizeChanger
-            showTotal={(total) => `共 ${total} 条记录`}
-          />
+          <Spin spinning={loading} delay={300}>
+            <Pagination
+              className={styles.pagging}
+              total={total}
+              showSizeChanger
+              showTotal={(total) => `共 ${total} 条记录`}
+              onChange={(page, pageSize) => {
+                setPage(page);
+                setPageSize(pageSize);
+              }}
+              pageSizeOptions={[10, 20, 50, 100, 200, 500, 1000]}
+              defaultPageSize={20}
+            />
+          </Spin>
         </Flex>
       </Flex>
       <Modal
@@ -196,6 +290,54 @@ const FavoriteJobView: React.FC = () => {
         width="80%"
       >
         <CompanyItemTable data={companyModalData}></CompanyItemTable>
+      </Modal>
+      <Modal
+        title={
+          <div
+            style={{ width: "100%", cursor: "move" }}
+            onMouseOver={() => {
+              if (disabled) {
+                setDisabled(false);
+              }
+            }}
+            onMouseOut={() => {
+              setDisabled(true);
+            }}
+            // fix eslintjsx-a11y/mouse-events-have-key-events
+            // https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/master/docs/rules/mouse-events-have-key-events.md
+            onFocus={() => {}}
+            onBlur={() => {}}
+            // end
+          >
+            职位偏好设置
+          </div>
+        }
+        open={isFavoriteJobSettingModalOpen}
+        onCancel={handleFavoriteJobSettingModalCancel}
+        footer={null}
+        width="60%"
+        style={{ maxWidth: "700px" }}
+        mask={false}
+        maskClosable={false}
+        modalRender={(modal) => (
+          <Draggable
+            disabled={disabled}
+            bounds={bounds}
+            nodeRef={draggleRef}
+            onStart={(event, uiData) => onStart(event, uiData)}
+          >
+            <div ref={draggleRef}>{modal}</div>
+          </Draggable>
+        )}
+      >
+        <FavoriteJobSettingView
+          data={favoriteJobSetting}
+          whitelist={whitelist}
+          onSave={async (data) => {
+            await AssistantApi.assistantSetJobFaviousSetting(data);
+            setFavoriteJobSetting(data);
+          }}
+        ></FavoriteJobSettingView>
       </Modal>
     </>
   );

@@ -3,12 +3,16 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import { initBridge } from "@/common/api/common";
+import { ConfigProvider } from "antd";
+import zhCN from "antd/es/locale/zh_CN";
 
 async function init() {
   await initBridge();
   createRoot(document.getElementById("root")!).render(
     <StrictMode>
-      <App />
+      <ConfigProvider locale={zhCN}>
+        <App />
+      </ConfigProvider>
     </StrictMode>
   );
 }

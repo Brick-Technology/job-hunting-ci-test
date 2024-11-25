@@ -12,7 +12,7 @@ import Paragraph from "antd/es/typography/Paragraph";
 import Card from "antd/es/card/Card";
 
 import "./JobItemCard.css";
-import { JobData } from "./JobData";
+import { JobData } from "../data/JobData";
 import { QuestionCircleOutlined } from "@ant-design/icons";
 
 const { platformLogo, platformFormat } = useJob();
