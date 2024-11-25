@@ -2,6 +2,7 @@ import { defineConfig } from 'wxt';
 import wasm from "vite-plugin-wasm";
 import { copyFileSync } from "fs";
 import { resolve } from "path";
+import react from "@vitejs/plugin-react-swc";
 
 // See https://wxt.dev/api/config.html
 export default defineConfig({
@@ -62,8 +63,15 @@ export default defineConfig({
   },
   vite: () => {
     return {
+      build: {
+        cssMinify: "lightningcss"
+      },
+      css: {
+        lightningcss: {
+        }
+      },
       plugins: () => {
-        [wasm()]
+        [react(), wasm()]
       },
       worker: {
         plugins: () => [wasm()]

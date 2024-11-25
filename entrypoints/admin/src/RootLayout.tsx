@@ -62,6 +62,9 @@ const RootLayout: React.FC = () => {
               key: "assistant",
               icon: <RobotOutlined />,
               label: "个人助理",
+              children: [
+                { key: "favoriteJob", label: "职位偏好" },
+              ]
             },
             {
               key: "bbs",

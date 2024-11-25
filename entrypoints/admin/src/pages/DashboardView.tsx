@@ -432,6 +432,7 @@ const DashboardView: React.FC = () => {
             <Row>
               {jobWebsiteList.map((item, index) => (
                 <Col
+                  key={index}
                   xs={12}
                   sm={8}
                   md={6}
@@ -448,11 +449,7 @@ const DashboardView: React.FC = () => {
                         />
                       </Col>
                       <Col xs={24} className="cardLabel flexCenter">
-                        <Flex>
-                          <Link href={item.url} target="_blank">
-                            {item.label}
-                          </Link>
-                        </Flex>
+                        <Flex>{item.label}</Flex>
                       </Col>
                     </Row>
                   </Link>
@@ -466,6 +463,7 @@ const DashboardView: React.FC = () => {
             <Row>
               {companyWebsiteList.map((item, index) => (
                 <Col
+                  key={index}
                   xs={12}
                   sm={8}
                   md={6}
@@ -478,11 +476,7 @@ const DashboardView: React.FC = () => {
                         <Icon className="companyLogo" icon="mdi:web" />
                       </Col>
                       <Col xs={24} className="cardLabel flexCenter">
-                        <Flex>
-                          <Link href={item.url} target="_blank" ellipsis={true}>
-                            {item.label}
-                          </Link>
-                        </Flex>
+                        <Flex>{item.label}</Flex>
                       </Col>
                     </Row>
                   </Link>
@@ -494,7 +488,7 @@ const DashboardView: React.FC = () => {
       </Row>
       <Row>
         {chartData.map((item, index) => (
-          <Col xs={24} sm={24} md={12} lg={12} xl={8} xxl={6} key={index}>
+          <Col key={index} xs={24} sm={24} md={12} lg={12} xl={8} xxl={6}>
             <BasicChart title={item.title} data={item.data} />
           </Col>
         ))}
