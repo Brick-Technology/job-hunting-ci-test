@@ -19,3 +19,7 @@
 .pagging {
   margin-top: 10px;
 }
+.spinContainer {
+  display: flex;
+  flex-wrap: wrap;
+}

@@ -24,6 +24,7 @@ import FavoriteJobSettingView from "./FavoriteJobSettingView";
 import { FavoriteJobSettingData } from "../../data/FavoriteJobSettingData";
 import type { DraggableData, DraggableEvent } from "react-draggable";
 import Draggable from "react-draggable";
+import "./FavoriteJobView.css";
 
 const FavoriteJobView: React.FC = () => {
   const [data, setData] = useState([]);
@@ -237,7 +238,11 @@ const FavoriteJobView: React.FC = () => {
               style={{ overflow: "hidden" }}
             >
               <Flex wrap className={styles.itemList}>
-                <Spin spinning={loading} delay={300}>
+                <Spin
+                  spinning={loading}
+                  delay={300}
+                  prefixCls="FavoriteJobView"
+                >
                   {data.map((item, index) => (
                     <JobItemCard
                       key={index}
