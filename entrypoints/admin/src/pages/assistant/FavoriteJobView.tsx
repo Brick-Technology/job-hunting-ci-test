@@ -1,30 +1,22 @@
 import { AssistantApi, TagApi } from "@/common/api";
 import { SearchFaviousJobBO } from "@/common/data/bo/searchFaviousJobBO";
-import {
-  Descriptions,
-  Flex,
-  FloatButton,
-  Modal,
-  Pagination,
-  Spin,
-  Splitter,
-} from "antd";
+import { Flex, FloatButton, Modal, Pagination, Spin, Splitter } from "antd";
 import React from "react";
 import JobItemCard from "../../components/JobItemCard";
 
-import Link from "antd/es/typography/Link";
-import { JobData } from "../../data/JobData";
-import styles from "./FavoriteJobView.module.css";
-import JobItemTable from "../../components/JobItemTable";
-import CompanyItemTable from "../../components/CompanyItemTable";
-import { CompanyData } from "../../data/CompanyData";
-import dayjs from "dayjs";
 import { SearchOutlined } from "@ant-design/icons";
-import FavoriteJobSettingView from "./FavoriteJobSettingView";
-import { FavoriteJobSettingData } from "../../data/FavoriteJobSettingData";
+import dayjs from "dayjs";
 import type { DraggableData, DraggableEvent } from "react-draggable";
 import Draggable from "react-draggable";
+import CompanyItemTable from "../../components/CompanyItemTable";
+import JobItemTable from "../../components/JobItemTable";
+import { CompanyData } from "../../data/CompanyData";
+import { FavoriteJobSettingData } from "../../data/FavoriteJobSettingData";
+import { JobData } from "../../data/JobData";
+import FavoriteJobSettingView from "./FavoriteJobSettingView";
 import "./FavoriteJobView.css";
+import styles from "./FavoriteJobView.module.css";
+import BasicMap from "../../components/BasicMap";
 
 const FavoriteJobView: React.FC = () => {
   const [data, setData] = useState([]);
@@ -255,7 +247,7 @@ const FavoriteJobView: React.FC = () => {
               </Flex>
             </Splitter.Panel>
             <Splitter.Panel collapsible>
-              <div>Map</div>
+              <BasicMap></BasicMap>
             </Splitter.Panel>
           </Splitter>
         </Flex>
