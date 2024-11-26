@@ -43,6 +43,7 @@ export type JobItemCardProps = {
   data: JobData;
   className: string;
   onCardClick?: (data: JobData) => void;
+  onLocate?: (data: JobData) => void;
 };
 const JobItemCard: React.FC<JobItemCardProps> = (props) => {
   const {
@@ -60,6 +61,7 @@ const JobItemCard: React.FC<JobItemCardProps> = (props) => {
     desc,
   } = props.data;
   const { name: companyName, companyTagList, url: companyUrl } = company;
+  const { onLocate } = props;
   return (
     <>
       <Card
@@ -136,11 +138,20 @@ const JobItemCard: React.FC<JobItemCardProps> = (props) => {
               </Tag>
             ))}
         </Flex>
-        <Flex className={`${styles.marginTop} ${styles.item}`}>
+        <Flex
+          onClick={(e) => {
+            e.stopPropagation();
+            onLocate(props.data);
+          }}
+          className={`${styles.marginTop} ${styles.item}`}
+        >
           <Text ellipsis className={styles.address}>
             {address}
           </Text>
-          <Text>定位</Text>
+          <Text style={{ color: "#1677ff" }}>
+            <Icon icon="mdi:location" />
+            定位
+          </Text>
         </Flex>
         <Flex className={`${styles.marginTop} ${styles.item}`}>
           <Paragraph ellipsis={{ rows: 3, expandable: false }} title={desc}>

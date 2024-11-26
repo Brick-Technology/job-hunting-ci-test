@@ -1,17 +1,62 @@
-import * as React from "react";
-import Map from "react-map-gl/maplibre";
+import Map, {
+  FullscreenControl,
+  GeolocateControl,
+  MapRef,
+  NavigationControl,
+  ScaleControl,
+} from "@vis.gl/react-maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
+import * as React from "react";
+import { useMemo, useState } from "react";
 
-export type BasicMapProps = {};
+import { JobData } from "../data/JobData";
+import JobPin from "./map/JobPin";
+import JobPopup from "./map/JobPopup";
 
-const BasicMap: React.FC<BasicMapProps> = (props) => {
+export type BasicMapProps = {
+  data: JobData[];
+  longitude: number;
+  latitude: number;
+  zoom: number;
+  locateItem?: JobData;
+};
+
+const BasicMap: React.FC<BasicMapProps> = ({
+  data,
+  longitude,
+  latitude,
+  zoom,
+  locateItem,
+}) => {
+  const [popupInfo, setPopupInfo] = useState(null);
+  const mapRef = useRef<MapRef>();
+
+  useEffect(() => {
+    setPopupInfo(null);
+  }, [data]);
+
+  useEffect(() => {
+    setPopupInfo(locateItem);
+    if (
+      locateItem &&
+      locateItem.longitude != null &&
+      locateItem.latitude != null
+    ) {
+      mapRef.current.flyTo({
+        center: [locateItem.longitude, locateItem.latitude],
+        zoom: 13,
+      });
+    }
+  }, [locateItem]);
+
   return (
     <>
       <Map
+        ref={mapRef}
         initialViewState={{
-          longitude: 116.3912757,
-          latitude: 39.906217,
-          zoom: 14,
+          longitude: longitude,
+          latitude: latitude,
+          zoom: zoom,
         }}
         mapStyle={{
           version: 8,
@@ -36,7 +81,33 @@ const BasicMap: React.FC<BasicMapProps> = (props) => {
             },
           ],
         }}
-      />
+      >
+        <GeolocateControl position="top-left" />
+        <FullscreenControl position="top-left" />
+        <NavigationControl position="top-left" />
+        <ScaleControl />
+
+        {data.map((item, index) =>
+          item.longitude != null && item.latitude != null ? (
+            <JobPin
+              key={index}
+              data={item}
+              onClick={(data) => {
+                setPopupInfo(data);
+              }}
+            />
+          ) : null
+        )}
+
+        {popupInfo && (
+          <JobPopup
+            data={popupInfo}
+            onClick={(data) => {
+              setPopupInfo(null);
+            }}
+          ></JobPopup>
+        )}
+      </Map>
     </>
   );
 };

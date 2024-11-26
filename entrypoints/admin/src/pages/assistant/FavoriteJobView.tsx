@@ -44,6 +44,8 @@ const FavoriteJobView: React.FC = () => {
   });
   const draggleRef = useRef<HTMLDivElement>(null);
 
+  const [locateJobItem, setLocateJobItem] = useState(null);
+
   const onStart = (_event: DraggableEvent, uiData: DraggableData) => {
     const { clientWidth, clientHeight } = window.document.documentElement;
     const targetRect = draggleRef.current?.getBoundingClientRect();
@@ -123,6 +125,10 @@ const FavoriteJobView: React.FC = () => {
     setIsJobModalOpen(true);
   };
 
+  const onJobItemLocateHandle = (data: JobData) => {
+    setLocateJobItem(data);
+  };
+
   const handleJobModalCancel = () => {
     setIsJobModalOpen(false);
     setJobModalData(null);
@@ -146,6 +152,14 @@ const FavoriteJobView: React.FC = () => {
   const handleFavoriteJobSettingModalCancel = () => {
     setIsFavoriteJobSettingModalOpen(false);
     setCompanyModalData(null);
+  };
+
+  const convertToJobDataList = (item: any[]): JobData[] => {
+    let result = [];
+    item.map((item) => {
+      result.push(convertToJobData(item));
+    });
+    return result;
   };
 
   const convertToJobData = (item: any): JobData => {
@@ -241,13 +255,20 @@ const FavoriteJobView: React.FC = () => {
                       data={convertToJobData(item)}
                       className={styles.item}
                       onCardClick={onCardClickHandle}
+                      onLocate={onJobItemLocateHandle}
                     ></JobItemCard>
                   ))}
                 </Spin>
               </Flex>
             </Splitter.Panel>
             <Splitter.Panel collapsible>
-              <BasicMap></BasicMap>
+              <BasicMap
+                longitude={116.3912757}
+                latitude={39.906217}
+                zoom={4}
+                data={convertToJobDataList(data)}
+                locateItem={locateJobItem}
+              ></BasicMap>
             </Splitter.Panel>
           </Splitter>
         </Flex>

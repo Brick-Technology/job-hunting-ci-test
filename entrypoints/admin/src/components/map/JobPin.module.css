@@ -1,0 +1,18 @@
+.mapIcon {
+    width: 200px;
+    background-color: lightgoldenrodyellow;
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid yellowgreen;
+}
+
+.logo {
+    width: 15px;
+    height: 15px;
+    margin-right: 2px;
+}
+
+.jobNameWrapper {
+    flex-wrap: nowrap;
+    align-items: center;
+}
