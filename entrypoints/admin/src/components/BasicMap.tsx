@@ -3,13 +3,14 @@ import Map, {
   GeolocateControl,
   MapRef,
   NavigationControl,
-  ScaleControl,
+  ScaleControl
 } from "@vis.gl/react-maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import * as React from "react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import { JobData } from "../data/JobData";
+import "./BasicMap.css";
 import JobPin from "./map/JobPin";
 import JobPopup from "./map/JobPopup";
 
@@ -52,6 +53,7 @@ const BasicMap: React.FC<BasicMapProps> = ({
   return (
     <>
       <Map
+
         ref={mapRef}
         initialViewState={{
           longitude: longitude,
