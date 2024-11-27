@@ -6,8 +6,7 @@ import Map, {
   ScaleControl
 } from "@vis.gl/react-maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
-import * as React from "react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 import { JobData } from "../data/JobData";
 import "./BasicMap.css";
@@ -50,6 +49,18 @@ const BasicMap: React.FC<BasicMapProps> = ({
     }
   }, [locateItem]);
 
+  const markers = useMemo(() => data.map((item, index) => (
+    item.longitude != null && item.latitude != null ? (
+      <JobPin
+        key={item.id}
+        data={item}
+        onClick={(data) => {
+          setPopupInfo(data);
+        }}
+      />
+    ) : null
+  )), [data]);
+
   return (
     <>
       <Map
@@ -89,17 +100,7 @@ const BasicMap: React.FC<BasicMapProps> = ({
         <NavigationControl position="top-left" />
         <ScaleControl />
 
-        {data.map((item, index) =>
-          item.longitude != null && item.latitude != null ? (
-            <JobPin
-              key={index}
-              data={item}
-              onClick={(data) => {
-                setPopupInfo(data);
-              }}
-            />
-          ) : null
-        )}
+        {markers}
 
         {popupInfo && (
           <JobPopup

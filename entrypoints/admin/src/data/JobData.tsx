@@ -1,6 +1,7 @@
 import { CompanyData } from "./CompanyData";
 
 export type JobData = {
+  id: string;
   name: string;
   url: string;
   salaryMin: number;

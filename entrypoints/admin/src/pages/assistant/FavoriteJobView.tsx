@@ -112,7 +112,7 @@ const FavoriteJobView: React.FC = () => {
       }
     };
     search();
-    return () => {};
+    return () => { };
   }, [
     //这里的值改变时，会执行上面return的匿名函数
     page,
@@ -182,6 +182,7 @@ const FavoriteJobView: React.FC = () => {
     } = item.companyDTO ?? {};
 
     return {
+      id: item.jobId,
       name: item.jobName,
       url: item.jobUrl,
       salaryMin: item.jobSalaryMin,
@@ -323,9 +324,9 @@ const FavoriteJobView: React.FC = () => {
             }}
             // fix eslintjsx-a11y/mouse-events-have-key-events
             // https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/master/docs/rules/mouse-events-have-key-events.md
-            onFocus={() => {}}
-            onBlur={() => {}}
-            // end
+            onFocus={() => { }}
+            onBlur={() => { }}
+          // end
           >
             职位偏好设置
           </div>

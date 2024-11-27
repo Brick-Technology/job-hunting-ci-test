@@ -13,11 +13,11 @@
   align-items: center;
 }
 .name {
-  width: 180px;
+  width: 200px;
   font-size: 15px;
 }
 .salary {
-  width: 120px;
+  width: 150px;
   font-size: 18px;
   text-align: right;
 }
