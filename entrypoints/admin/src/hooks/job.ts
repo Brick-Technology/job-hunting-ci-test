@@ -10,8 +10,31 @@ import {
 import { logo } from "../assets";
 import { JobData } from "../data/JobData";
 import dayjs from "dayjs";
+import { Feature, FeatureCollection } from "geojson";
 
 export function useJob() {
+
+    const convertJobDataToGeojson = (items: JobData[]): FeatureCollection => {
+        let features: Feature[] = [];
+        items.forEach(item => {
+            if (item.longitude != null && item.latitude != null) {
+                features.push({
+                    id: item.id,
+                    type: "Feature",
+                    geometry: {
+                        type: "Point",
+                        coordinates: [item.longitude, item.latitude],
+                    },
+                    properties: item,
+                });
+            }
+        });
+        let result: FeatureCollection = {
+            type: "FeatureCollection",
+            features: features,
+        };
+        return result;
+    }
 
     const convertToJobDataList = (item: any[]): JobData[] => {
         let result = [];
@@ -51,7 +74,7 @@ export function useJob() {
                 companyTagList: item.companyTagDTOList,
                 url: item.companyDTO?.sourceUrl,
                 status: companyStatus,
-                startDate: dayjs(companyStartDate).toDate(),
+                startDate: companyStartDate!=null?dayjs(companyStartDate).toDate():null,
                 industry: companyIndustry,
                 unifiedCode: companyUnifiedCode,
                 taxNo: companyTaxNo,
@@ -116,6 +139,6 @@ export function useJob() {
         }
     };
 
-    return { platformFormat, platformLogo, convertToJobDataList, convertToJobData }
+    return { platformFormat, platformLogo, convertToJobDataList, convertToJobData, convertJobDataToGeojson }
 
 }

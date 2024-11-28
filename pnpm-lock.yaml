@@ -20,6 +20,9 @@ importers:
       '@pansy/lnglat-transform':
         specifier: ^1.0.3
         version: 1.0.3
+      '@types/geojson':
+        specifier: ^7946.0.14
+        version: 7946.0.14
       '@vis.gl/react-maplibre':
         specifier: 1.0.0-alpha.4
         version: 1.0.0-alpha.4(maplibre-gl@4.7.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
