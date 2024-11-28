@@ -8,31 +8,50 @@
   margin: 5px;
 
 }
+
 .item {
   justify-content: space-between;
   align-items: center;
 }
+
 .name {
   width: 200px;
   font-size: 15px;
 }
+
 .salary {
   width: 150px;
   font-size: 18px;
   text-align: right;
 }
+
 .marginTop {
   margin-top: 5px;
 }
+
 .address {
   width: 260px;
   font-size: 12px;
 }
+
 .platformLogo {
   width: 20px;
   height: 20px;
   padding: 2px;
 }
+
 .platformName {
   white-space: nowrap;
+}
+
+.newBadge {
+  position: absolute;
+  right: -7px;
+  top: -20px;
+  color: darkcyan;
+}
+
+.newBadgeIcon {
+  width: 40px;
+  height: 40px;
 }

@@ -3,7 +3,7 @@ const { Text } = Typography;
 
 import styles from "./JobItemCard.module.css";
 import Link from "antd/es/typography/Link";
-import { convertTimeOffsetToHumanReadable } from "@/common/utils";
+import { convertTimeOffsetToHumanReadable, isToday } from "@/common/utils";
 
 import dayjs from "dayjs";
 import { Icon } from "@iconify/react";
@@ -60,6 +60,7 @@ const JobItemCard: React.FC<JobItemCardProps> = (props) => {
     platform,
     desc,
     browseTime,
+    createDatetime,
   } = props.data;
   const { name: companyName, companyTagList, url: companyUrl } = company;
   const { onLocate } = props;
@@ -75,6 +76,9 @@ const JobItemCard: React.FC<JobItemCardProps> = (props) => {
         }}
       >
         <Flex className={styles.item}>
+          {isToday(createDatetime) ? <div className={styles.newBadge}>
+            <Icon className={styles.newBadgeIcon} icon="foundation:burst-new" />
+          </div> : null}
           <Link
             onClick={(event) => {
               event.stopPropagation();

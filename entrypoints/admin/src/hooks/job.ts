@@ -100,6 +100,7 @@ export function useJob() {
             longitude: item.jobLongitude,
             latitude: item.jobLatitude,
             browseTime: item.latestBrowseDetailDatetime,
+            createDatetime:item.createDatetime,
         };
     };
 

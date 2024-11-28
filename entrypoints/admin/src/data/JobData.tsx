@@ -18,4 +18,5 @@ export type JobData = {
   longitude: number;
   latitude: number;
   browseTime?: Date;
+  createDatetime?:Date;
 };
