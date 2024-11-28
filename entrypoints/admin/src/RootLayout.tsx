@@ -64,6 +64,8 @@ const RootLayout: React.FC = () => {
               label: "个人助理",
               children: [
                 { key: "favoriteJob", label: "职位偏好" },
+                { key: "historyJob", label: "浏览历史" },
+                { key: "automate", label: "自动化" },
               ]
             },
             {

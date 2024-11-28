@@ -8,8 +8,77 @@ import {
 } from "@/common";
 
 import { logo } from "../assets";
+import { JobData } from "../data/JobData";
+import dayjs from "dayjs";
 
 export function useJob() {
+
+    const convertToJobDataList = (item: any[]): JobData[] => {
+        let result = [];
+        item.map((item) => {
+            result.push(convertToJobData(item));
+        });
+        return result;
+    };
+
+    const convertToJobData = (item: any): JobData => {
+        const {
+            companyStatus,
+            companyStartDate,
+            companyIndustry,
+            companyUnifiedCode,
+            companyTaxNo,
+            companyLicenseNumber,
+            companyLegalPerson,
+            companyWebSite,
+            companyInsuranceNum,
+            companySelfRisk,
+            companyUnionRisk,
+            companyAddress,
+            companyLongitude,
+            companyLatitude,
+            companyDesc,
+        } = item.companyDTO ?? {};
+
+        return {
+            id: item.jobId,
+            name: item.jobName,
+            url: item.jobUrl,
+            salaryMin: item.jobSalaryMin,
+            salaryMax: item.jobSalaryMax,
+            company: {
+                name: item.jobCompanyName,
+                companyTagList: item.companyTagDTOList,
+                url: item.companyDTO?.sourceUrl,
+                status: companyStatus,
+                startDate: dayjs(companyStartDate).toDate(),
+                industry: companyIndustry,
+                unifiedCode: companyUnifiedCode,
+                taxNo: companyTaxNo,
+                licenseNumber: companyLicenseNumber,
+                legalPerson: companyLegalPerson,
+                webSite: companyWebSite,
+                insuranceNum: companyInsuranceNum,
+                selfRisk: companySelfRisk,
+                unionRisk: companyUnionRisk,
+                address: companyAddress,
+                longitude: companyLongitude,
+                latitude: companyLatitude,
+                desc: companyDesc,
+            },
+            jobTagList: item.jobTagDTOList,
+            address: item.jobAddress,
+            publishDatetime: item.jobFirstPublishDatetime,
+            bossName: item.bossName,
+            bossPosition: item.bossPosition,
+            platform: item.jobPlatform,
+            desc: item.jobDescription,
+            degree: item.jobDegreeName,
+            longitude: item.jobLongitude,
+            latitude: item.jobLatitude,
+            browseTime: item.latestBrowseDetailDatetime,
+        };
+    };
 
     const platformFormat = (value: string) => {
         switch (value) {
@@ -47,6 +116,6 @@ export function useJob() {
         }
     };
 
-    return { platformFormat, platformLogo }
+    return { platformFormat, platformLogo, convertToJobDataList, convertToJobData }
 
 }

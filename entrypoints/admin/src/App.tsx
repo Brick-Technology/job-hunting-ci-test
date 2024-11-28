@@ -11,6 +11,8 @@ import CompanyTagView from "./pages/data/CompanyTagView";
 import CompanyView from "./pages/data/CompanyView";
 import JobTagView from "./pages/data/JobTagView";
 import JobView from "./pages/data/JobView";
+import HistoryJobView from "./pages/assistant/HistoryJobView";
+import AutomateView from "./pages/assistant/AutomateView";
 
 const App: React.FC = () => {
   return (
@@ -19,6 +21,8 @@ const App: React.FC = () => {
         <Route element={<RootLayout />}>
           <Route index element={<DashboardView />} />
           <Route path="favoriteJob" element={<FavoriteJobView />} />
+          <Route path="historyJob" element={<HistoryJobView />} />
+          <Route path="automate" element={<AutomateView />} />
           <Route path="bbs" element={<BbsView />} />
           <Route path="job" element={<JobView />} />
           <Route path="company" element={<CompanyView />} />

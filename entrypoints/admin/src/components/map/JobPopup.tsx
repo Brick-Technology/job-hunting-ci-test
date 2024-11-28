@@ -28,7 +28,7 @@ const JobPopup: React.FC<JobPopupProps> = ({ data, onClick }) => {
     address,
     jobTagList,
   } = data;
-  const { name: companyName, companyTagList } = data.company;
+  const { name: companyName, companyTagList } = data.company ?? {};
   return (
     <>
       <Popup

@@ -19,6 +19,7 @@ export type BasicMapProps = {
   latitude: number;
   zoom: number;
   locateItem?: JobData;
+  initLocateItem?: JobData;
 };
 
 const BasicMap: React.FC<BasicMapProps> = ({
@@ -27,13 +28,25 @@ const BasicMap: React.FC<BasicMapProps> = ({
   latitude,
   zoom,
   locateItem,
+  initLocateItem,
 }) => {
   const [popupInfo, setPopupInfo] = useState(null);
   const mapRef = useRef<MapRef>();
 
+
   useEffect(() => {
     setPopupInfo(null);
   }, [data]);
+
+  useEffect(() => {
+    if (initLocateItem) {
+      mapRef.current.flyTo({
+        center: [initLocateItem.longitude, initLocateItem.latitude],
+        zoom: zoom,
+      });
+      mapRef.current.setPixelRatio(2);
+    }
+  }, [initLocateItem])
 
   useEffect(() => {
     setPopupInfo(locateItem);
@@ -52,7 +65,7 @@ const BasicMap: React.FC<BasicMapProps> = ({
   const markers = useMemo(() => data.map((item, index) => (
     item.longitude != null && item.latitude != null ? (
       <JobPin
-        key={item.id}
+        key={`JobPin_${item.id}`}
         data={item}
         onClick={(data) => {
           setPopupInfo(data);
@@ -64,7 +77,6 @@ const BasicMap: React.FC<BasicMapProps> = ({
   return (
     <>
       <Map
-
         ref={mapRef}
         initialViewState={{
           longitude: longitude,

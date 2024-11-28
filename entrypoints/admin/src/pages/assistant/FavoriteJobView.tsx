@@ -17,6 +17,9 @@ import FavoriteJobSettingView from "./FavoriteJobSettingView";
 import "./FavoriteJobView.css";
 import styles from "./FavoriteJobView.module.css";
 import BasicMap from "../../components/BasicMap";
+import { useJob } from "../../hooks/job";
+
+const { convertToJobDataList, convertToJobData } = useJob();
 
 const FavoriteJobView: React.FC = () => {
   const [data, setData] = useState([]);
@@ -45,6 +48,8 @@ const FavoriteJobView: React.FC = () => {
   const draggleRef = useRef<HTMLDivElement>(null);
 
   const [locateJobItem, setLocateJobItem] = useState(null);
+  const [initLocateItem, setInitLocateItem] = useState(null);
+
 
   const onStart = (_event: DraggableEvent, uiData: DraggableData) => {
     const { clientWidth, clientHeight } = window.document.documentElement;
@@ -105,6 +110,12 @@ const FavoriteJobView: React.FC = () => {
         let searchResult = await AssistantApi.assistantSearchFaviousJob(
           getSearchParam()
         );
+        const filter = data.filter(item => (item.longitude == null || item.latitude == null));
+        if (filter != null && filter.length > 0) {
+          setInitLocateItem(convertToJobData(filter[0]));
+        }else{
+          setInitLocateItem(null);
+        }
         setTotal(parseInt(searchResult.total));
         setData(searchResult.items);
       } finally {
@@ -154,72 +165,6 @@ const FavoriteJobView: React.FC = () => {
     setCompanyModalData(null);
   };
 
-  const convertToJobDataList = (item: any[]): JobData[] => {
-    let result = [];
-    item.map((item) => {
-      result.push(convertToJobData(item));
-    });
-    return result;
-  };
-
-  const convertToJobData = (item: any): JobData => {
-    const {
-      companyStatus,
-      companyStartDate,
-      companyIndustry,
-      companyUnifiedCode,
-      companyTaxNo,
-      companyLicenseNumber,
-      companyLegalPerson,
-      companyWebSite,
-      companyInsuranceNum,
-      companySelfRisk,
-      companyUnionRisk,
-      companyAddress,
-      companyLongitude,
-      companyLatitude,
-      companyDesc,
-    } = item.companyDTO ?? {};
-
-    return {
-      id: item.jobId,
-      name: item.jobName,
-      url: item.jobUrl,
-      salaryMin: item.jobSalaryMin,
-      salaryMax: item.jobSalaryMax,
-      company: {
-        name: item.jobCompanyName,
-        companyTagList: item.companyTagDTOList,
-        url: item.companyDTO?.sourceUrl,
-        status: companyStatus,
-        startDate: dayjs(companyStartDate).toDate(),
-        industry: companyIndustry,
-        unifiedCode: companyUnifiedCode,
-        taxNo: companyTaxNo,
-        licenseNumber: companyLicenseNumber,
-        legalPerson: companyLegalPerson,
-        webSite: companyWebSite,
-        insuranceNum: companyInsuranceNum,
-        selfRisk: companySelfRisk,
-        unionRisk: companyUnionRisk,
-        address: companyAddress,
-        longitude: companyLongitude,
-        latitude: companyLatitude,
-        desc: companyDesc,
-      },
-      jobTagList: item.jobTagDTOList,
-      address: item.jobAddress,
-      publishDatetime: item.jobFirstPublishDatetime,
-      bossName: item.bossName,
-      bossPosition: item.bossPosition,
-      platform: item.jobPlatform,
-      desc: item.jobDescription,
-      degree: item.jobDegreeName,
-      longitude: item.jobLongitude,
-      latitude: item.jobLatitude,
-    };
-  };
-
   return (
     <>
       <FloatButton
@@ -247,12 +192,12 @@ const FavoriteJobView: React.FC = () => {
               <Flex wrap className={styles.itemList}>
                 <Spin
                   spinning={loading}
-                  delay={300}
+                  delay={100}
                   prefixCls="FavoriteJobView"
                 >
                   {data.map((item, index) => (
                     <JobItemCard
-                      key={index}
+                      key={item.id}
                       data={convertToJobData(item)}
                       className={styles.item}
                       onCardClick={onCardClickHandle}
@@ -269,12 +214,13 @@ const FavoriteJobView: React.FC = () => {
                 zoom={4}
                 data={convertToJobDataList(data)}
                 locateItem={locateJobItem}
+                initLocateItem={initLocateItem}
               ></BasicMap>
             </Splitter.Panel>
           </Splitter>
         </Flex>
         <Flex>
-          <Spin spinning={loading} delay={300}>
+          <Spin spinning={loading} delay={100}>
             <Pagination
               className={styles.pagging}
               total={total}

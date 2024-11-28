@@ -17,4 +17,5 @@ export type JobData = {
   degree: string;
   longitude: number;
   latitude: number;
+  browseTime?: Date;
 };

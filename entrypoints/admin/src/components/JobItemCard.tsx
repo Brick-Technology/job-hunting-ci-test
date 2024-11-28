@@ -59,12 +59,15 @@ const JobItemCard: React.FC<JobItemCardProps> = (props) => {
     bossPosition,
     platform,
     desc,
+    browseTime,
   } = props.data;
   const { name: companyName, companyTagList, url: companyUrl } = company;
   const { onLocate } = props;
   return (
     <>
       <Card
+        title={browseTime ? `浏览时间:${convertTimeOffsetToHumanReadable(browseTime)}` : null}
+        size="small"
         hoverable={props.onCardClick ? true : false}
         className={`${styles.main} ${props.className}`}
         onClick={() => {
