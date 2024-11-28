@@ -4,15 +4,14 @@ import { Flex, Modal, Pagination, Spin, Splitter } from "antd";
 import React from "react";
 import JobItemCard from "../../components/JobItemCard";
 
-import dayjs from "dayjs";
 import BasicMap from "../../components/BasicMap";
 import CompanyItemTable from "../../components/CompanyItemTable";
 import JobItemTable from "../../components/JobItemTable";
 import { CompanyData } from "../../data/CompanyData";
 import { JobData } from "../../data/JobData";
+import { useJob } from "../../hooks/job";
 import "./FavoriteJobView.css";
 import styles from "./FavoriteJobView.module.css";
-import { useJob } from "../../hooks/job";
 
 const { convertToJobDataList, convertToJobData } = useJob();
 
@@ -53,7 +52,7 @@ const HistoryJobView: React.FC = () => {
                     setInitLocateItem(null);
                 }
                 setTotal(parseInt(searchResult.total));
-                setData(searchResult.items);
+                setData(convertToJobDataList(searchResult.items));
             } finally {
                 setLoading(false);
             }
@@ -116,7 +115,7 @@ const HistoryJobView: React.FC = () => {
                                     {data.map((item, index) => (
                                         <JobItemCard
                                             key={item.id}
-                                            data={convertToJobData(item)}
+                                            data={item}
                                             className={styles.item}
                                             onCardClick={onCardClickHandle}
                                             onLocate={onJobItemLocateHandle}
@@ -130,7 +129,7 @@ const HistoryJobView: React.FC = () => {
                                 longitude={116.3912757}
                                 latitude={39.906217}
                                 zoom={4}
-                                data={convertToJobDataList(data)}
+                                data={data}
                                 locateItem={locateJobItem}
                                 initLocateItem={initLocateItem}
                             ></BasicMap>

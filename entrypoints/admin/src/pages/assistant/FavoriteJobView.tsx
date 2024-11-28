@@ -113,11 +113,11 @@ const FavoriteJobView: React.FC = () => {
         const filter = data.filter(item => (item.longitude == null || item.latitude == null));
         if (filter != null && filter.length > 0) {
           setInitLocateItem(convertToJobData(filter[0]));
-        }else{
+        } else {
           setInitLocateItem(null);
         }
         setTotal(parseInt(searchResult.total));
-        setData(searchResult.items);
+        setData(convertToJobDataList(searchResult.items));
       } finally {
         setLoading(false);
       }
@@ -198,7 +198,7 @@ const FavoriteJobView: React.FC = () => {
                   {data.map((item, index) => (
                     <JobItemCard
                       key={item.id}
-                      data={convertToJobData(item)}
+                      data={item}
                       className={styles.item}
                       onCardClick={onCardClickHandle}
                       onLocate={onJobItemLocateHandle}
@@ -212,7 +212,7 @@ const FavoriteJobView: React.FC = () => {
                 longitude={116.3912757}
                 latitude={39.906217}
                 zoom={4}
-                data={convertToJobDataList(data)}
+                data={data}
                 locateItem={locateJobItem}
                 initLocateItem={initLocateItem}
               ></BasicMap>
