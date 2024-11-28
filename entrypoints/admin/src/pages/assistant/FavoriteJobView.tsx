@@ -211,7 +211,7 @@ const FavoriteJobView: React.FC = () => {
               <BasicMap
                 longitude={116.3912757}
                 latitude={39.906217}
-                zoom={4}
+                zoom={3}
                 data={data}
                 locateItem={locateJobItem}
                 initLocateItem={initLocateItem}
