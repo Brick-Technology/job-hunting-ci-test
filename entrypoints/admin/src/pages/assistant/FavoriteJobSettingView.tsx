@@ -1,7 +1,6 @@
 import {
   Button,
   Form,
-  FormInstance,
   FormProps,
   Input,
   Radio,
@@ -10,33 +9,7 @@ import {
 } from "antd";
 import React from "react";
 import { FavoriteJobSettingData } from "../../data/FavoriteJobSettingData";
-
-interface SubmitButtonProps {
-  form: FormInstance;
-}
-
-const SubmitButton: React.FC<React.PropsWithChildren<SubmitButtonProps>> = ({
-  form,
-  children,
-}) => {
-  const [submittable, setSubmittable] = React.useState<boolean>(false);
-
-  // Watch all values
-  const values = Form.useWatch([], form);
-
-  React.useEffect(() => {
-    form
-      .validateFields({ validateOnly: true })
-      .then(() => setSubmittable(true))
-      .catch(() => setSubmittable(false));
-  }, [form, values]);
-
-  return (
-    <Button type="primary" htmlType="submit" disabled={!submittable}>
-      {children}
-    </Button>
-  );
-};
+import SubmitButton from "../../components/SubmitButton";
 
 export type FavoriteJobSettingProps = {
   data: FavoriteJobSettingData;

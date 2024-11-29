@@ -1,27 +1,25 @@
-import { Card, Col, Flex, Row, Statistic } from "antd";
-import { JobApi, CompanyApi } from "@/common/api";
 import {
-  ArrowDownOutlined,
-  ArrowRightOutlined,
-  ArrowUpOutlined,
-} from "@ant-design/icons";
-import { Space, Typography } from "antd";
-import { Icon } from "@iconify/react";
-import {
-  JobStatisticGrouByPublishDateBO,
-  TYPE_ENUM_MONTH,
-  TYPE_ENUM_WEEK,
-  TYPE_ENUM_DAY,
-  TYPE_ENUM_HOUR,
-} from "@/common/data/bo/jobStatisticGrouByPublishDateBO";
-import {
-  PLATFORM_BOSS,
   PLATFORM_51JOB,
-  PLATFORM_ZHILIAN,
+  PLATFORM_BOSS,
+  PLATFORM_JOBSDB,
   PLATFORM_LAGOU,
   PLATFORM_LIEPIN,
-  PLATFORM_JOBSDB,
+  PLATFORM_ZHILIAN,
 } from "@/common";
+import { CompanyApi, JobApi } from "@/common/api";
+import {
+  JobStatisticGrouByPublishDateBO,
+  TYPE_ENUM_DAY,
+  TYPE_ENUM_HOUR,
+  TYPE_ENUM_MONTH,
+  TYPE_ENUM_WEEK,
+} from "@/common/data/bo/jobStatisticGrouByPublishDateBO";
+import {
+  FallOutlined,
+  RiseOutlined
+} from "@ant-design/icons";
+import { Icon } from "@iconify/react";
+import { Card, Col, Flex, Row, Space, Statistic, Typography } from "antd";
 import { useJob } from "../hooks/job";
 
 import "./DashboardView.css";
@@ -41,13 +39,13 @@ const StatisticCard: React.FC<StatisticCardProps> = (props) => {
     let prefix = null;
     if (props.previousCount > props.count) {
       color = "#cf1322";
-      prefix = <ArrowDownOutlined />;
+      prefix = <FallOutlined />;
     } else if (props.previousCount == props.count) {
       color = "#3f8600";
-      prefix = <ArrowRightOutlined />;
+      prefix = null;
     } else {
       color = "#3fBB00";
-      prefix = <ArrowUpOutlined />;
+      prefix = <RiseOutlined />;
     }
     return (
       <>
@@ -140,8 +138,8 @@ const BasicChart: React.FC<BasicChartProps> = (props) => {
   );
 };
 
-import { logo } from "../assets";
 import { Column } from "@ant-design/charts";
+import { logo } from "../assets";
 
 const jobWebsiteList = [
   {
