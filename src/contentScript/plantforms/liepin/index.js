@@ -10,9 +10,6 @@ import {
   finalRender,
   renderFunctionPanel,
 } from "../../commonRender";
-import { randomDelay } from "../../../common/utils";
-const DELAY_FETCH_TIME = 75; //ms
-const DELAY_FETCH_TIME_RANDOM_OFFSET = 50; //ms
 
 export function getLiepinData(responseText) {
   try {
@@ -87,82 +84,64 @@ async function parseData(list, getListItem) {
     );
     dom.appendChild(loadingLastModifyTimeTag);
   });
-  const promiseList = urlList.map(async (url, index) => {
-    await randomDelay(DELAY_FETCH_TIME * index, DELAY_FETCH_TIME_RANDOM_OFFSET); // 避免频繁请求触发风控
-    const response = await fetch(url);
-    const result = await response.text();
-    return result;
+  await saveBrowseJob(list, PLATFORM_LIEPIN);
+  let jobDTOList = await JobApi.getJobBrowseInfoByIds(
+    getJobIds(list, PLATFORM_LIEPIN)
+  );
+  list.forEach((item, index) => {
+    const { compId } = item.comp;
+    jobDTOList[
+      index
+    ].jobCompanyApiUrl = `https://www.liepin.com/company/${compId}`;
+    const dom = getListItem(index);
+    let tag = createDOM(jobDTOList[index]);
+    dom.appendChild(tag);
   });
-  Promise.allSettled(promiseList)
-    .then(async (jobDetailHtmlContentList) => {
-      const hrActiveTimeDescList = [];
-      jobDetailHtmlContentList.forEach((item, index) => {
-        let jobDesc = null;
-        let jobDescFilterTextList = item.value.match(
-          /<dd data-selector="job-intro-content">[\s\S]*?<\/dd>/g
-        );
-        if (jobDescFilterTextList && jobDescFilterTextList.length > 0) {
-          const jobDescGroups = jobDescFilterTextList[0].match(
-            /<dd data-selector="job-intro-content">(?<data>[\s\S]*)<\/dd>/
-          )?.groups;
-          if (jobDescGroups) {
-            jobDesc = jobDescGroups["data"];
-          }
-        }
-        list[index].job.jobDesc = jobDesc;
-        let hrActiveTimeDesc = null;
-        let hrActiveTimeDescGroups = item.value.match(
-          /<span class="online off">(?<data>.*)<\/span>/
-        )?.groups;
-        if (hrActiveTimeDescGroups) {
-          hrActiveTimeDesc = hrActiveTimeDescGroups["data"];
-        }
-        hrActiveTimeDescList.push(hrActiveTimeDesc);
-      });
-      await saveBrowseJob(list, PLATFORM_LIEPIN);
-      let jobDTOList = await JobApi.getJobBrowseInfoByIds(
-        getJobIds(list, PLATFORM_LIEPIN)
+  hiddenLoadingDOM();
+  renderSortJobItem(jobDTOList, getListItem, { platform: PLATFORM_LIEPIN });
+  renderFunctionPanel(jobDTOList, getListItem, {
+    searchButtonTitle: "点击快速查询其他信息",
+    platform: PLATFORM_LIEPIN,
+    getCompanyInfoFunction: async function (url, { item }) {
+      const jobResponse = await fetch(item.jobUrl);
+      const jobResult = await jobResponse.text();
+      let jobDesc = null;
+      let jobDescFilterTextList = jobResult.match(
+        /<dd data-selector="job-intro-content">[\s\S]*?<\/dd>/g
       );
-      list.forEach((item, index) => {
-        const { compId } = item.comp;
-        jobDTOList[
-          index
-        ].jobCompanyApiUrl = `https://www.liepin.com/company/${compId}`;
-        jobDTOList[index].hrActiveTimeDesc = hrActiveTimeDescList[index];
-        const dom = getListItem(index);
-        let tag = createDOM(jobDTOList[index]);
-        dom.appendChild(tag);
-      });
-      hiddenLoadingDOM();
-      renderSortJobItem(jobDTOList, getListItem, { platform: PLATFORM_LIEPIN });
-      renderFunctionPanel(jobDTOList, getListItem, {
-        platform: PLATFORM_LIEPIN,
-        getCompanyInfoFunction: async function (url) {
-          const response = await fetch(url);
-          const result = await response.text();
-          //eg: ["企业全称</span></p><pclass=\"text\">长沙裕邦软件开发有限公司</p>"]
-          let firstFilterTextList = result
-            .replaceAll("\n", "")
-            .replaceAll(" ", "")
-            .match(/企业全称<\/span><\/p>.*?\/p>/g);
-          if (firstFilterTextList && firstFilterTextList.length > 0) {
-            const groups = firstFilterTextList[0].match(/">(?<data>.*)<\/p>/)
-              ?.groups;
-            if (groups) {
-              return groups["data"];
-            } else {
-              return null;
-            }
-          }
+      if (jobDescFilterTextList && jobDescFilterTextList.length > 0) {
+        const jobDescGroups = jobDescFilterTextList[0].match(
+          /<dd data-selector="job-intro-content">(?<data>[\s\S]*)<\/dd>/
+        )?.groups;
+        if (jobDescGroups) {
+          jobDesc = jobDescGroups["data"];
+        }
+      }
+      item.jobDescription = jobDesc;
+      //将更新时间置空， 以新记录形式更新
+      item.updateDatetime = null;
+      await JobApi.batchAddOrUpdateJobWithTransaction([item]);
+
+      const response = await fetch(url);
+      const result = await response.text();
+      //eg: ["企业全称</span></p><pclass=\"text\">长沙裕邦软件开发有限公司</p>"]
+      let firstFilterTextList = result
+        .replaceAll("\n", "")
+        .replaceAll(" ", "")
+        .match(/企业全称<\/span><\/p>.*?\/p>/g);
+      if (firstFilterTextList && firstFilterTextList.length > 0) {
+        const groups = firstFilterTextList[0].match(/">(?<data>.*)<\/p>/)
+          ?.groups;
+        if (groups) {
+          return groups["data"];
+        } else {
           return null;
-        },
-      });
-      finalRender(jobDTOList, { platform: PLATFORM_LIEPIN });
-    })
-    .catch((error) => {
-      console.log(error);
-      hiddenLoadingDOM();
-    });
+        }
+      }
+      return null;
+    },
+  });
+  finalRender(jobDTOList, { platform: PLATFORM_LIEPIN });
 }
 
 export function createDOM(jobDTO) {
