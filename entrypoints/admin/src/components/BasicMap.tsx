@@ -57,11 +57,12 @@ const BasicMap: React.FC<BasicMapProps> = ({
 
   useEffect(() => {
     if (initLocateItem) {
-      mapRef.current.flyTo({
-        center: [initLocateItem.longitude, initLocateItem.latitude],
-        zoom: zoom,
-      });
-      mapRef.current.setPixelRatio(2);
+      if (initLocateItem.longitude != null && initLocateItem.latitude != null) {
+        mapRef.current.flyTo({
+          center: [initLocateItem.longitude, initLocateItem.latitude],
+          zoom: zoom,
+        });
+      }
     }
   }, [initLocateItem])
 

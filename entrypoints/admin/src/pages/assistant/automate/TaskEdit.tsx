@@ -1,4 +1,4 @@
-import { Button, Form, FormProps, Input, Radio, Select, Slider, Space } from "antd";
+import { Button, Flex, Form, FormProps, Input, Radio, Select, Slider, Space, Spin } from "antd";
 import SubmitButton from "../../../components/SubmitButton";
 import { TaskData } from "../../../data/TaskData";
 import { MISSION_AUTO_BROWSE_JOB_SEARCH_PAGE, PLATFORM_51JOB, PLATFORM_BOSS, PLATFORM_ZHILIAN, PLATFORM_LAGOU, PLATFORM_LIEPIN } from "@/common";
@@ -20,132 +20,144 @@ interface TaskEditProps {
     onSave: (data: TaskData) => void;
 }
 
-const TaskEditView: React.FC<TaskEditProps> = (props) => {
+const TaskEditView: React.FC<TaskEditProps> = ({ data, onSave }) => {
     const [form] = Form.useForm();
+    const [loading, setLoading] = useState<boolean>(false);
 
-    const [data,setData] = useState();
-
-    const onSave: FormProps<TaskData>["onFinish"] = (values) => {
-        props.onSave(values);
+    const onSaveHandle: FormProps<TaskData>["onFinish"] = async (values) => {
+        values.type = MISSION_AUTO_BROWSE_JOB_SEARCH_PAGE;
+        try {
+            setLoading(true);
+            await onSave(values);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
         <>
-            <Form
-                name="basic"
-                labelCol={{ span: 6 }}
-                wrapperCol={{ span: 18 }}
-                style={{ maxWidth: 800 }}
-                initialValues={{ ...props.data }}
-                onFinish={onSave}
-                autoComplete="off"
-                requiredMark
+            <Spin
+                spinning={loading}
+                delay={100}
             >
-                <Form.Item
-                    label="类型"
-                    name="type"
-                    required
+                <Form
+                    name="basic"
+                    labelCol={{ span: 6 }}
+                    wrapperCol={{ span: 18 }}
+                    style={{ maxWidth: 800 }}
+                    initialValues={data}
+                    onFinish={onSaveHandle}
+                    autoComplete="off"
+                    requiredMark
                 >
-                    <Select
-                        allowClear
-                        style={{ width: "100%" }}
-                        placeholder="请选择类型"
-                        options={missionTypes}
-                    />
-                </Form.Item>
-                <Form.Item
-                    label="运行平台"
-                    name="platform"
-                    required
-                >
-                    <Radio.Group optionType="button">
-                        {MISSION_AUTO_BROWSE_JOB_SEARCH_PAGE_OPTIONS.map((item, index) => (
-                            <Radio key={index} value={item.value}>
-                                {item.label}
-                            </Radio>
-                        ))}
-                    </Radio.Group>
-                </Form.Item>
-                <Form.Item
-                    label="标题"
-                    name="name"
-                    required
-                >
-                    <Input></Input>
-                </Form.Item>
-                <Form.Item
-                    label="访问地址"
-                    name="url"
-                    required
-                >
-                    <Input></Input>
-                </Form.Item>
-                <Form.Item
-                    label="翻页延迟时间"
-                    name="delay"
-                >
-                    <Slider
-                        marks={{
-                            0: '无',
-                            5: '5秒',
-                            10: '10秒',
-                            15: '15秒',
-                            20: '20秒',
-                        }}
-                        tooltip={{
-                            formatter: (value) => {
-                                return value == 0 ? `无` : `${value}秒`
-                            }
-                        }}
-                        min={0} max={20}></Slider>
-                </Form.Item>
-                <Form.Item
-                    label="额外随机时间范围"
-                    name="delayRange"
-                >
-                    <Slider
-                        marks={{
-                            0: '无',
-                            5: '5秒',
-                            10: '10秒',
-                            15: '15秒',
-                            20: '20秒',
-                        }}
-                        tooltip={{
-                            formatter: (value) => {
-                                return value == 0 ? `无` : `${value}秒`
-                            }
-                        }}
-                        min={0} max={20}></Slider>
-                </Form.Item>
-                <Form.Item
-                    label="最大翻页数"
-                    name="maxPage"
-                >
-                    <Slider
-                        marks={{
-                            0: '♾️',
-                            5: '5页',
-                            10: '10页',
-                            20: '20页',
-                            40: '40页',
-                            80: '80页',
-                            100: '100页',
-                        }}
-                        tooltip={{
-                            formatter: (value) => {
-                                return value == 0 ? `♾️` : `${value}页`
-                            }
-                        }} min={0} max={100}></Slider>
-                </Form.Item>
+                    <Form.Item
+                        label="类型"
+                        name="type"
+                    >
+                        <Select
+                            allowClear
+                            style={{ width: "100%" }}
+                            placeholder="请选择类型"
+                            options={missionTypes}
+                            defaultValue={MISSION_AUTO_BROWSE_JOB_SEARCH_PAGE}
+                        />
+                    </Form.Item>
+                    <Form.Item
+                        label="运行平台"
+                        name="platform"
+                        rules={[{ required: true }]}
+                    >
+                        <Radio.Group optionType="button">
+                            {MISSION_AUTO_BROWSE_JOB_SEARCH_PAGE_OPTIONS.map((item, index) => (
+                                <Radio key={index} value={item.value}>
+                                    {item.label}
+                                </Radio>
+                            ))}
+                        </Radio.Group>
+                    </Form.Item>
+                    <Form.Item
+                        label="标题"
+                        name="name"
+                        rules={[{ required: true }]}
+                    >
+                        <Input></Input>
+                    </Form.Item>
+                    <Form.Item
+                        label="访问地址"
+                        name="url"
+                        rules={[{ required: true }]}
+                    >
+                        <Input></Input>
+                    </Form.Item>
+                    <Form.Item
+                        label="翻页延迟时间"
+                        name="delay"
+                    >
+                        <Slider
+                            marks={{
+                                0: '无',
+                                5: '5秒',
+                                10: '10秒',
+                                15: '15秒',
+                                20: '20秒',
+                            }}
+                            tooltip={{
+                                formatter: (value) => {
+                                    return value == 0 ? `无` : `${value}秒`
+                                }
+                            }}
+                            min={0} max={20}></Slider>
+                    </Form.Item>
+                    <Form.Item
+                        label="额外随机时间范围"
+                        name="delayRange"
+                    >
+                        <Slider
+                            marks={{
+                                0: '无',
+                                5: '5秒',
+                                10: '10秒',
+                                15: '15秒',
+                                20: '20秒',
+                            }}
+                            tooltip={{
+                                formatter: (value) => {
+                                    return value == 0 ? `无` : `${value}秒`
+                                }
+                            }}
+                            min={0} max={20}></Slider>
+                    </Form.Item>
+                    <Form.Item
+                        label="最大翻页数"
+                        name="maxPage"
+                    >
+                        <Slider
+                            marks={{
+                                0: '♾️',
+                                5: '5页',
+                                10: '10页',
+                                20: '20页',
+                                40: '40页',
+                                80: '80页',
+                                100: '100页',
+                            }}
+                            tooltip={{
+                                formatter: (value) => {
+                                    return value == 0 ? `♾️` : `${value}页`
+                                }
+                            }} min={0} max={100}></Slider>
+                    </Form.Item>
 
-                <Form.Item label={null}>
-                    <Space>
-                        <SubmitButton form={form}>保存</SubmitButton>
-                        <Button htmlType="reset">重置</Button>
-                    </Space>
-                </Form.Item>
-            </Form>
+                    <Form.Item label={null}>
+                        <Flex justify="end">
+                            <Space>
+                                <SubmitButton form={form}>保存</SubmitButton>
+                                <Button htmlType="reset">重置</Button>
+                            </Space>
+                        </Flex>
+                    </Form.Item>
+                </Form>
+            </Spin>
         </>
     );
 }

@@ -1,3 +1,5 @@
+import { TaskRunData } from "./TaskRunData";
+
 export type TaskData = {
     id?: string,
     name: string,
@@ -7,4 +9,5 @@ export type TaskData = {
     delay?: number,
     delayRange?: number,
     maxPage?: number,
+    taskRunData:TaskRunData,
 };

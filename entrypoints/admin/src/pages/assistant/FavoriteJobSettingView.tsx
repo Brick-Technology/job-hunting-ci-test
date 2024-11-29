@@ -1,5 +1,6 @@
 import {
   Button,
+  Flex,
   Form,
   FormProps,
   Input,
@@ -177,10 +178,12 @@ const FavoriteJobSettingView: React.FC<FavoriteJobSettingProps> = (props) => {
           </Radio.Group>
         </Form.Item>
         <Form.Item label={null}>
-          <Space>
-            <SubmitButton form={form}>保存</SubmitButton>
-            <Button htmlType="reset">重置</Button>
-          </Space>
+          <Flex justify="end">
+            <Space>
+              <SubmitButton form={form}>保存</SubmitButton>
+              <Button htmlType="reset">重置</Button>
+            </Space>
+          </Flex>
         </Form.Item>
       </Form>
     </>

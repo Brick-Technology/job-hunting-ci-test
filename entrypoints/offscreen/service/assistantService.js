@@ -45,7 +45,6 @@ export const AssistantService = {
             let sqlQueryCountSubSql = sqlQuery;
             sqlQuery += orderBy;
             sqlQuery += limit;
-            console.log(sqlQuery)
             let items = [];
             let total = 0;
             let queryRows = [];
