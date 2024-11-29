@@ -107,8 +107,6 @@ export function renderTimeTag(
     hrActiveTimeDescTag.classList.add("__time_tag_base_text_font");
     divElement.appendChild(hrActiveTimeDescTag);
   }
-  //显示职位介绍
-  divElement.title = jobDTO.jobDescription;
   //companyInfo
   let companyInfoTag = null;
   let companyInfoText = getCompanyInfoText(jobDTO.jobCompanyName);
@@ -155,6 +153,10 @@ export function finalRender(jobDTOList, { platform }) {
     commentWrapperDiv.append(jobItemCommentButton);
     if (i == jobDTOList.length - 1) {
       commentWrapperDiv.appendChild($(`<div class="__status_job_render_finish"></div>`)[0]);
+    }
+    const jobCardItem = commentWrapperDiv.parentElement.parentElement;
+    if (item.jobDescription) {
+      jobCardItem.title = item.jobDescription;
     }
   }
 }
@@ -639,7 +641,7 @@ function convertHrActiveTimeDescToOffsetTime(hrActiveTimeDesc) {
 export function renderFunctionPanel(
   list,
   getListItem,
-  { platform, getCompanyInfoFunction } = {}
+  { platform, getCompanyInfoFunction, searchButtonTitle } = {}
 ) {
   stopAndCleanAbortFunctionHandler();
   list.forEach((item, index) => {
@@ -664,7 +666,9 @@ export function renderFunctionPanel(
     functionPanelDiv.appendChild(
       createCompanyInfo(item, {
         getCompanyInfoFunction: getCompanyInfoFunction,
-        platform
+        platform,
+        searchButtonTitle,
+        jobCardItemDom: targetDom
       })
     );
     functionPanelDiv.appendChild(createJobTag(item));
@@ -731,14 +735,18 @@ function createFirstBrowse(jobDTO) {
   return firstBrowseTimeTag;
 }
 
-function createCompanyInfo(item, { getCompanyInfoFunction, platform } = {}) {
+function createCompanyInfo(item, { getCompanyInfoFunction, platform, searchButtonTitle, jobCardItemDom } = {}) {
   const dom = document.createElement("div");
   dom.className = "__company_info_quick_search";
   let mainChannelDiv = document.createElement("div");
   let otherChannelDiv = document.createElement("div");
   let quickSearchButton = document.createElement("div");
   quickSearchButton.className = "__company_info_quick_search_button";
-  quickSearchButton.textContent = "🔎点击快速查询公司信息";
+  if (searchButtonTitle) {
+    quickSearchButton.textContent = `🔎${searchButtonTitle}`;
+  } else {
+    quickSearchButton.textContent = "🔎点击快速查询公司信息";
+  }
   let fixValidHummanButton = document.createElement("a");
   fixValidHummanButton.className = "__company_info_quick_search_button";
   fixValidHummanButton.target = "_blank";
@@ -761,8 +769,10 @@ function createCompanyInfo(item, { getCompanyInfoFunction, platform } = {}) {
         "一直查询失败？点击该按钮去尝试解除人机验证吧！";
       if (getCompanyInfoFunction) {
         let targetCompanyName = await getCompanyInfoFunction(
-          item.jobCompanyApiUrl
+          item.jobCompanyApiUrl,
+          { item }
         );
+        jobCardItemDom.title = item.jobDescription;
         if (targetCompanyName) {
           targetCompanyName = companyNameConvert(targetCompanyName);
           if (companyName == targetCompanyName) {
