@@ -11,9 +11,9 @@ import {
 import { Button, Flex, Layout, Menu, theme } from "antd";
 import React, { useState } from "react";
 import { Outlet } from "react-router";
-import "./App.css";
-import logo from "./assets/logo.svg";
+import logo from "../assets/logo.svg";
 import { useNavigate } from "react-router";
+import HeaderRight from "./HeaderRight";
 const { Header, Sider, Content } = Layout;
 
 const siderStyle: React.CSSProperties = {
@@ -99,16 +99,21 @@ const RootLayout: React.FC = () => {
       </Sider>
       <Layout>
         <Header style={{ padding: 0, background: colorBgContainer }}>
-          <Button
-            type="text"
-            icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-            onClick={() => setCollapsed(!collapsed)}
-            style={{
-              fontSize: "16px",
-              width: 64,
-              height: 64,
-            }}
-          />
+          <Flex>
+            <Button
+              type="text"
+              icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+              onClick={() => setCollapsed(!collapsed)}
+              style={{
+                fontSize: "16px",
+                width: 64,
+                height: 64,
+              }}
+            />
+            <Flex flex={1} justify="end">
+              <HeaderRight></HeaderRight>
+            </Flex>
+          </Flex>
         </Header>
         <Content
           style={{

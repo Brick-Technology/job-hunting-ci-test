@@ -1,7 +1,7 @@
 import React from "react";
 import { HashRouter, Route, Routes } from "react-router";
 import "./App.css";
-import RootLayout from "./RootLayout";
+import RootLayout from "./layout/RootLayout";
 import BbsView from "./pages/BbsView";
 import DashboardView from "./pages/DashboardView";
 import DataSharePlanView from "./pages/DataSharePlanView";
@@ -13,8 +13,20 @@ import JobTagView from "./pages/data/JobTagView";
 import JobView from "./pages/data/JobView";
 import HistoryJobView from "./pages/assistant/HistoryJobView";
 import AutomateView from "./pages/assistant/AutomateView";
+import { useShallow } from 'zustand/shallow';
+import useAuthStore from "./store/AuthStore";
+
 
 const App: React.FC = () => {
+
+  const [init] = useAuthStore(useShallow(((state) => [
+    state.init,
+  ])));
+
+  useEffect(() => {
+    init();
+  }, [])
+
   return (
     <HashRouter>
       <Routes>
