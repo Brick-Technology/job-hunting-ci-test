@@ -58,7 +58,7 @@ const TaskItemCard: React.FC<TaskItemCardProps> = ({ data, onEdit, onDelete, onA
     }
     return (
         <>
-            <Card title={data.name ? data.name : ' '} extra={<><Flex align="center"><Button onClick={() => {
+            <Card className={styles.root} title={data.name ? data.name : ' '} extra={<><Flex align="center"><Button onClick={() => {
                 onShowHistory(data);
             }} title="查看执行历史" shape="circle" icon={<Icon className={styles.menuButton} icon="material-symbols:history" />}>
             </Button></Flex></>}>

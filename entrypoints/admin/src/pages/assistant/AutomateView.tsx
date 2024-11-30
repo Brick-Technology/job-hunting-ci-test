@@ -13,10 +13,12 @@ import { errorLog } from "@/common/log";
 import { MISSION_STATUS_FAILURE, MISSION_STATUS_SUCCESS } from "@/common";
 import { MissionLog } from "@/common/data/domain/missionLog";
 import { MissionLogJobPageDetailDTO } from "@/common/data/dto/missionLogJobPageDetailDTO";
+import { arrayMoveImmutable } from 'array-move';
+import { SortableContainer, SortableElement } from 'react-sortable-hoc';
+import MissionHistory from "../../components/task/MissionHistory";
 import MissionLogDetail from "../../components/task/MissionLogDetail";
 import TaskItemCard from "../../components/task/TaskItemCard";
 import { useTask } from "../../hooks/task";
-import MissionHistory from "../../components/task/MissionHistory";
 
 const { convertTaskList } = useTask();
 
@@ -78,6 +80,7 @@ const AutomateView: React.FC<AutomateProps> = (props) => {
     const [messageApi, contextHolder] = message.useMessage();
     const [history, setHistory] = useState<TaskData>();
     const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+    const [isSort, setIsSort] = useState(false);
 
     useEffect(() => {
         const search = async () => {
@@ -172,6 +175,41 @@ const AutomateView: React.FC<AutomateProps> = (props) => {
         setData(Object.assign([], data));
     }
 
+    const SortableItem = SortableElement(({ item }) => <TaskItemCard
+        key={`task_${item.id}`} data={item}
+        onAccessUrl={onAccessUrl}
+        onEdit={(data) => {
+            setIsTaskModalOpen(true);
+            setEditItem(data);
+        }}
+        onDelete={onDeleteTask}
+        onPlay={play}
+        onShowDetailLogDetail={((item: TaskData) => {
+            setMissionLogDetail(item);
+            setIsMissionLogDetailModalOpen(true);
+        })}
+        onShowHistory={((item: TaskData) => {
+            setHistory(item);
+            setIsHistoryModalOpen(true);
+        })}
+    ></TaskItemCard>);
+
+    const SortableList = SortableContainer(({ items }) => {
+        return (
+            <Flex gap={5} wrap>
+                {items.map((item, index) => (
+                    <SortableItem disabled={!isSort} key={`item-${item.id}`} index={index} item={item} />
+                ))}
+            </Flex>
+        );
+    });
+
+    const onSortEnd = async ({ oldIndex, newIndex }) => {
+        const result = arrayMoveImmutable(data, oldIndex, newIndex);
+        await MissionLogApi.missionSort(result.flatMap(item => item.id));
+        setData(result);
+    };
+
     return (
         <>
             {contextHolder}
@@ -190,29 +228,12 @@ const AutomateView: React.FC<AutomateProps> = (props) => {
                             新增任务
                         </Button>
                     </Tooltip>
-                    <Switch checkedChildren="开启排序" unCheckedChildren="关闭排序" defaultChecked={false} />
+                    <Switch checkedChildren="开启排序" unCheckedChildren="关闭排序" value={isSort} onChange={(checked)=>{
+                        setIsSort(checked);
+                    }}/>
                 </Flex>
                 <Flex gap="small" wrap>
-                    {data.map((item, index) => (
-                        <TaskItemCard
-                            key={`task_${item.id}`} data={item}
-                            onAccessUrl={onAccessUrl}
-                            onEdit={(data) => {
-                                setIsTaskModalOpen(true);
-                                setEditItem(data);
-                            }}
-                            onDelete={onDeleteTask}
-                            onPlay={play}
-                            onShowDetailLogDetail={((item: TaskData) => {
-                                setMissionLogDetail(item);
-                                setIsMissionLogDetailModalOpen(true);
-                            })}
-                            onShowHistory={((item: TaskData) => {
-                                setHistory(item);
-                                setIsHistoryModalOpen(true);
-                            })}
-                        ></TaskItemCard>
-                    ))}
+                    <SortableList axis="xy" items={data} onSortEnd={onSortEnd} />
                 </Flex>
             </Space>
             <Modal

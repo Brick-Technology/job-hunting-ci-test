@@ -1,4 +1,8 @@
-.menuButton{
-    width:20px;
-    height:20px;
+.root {
+    min-width: 250px;
+}
+
+.menuButton {
+    width: 20px;
+    height: 20px;
 }
