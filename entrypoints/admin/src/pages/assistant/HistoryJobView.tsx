@@ -1,6 +1,6 @@
 import { JobApi } from "@/common/api";
 import { SearchJobBO } from "@/common/data/bo/searchJobBO";
-import { Flex, Modal, Pagination, Spin, Splitter } from "antd";
+import { Empty, Flex, Modal, Pagination, Spin, Splitter } from "antd";
 import React from "react";
 import JobItemCard from "../../components/JobItemCard";
 
@@ -106,13 +106,13 @@ const HistoryJobView: React.FC = () => {
                             min={380}
                             style={{ overflow: "hidden" }}
                         >
-                            <Flex wrap className={styles.itemList}>
+                            <Flex align="center" justify="center" wrap className={styles.itemList}>
                                 <Spin
                                     spinning={loading}
                                     delay={100}
                                     prefixCls="FavoriteJobView"
                                 >
-                                    {data.map((item, index) => (
+                                    {data && data.length > 0 ? data.map((item, index) => (
                                         <JobItemCard
                                             key={item.id}
                                             data={item}
@@ -120,7 +120,8 @@ const HistoryJobView: React.FC = () => {
                                             onCardClick={onCardClickHandle}
                                             onLocate={onJobItemLocateHandle}
                                         ></JobItemCard>
-                                    ))}
+                                    )) : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />}
+
                                 </Spin>
                             </Flex>
                         </Splitter.Panel>

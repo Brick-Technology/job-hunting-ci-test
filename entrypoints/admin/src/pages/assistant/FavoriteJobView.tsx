@@ -1,6 +1,6 @@
 import { AssistantApi, TagApi } from "@/common/api";
 import { SearchFaviousJobBO } from "@/common/data/bo/searchFaviousJobBO";
-import { Flex, FloatButton, Modal, Pagination, Spin, Splitter } from "antd";
+import { Empty, Flex, FloatButton, Modal, Pagination, Spin, Splitter } from "antd";
 import React from "react";
 import JobItemCard from "../../components/JobItemCard";
 
@@ -189,13 +189,13 @@ const FavoriteJobView: React.FC = () => {
               min={380}
               style={{ overflow: "hidden" }}
             >
-              <Flex wrap className={styles.itemList}>
+              <Flex wrap className={styles.itemList} align="center" justify="center">
                 <Spin
                   spinning={loading}
                   delay={100}
                   prefixCls="FavoriteJobView"
                 >
-                  {data.map((item, index) => (
+                  {data && data.length > 0 ? data.map((item, index) => (
                     <JobItemCard
                       key={item.id}
                       data={item}
@@ -203,7 +203,7 @@ const FavoriteJobView: React.FC = () => {
                       onCardClick={onCardClickHandle}
                       onLocate={onJobItemLocateHandle}
                     ></JobItemCard>
-                  ))}
+                  )) : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />}
                 </Spin>
               </Flex>
             </Splitter.Panel>

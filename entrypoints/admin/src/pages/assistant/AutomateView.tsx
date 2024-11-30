@@ -1,5 +1,5 @@
 import { Icon } from "@iconify/react";
-import { Button, Flex, Modal, Space, Switch, Tooltip, message } from "antd";
+import { Button, Empty, Flex, Modal, Space, Switch, Tooltip, message } from "antd";
 
 import { TaskData } from "../../data/TaskData";
 import styles from "./AutomateView.module.css";
@@ -196,10 +196,10 @@ const AutomateView: React.FC<AutomateProps> = (props) => {
 
     const SortableList = SortableContainer(({ items }) => {
         return (
-            <Flex gap={5} wrap>
-                {items.map((item, index) => (
+            <Flex gap={5} wrap >
+                {items && items.length > 0 ? items.map((item, index) => (
                     <SortableItem disabled={!isSort} key={`item-${item.id}`} index={index} item={item} />
-                ))}
+                )) : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />}
             </Flex>
         );
     });
@@ -228,9 +228,9 @@ const AutomateView: React.FC<AutomateProps> = (props) => {
                             新增任务
                         </Button>
                     </Tooltip>
-                    <Switch checkedChildren="开启排序" unCheckedChildren="关闭排序" value={isSort} onChange={(checked)=>{
+                    <Switch checkedChildren="开启排序" unCheckedChildren="关闭排序" value={isSort} onChange={(checked) => {
                         setIsSort(checked);
-                    }}/>
+                    }} />
                 </Flex>
                 <Flex gap="small" wrap>
                     <SortableList axis="xy" items={data} onSortEnd={onSortEnd} />
