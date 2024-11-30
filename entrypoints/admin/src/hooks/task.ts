@@ -1,5 +1,11 @@
+import { MissionLogData } from "../data/MissionLogData";
 import { TaskData } from "../data/TaskData";
-import { MISSION_AUTO_BROWSE_JOB_SEARCH_PAGE, PLATFORM_51JOB, PLATFORM_BOSS, PLATFORM_ZHILIAN, PLATFORM_LAGOU, PLATFORM_LIEPIN } from "@/common"
+import {
+    MISSION_AUTO_BROWSE_JOB_SEARCH_PAGE, PLATFORM_51JOB,
+    PLATFORM_BOSS, PLATFORM_ZHILIAN, PLATFORM_LAGOU, PLATFORM_LIEPIN,
+    MISSION_STATUS_SUCCESS, MISSION_STATUS_FAILURE, AUTOMATE_ERROR_HUMAN_VALID, AUTOMATE_ERROR_UNKNOW
+} from "@/common"
+import dayjs from "dayjs";
 
 export function useTask() {
 
@@ -48,8 +54,56 @@ export function useTask() {
         }
     };
 
+    const convertMissionLogList = (items: any[]): MissionLogData[] => {
+        const result = [];
+        items.forEach(item => {
+            result.push(convertMissionLog(item));
+        });
+        return result;
+    }
 
+    const convertMissionLog = (item: any): MissionLogData => {
+        const { missionId, missionLogDetial, missionLogId, missionStatus, missionStatusReason, createDatetime, updateDatetime } = item;
+        let detail = JSON.parse(missionLogDetial);
+        detail.startDatetime = detail.startDatetime != null ? dayjs(detail.startDatetime).toDate() : null;
+        detail.endDatetime = detail.endDatetime != null ? dayjs(detail.endDatetime).toDate() : null;
+        return {
+            missionId: missionId,
+            detail,
+            id: missionLogId,
+            status: missionStatus,
+            reason: missionStatusReason,
+            createDatetime,
+            updateDatetime,
+        }
 
-    return { convertTask, convertTaskList, missionPlatformFormat, missionTypeFormat }
+    }
+
+    const missionStatusFormat = (value: string): string => {
+        if (value == MISSION_STATUS_SUCCESS) {
+            return "成功";
+        } else if (value == MISSION_STATUS_FAILURE) {
+            return "失败";
+        } else {
+            return value;
+        }
+    }
+
+    const missionErrorFormat = (value: string) => {
+        if (value == AUTOMATE_ERROR_HUMAN_VALID) {
+            return "人机验证错误";
+        } else if (value == AUTOMATE_ERROR_UNKNOW) {
+            return "未知错误";
+        } else {
+            return value;
+        }
+    }
+
+    return {
+        convertTask, convertTaskList, missionPlatformFormat,
+        missionTypeFormat, convertMissionLog, convertMissionLogList,
+        missionStatusFormat, missionErrorFormat
+    }
+
 }
 

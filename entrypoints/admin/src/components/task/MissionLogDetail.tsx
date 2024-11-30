@@ -1,18 +1,9 @@
 import { TaskData } from "../../data/TaskData";
-import dayjs from "dayjs";
 import { dateToStr } from "@/common/utils";
-import { Carousel, Flex, Image } from "antd";
+import { Flex, Image } from "antd";
+import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 dayjs.extend(duration)
-
-const contentStyle: React.CSSProperties = {
-    margin: 0,
-    height: '160px',
-    color: '#fff',
-    lineHeight: '160px',
-    textAlign: 'center',
-    background: '#364d79',
-};
 
 export type MissionLogDetailProps = {
     data: TaskData;
@@ -64,7 +55,7 @@ const MissionLogDetail: React.FC<MissionLogDetailProps> = ({ data }) => {
                 <Flex>日志({logList.length})：</Flex>
                 <Flex vertical>
                     {logList.map((item, index) => (
-                        <Flex>{item}</Flex>
+                        <Flex key={item}>{item}</Flex>
                     ))}
                 </Flex>
             </Flex>

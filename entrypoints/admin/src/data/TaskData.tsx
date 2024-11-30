@@ -9,5 +9,5 @@ export type TaskData = {
     delay?: number,
     delayRange?: number,
     maxPage?: number,
-    taskRunData:TaskRunData,
+    taskRunData?:TaskRunData,
 };

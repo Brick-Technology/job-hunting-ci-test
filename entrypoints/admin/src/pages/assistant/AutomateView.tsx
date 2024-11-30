@@ -16,6 +16,7 @@ import { MissionLogJobPageDetailDTO } from "@/common/data/dto/missionLogJobPageD
 import MissionLogDetail from "../../components/task/MissionLogDetail";
 import TaskItemCard from "../../components/task/TaskItemCard";
 import { useTask } from "../../hooks/task";
+import MissionHistory from "../../components/task/MissionHistory";
 
 const { convertTaskList } = useTask();
 
@@ -75,6 +76,8 @@ const AutomateView: React.FC<AutomateProps> = (props) => {
     const [isMissionLogDetailModalOpen, setIsMissionLogDetailModalOpen] = useState(false);
     const [missionLogDetail, setMissionLogDetail] = useState<TaskData>();
     const [messageApi, contextHolder] = message.useMessage();
+    const [history, setHistory] = useState<TaskData>();
+    const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
 
     useEffect(() => {
         const search = async () => {
@@ -147,17 +150,39 @@ const AutomateView: React.FC<AutomateProps> = (props) => {
         setIsMissionLogDetailModalOpen(false);
     }
 
+    const playAll = async () => {
+        for (let i = 0; i < data.length; i++) {
+            await play(data[i]);
+        }
+    }
+
+    const concurrentPlayAll = () => {
+        for (let i = 0; i < data.length; i++) {
+            play(data[i]);
+        }
+    }
+
+    const play = async (item: TaskData) => {
+        let target = data.find((value) => value.id == item.id);
+        target.taskRunData.status = "playing";
+        setData(Object.assign([], data));
+        let newItem = await automateFetchJobItemData(item);
+        let index = data.findIndex((value) => value.id == newItem.id);
+        data[index] = newItem;
+        setData(Object.assign([], data));
+    }
+
     return (
         <>
             {contextHolder}
             <Space direction="vertical">
                 <Flex gap="small" align="center">
                     <Tooltip title="并发执行">
-                        <Button type="primary" shape="circle" icon={<Icon className={styles.menuButton} icon="material-symbols:double-arrow" />}>
+                        <Button onClick={concurrentPlayAll} type="primary" shape="circle" icon={<Icon className={styles.menuButton} icon="material-symbols:double-arrow" />}>
                         </Button>
                     </Tooltip>
                     <Tooltip title="顺序执行">
-                        <Button type="primary" shape="circle" icon={<Icon className={styles.menuButton} icon="material-symbols:play-arrow" />}>
+                        <Button onClick={playAll} type="primary" shape="circle" icon={<Icon className={styles.menuButton} icon="material-symbols:play-arrow" />}>
                         </Button>
                     </Tooltip>
                     <Tooltip title="新增任务">
@@ -170,25 +195,21 @@ const AutomateView: React.FC<AutomateProps> = (props) => {
                 <Flex gap="small" wrap>
                     {data.map((item, index) => (
                         <TaskItemCard
-                            key={`task_${index}`} data={item}
+                            key={`task_${item.id}`} data={item}
                             onAccessUrl={onAccessUrl}
                             onEdit={(data) => {
                                 setIsTaskModalOpen(true);
                                 setEditItem(data);
                             }}
                             onDelete={onDeleteTask}
-                            onPlay={async (item: TaskData) => {
-                                let target = data.find((value) => value.id == item.id);
-                                target.taskRunData.status = "playing";
-                                setData(Object.assign([], data));
-                                let newItem = await automateFetchJobItemData(item);
-                                let index = data.findIndex((value) => value.id == newItem.id);
-                                data[index] = newItem;
-                                setData(Object.assign([], data));
-                            }}
+                            onPlay={play}
                             onShowDetailLogDetail={((item: TaskData) => {
                                 setMissionLogDetail(item);
                                 setIsMissionLogDetailModalOpen(true);
+                            })}
+                            onShowHistory={((item: TaskData) => {
+                                setHistory(item);
+                                setIsHistoryModalOpen(true);
                             })}
                         ></TaskItemCard>
                     ))}
@@ -215,6 +236,19 @@ const AutomateView: React.FC<AutomateProps> = (props) => {
                 destroyOnClose
             >
                 <MissionLogDetail data={missionLogDetail}></MissionLogDetail>
+            </Modal>
+            <Modal
+                title={`任务历史(${history?.name})`}
+                open={isHistoryModalOpen}
+                onCancel={() => {
+                    setIsHistoryModalOpen(false);
+                }}
+                footer={null}
+                style={{ maxWidth: "800px" }}
+                width="80%"
+                destroyOnClose
+            >
+                <MissionHistory data={history}></MissionHistory>
             </Modal>
         </>
     )
