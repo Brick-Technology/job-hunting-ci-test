@@ -12,6 +12,7 @@ import { BBSViewDTO } from "./bbs/BBSViewDTO";
 import Issue from './bbs/Issue';
 import IssueEdit from "./bbs/IssueEdit";
 import { IssueEditData } from "../data/IssueEditData";
+import { randomDelay } from "@/common/utils";
 const { getAllData, getLocationId } = useLocation();
 
 const CONFIG_KEY_VIEW_BBS = "CONFIG_KEY_VIEW_BBS";
@@ -66,7 +67,7 @@ const BbsView: React.FC = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
   const [editData, setEditData] = useState<IssueEditData>();
-  const [refresh,setRefresh] = useState(false);
+  const [refresh, setRefresh] = useState(false);
 
   const onChange: CascaderProps<Option>['onChange'] = (value: string[]) => {
     cascaderRef.current.blur();
@@ -129,7 +130,7 @@ const BbsView: React.FC = () => {
     if (searchParam.id != "") {
       search();
     }
-  }, [searchParam,refresh]);
+  }, [searchParam, refresh]);
 
   const scrollToTop = () => {
     rootRef.current.parentElement.scrollTo(0, 0);
@@ -164,6 +165,8 @@ const BbsView: React.FC = () => {
         type: 'success',
         content: `新增讨论成功`,
       });
+      //延迟，以便能刷新出新讨论
+      await randomDelay(1000, 0);
       setIsIssueModalOpen(false);
       setRefresh(!refresh)
     } catch (e) {
