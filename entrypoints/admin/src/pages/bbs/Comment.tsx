@@ -1,19 +1,18 @@
-import { Avatar, Button, Card, Flex, Typography } from "antd";
-import { IssueData } from "../../data/IssueData";
-const { Text } = Typography;
 import { convertTimeOffsetToHumanReadable } from "@/common/utils";
+import { Avatar, Card, Flex, Typography } from "antd";
 import Link from "antd/es/typography/Link";
-import { CommentOutlined } from "@ant-design/icons";
+import { CommentData } from "../../data/CommentData";
+const { Text } = Typography;
 
-export type IssueProps = {
-    data: IssueData;
-    onCommentOpen: (data: IssueData) => void;
+
+export type CommentProps = {
+    data: CommentData;
 };
-const Issue: React.FC<IssueProps> = ({ data, onCommentOpen }) => {
+const Comment: React.FC<CommentProps> = ({ data }) => {
 
     const { author, bodyHTML, createdAt, bodyUrl } = data;
     const { avatarUrl, login } = author;
-
+    
     return <>
         <Card title={<Flex align="end" gap={5}>
             <Avatar alt={login} size="large" src={avatarUrl} />
@@ -23,13 +22,6 @@ const Issue: React.FC<IssueProps> = ({ data, onCommentOpen }) => {
             extra={
                 <Link href={bodyUrl} target="_blank">来源</Link>
             }
-            actions={[
-                <Flex justify="center">
-                    <Button onClick={() => {
-                        onCommentOpen(data);
-                    }} icon={<CommentOutlined key="comment" />}>查看评论</Button>
-                </Flex>
-            ]}
         >
             <div dangerouslySetInnerHTML={
                 { __html: bodyHTML }
@@ -37,4 +29,4 @@ const Issue: React.FC<IssueProps> = ({ data, onCommentOpen }) => {
         </Card>
     </>
 }
-export default Issue;
+export default Comment;

@@ -13,6 +13,7 @@ import Issue from './bbs/Issue';
 import IssueEdit from "./bbs/IssueEdit";
 import { IssueEditData } from "../data/IssueEditData";
 import { randomDelay } from "@/common/utils";
+import IssueCommentView from "./bbs/IssueCommentView";
 const { getAllData, getLocationId } = useLocation();
 
 const CONFIG_KEY_VIEW_BBS = "CONFIG_KEY_VIEW_BBS";
@@ -68,6 +69,9 @@ const BbsView: React.FC = () => {
   const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
   const [editData, setEditData] = useState<IssueEditData>();
   const [refresh, setRefresh] = useState(false);
+
+  const [isIssueCommentModalOpen, setIsIssueCommentModalOpen] = useState(false);
+  const [commentIssueData, setCommentIssueData] = useState<IssueData>();
 
   const onChange: CascaderProps<Option>['onChange'] = (value: string[]) => {
     cascaderRef.current.blur();
@@ -133,7 +137,7 @@ const BbsView: React.FC = () => {
   }, [searchParam, refresh]);
 
   const scrollToTop = () => {
-    rootRef.current.parentElement.scrollTo(0, 0);
+    rootRef.current.scrollIntoView();
   }
 
   const onPageChange = (page: number, pageSize: number) => {
@@ -177,6 +181,11 @@ const BbsView: React.FC = () => {
     }
   }
 
+  const onCommentOpen = (data: IssueData) => {
+    setCommentIssueData(data);
+    setIsIssueCommentModalOpen(true);
+  }
+
   return <>
     {contextHolder}
     <FloatButton.Group
@@ -194,7 +203,7 @@ const BbsView: React.FC = () => {
         <Flex vertical gap={20}>
           {data && data.length > 0 ?
             data.map((item, index) => (
-              <Issue key={item.id} data={item}></Issue>
+              <Issue onCommentOpen={onCommentOpen} key={item.id} data={item}></Issue>
             )) : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
           }
           <Flex>
@@ -217,6 +226,21 @@ const BbsView: React.FC = () => {
     >
       <IssueEdit data={editData} onSave={onIssueSave}></IssueEdit>
     </Modal>
+
+    <Modal
+      title={" "}
+      open={isIssueCommentModalOpen}
+      onCancel={() => {
+        setIsIssueCommentModalOpen(false);
+      }}
+      footer={null}
+      style={{ maxWidth: "1000px" }}
+      width="80%"
+      destroyOnClose
+    >
+      <IssueCommentView data={commentIssueData}></IssueCommentView>
+    </Modal>
+
   </>
 };
 
