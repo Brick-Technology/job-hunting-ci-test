@@ -31,9 +31,9 @@ const HeaderRight: React.FC = () => {
                 okText="是"
                 cancelText="否"
             >
-                <Avatar alt={username} size="large" icon={auth ? <UserOutlined /> : null} src={auth ? avatar : null} />
+                <Avatar style={{ cursor: "pointer" }} alt={username} size="large" icon={auth ? <UserOutlined /> : null} src={auth ? avatar : null} />
             </Popconfirm>
-                : <Avatar alt={username} onClick={() => {
+                : <Avatar style={{ cursor: "pointer" }} alt={username} onClick={() => {
                     login();
                 }} size="large" icon={auth ? <UserOutlined /> : null} src={auth ? avatar : null} />
             }
