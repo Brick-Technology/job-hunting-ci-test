@@ -1,16 +1,16 @@
 import {
     PLATFORM_51JOB,
     PLATFORM_BOSS,
+    PLATFORM_JOBSDB,
     PLATFORM_LAGOU,
     PLATFORM_LIEPIN,
     PLATFORM_ZHILIAN,
-    PLATFORM_JOBSDB,
 } from "@/common";
 
-import { logo } from "../assets";
-import { JobData } from "../data/JobData";
 import dayjs from "dayjs";
 import { Feature, FeatureCollection } from "geojson";
+import { logo } from "../assets";
+import { JobData } from "../data/JobData";
 
 export function useJob() {
 
@@ -69,12 +69,13 @@ export function useJob() {
             url: item.jobUrl,
             salaryMin: item.jobSalaryMin,
             salaryMax: item.jobSalaryMax,
+            salaryTotalMonth: item.jobSalaryTotalMonth,
             company: {
                 name: item.jobCompanyName,
                 companyTagList: item.companyTagDTOList,
                 url: item.companyDTO?.sourceUrl,
                 status: companyStatus,
-                startDate: companyStartDate!=null?dayjs(companyStartDate).toDate():null,
+                startDate: companyStartDate != null ? dayjs(companyStartDate).toDate() : null,
                 industry: companyIndustry,
                 unifiedCode: companyUnifiedCode,
                 taxNo: companyTaxNo,
@@ -90,6 +91,7 @@ export function useJob() {
                 desc: companyDesc,
             },
             jobTagList: item.jobTagDTOList,
+            location: item.jobLocationName,
             address: item.jobAddress,
             publishDatetime: item.jobFirstPublishDatetime,
             bossName: item.bossName,
@@ -97,10 +99,13 @@ export function useJob() {
             platform: item.jobPlatform,
             desc: item.jobDescription,
             degree: item.jobDegreeName,
+            demandYear: item.jobYear,
             longitude: item.jobLongitude,
             latitude: item.jobLatitude,
             browseTime: item.latestBrowseDetailDatetime,
-            createDatetime:item.createDatetime,
+            createDatetime: item.createDatetime,
+            browseCount: item.browseCount,
+            browseDetailCount: item.browseDetailCount,
         };
     };
 
@@ -140,6 +145,20 @@ export function useJob() {
         }
     };
 
-    return { platformFormat, platformLogo, convertToJobDataList, convertToJobData, convertJobDataToGeojson }
+    const sortFieldMap = {
+        "publishDatetime": "jobFirstPublishDatetime",
+        "salaryMin": "jobSalaryMin",
+        "salaryMax": "jobSalaryMax",
+        "salaryTotalMonth": "jobSalaryTotalMonth",
+        "degree": "jobDegreeName",
+        "browseTime": "latestBrowseDetailDatetime",
+        "createDatetime": "create_datetime",
+        "browseCount": "browseDetailCount",
+    }
+
+    const convertSortField = (key: any) => {
+        return sortFieldMap[key];
+    }
+    return { platformFormat, platformLogo, convertToJobDataList, convertToJobData, convertJobDataToGeojson, convertSortField }
 
 }

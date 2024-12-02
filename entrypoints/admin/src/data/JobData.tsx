@@ -6,17 +6,22 @@ export type JobData = {
   url: string;
   salaryMin: number;
   salaryMax: number;
+  salaryTotalMonth: number;
   company: CompanyData;
   jobTagList: { tagName: string }[];
-  address: string[];
+  location: string,
+  address: string;
   publishDatetime: Date;
   bossName: string;
   bossPosition: string;
   platform: string;
   desc: string;
   degree: string;
+  demandYear: number,
   longitude: number;
   latitude: number;
   browseTime?: Date;
-  createDatetime?:Date;
+  createDatetime?: Date;
+  browseCount:number;
+  browseDetailCount:number;
 };

@@ -41,7 +41,7 @@ const getTimeColorByOffsetTimeDay = (datetime) => {
 
 export type JobItemCardProps = {
   data: JobData;
-  className: string;
+  className?: string;
   onCardClick?: (data: JobData) => void;
   onLocate?: (data: JobData) => void;
 };
@@ -70,7 +70,7 @@ const JobItemCard: React.FC<JobItemCardProps> = (props) => {
         title={browseTime ? `浏览时间:${convertTimeOffsetToHumanReadable(browseTime)}` : null}
         size="small"
         hoverable={props.onCardClick ? true : false}
-        className={`${styles.main} ${props.className}`}
+        className={`${styles.main} ${props.className?props.className:""}`}
         onClick={() => {
           props.onCardClick(props.data);
         }}
