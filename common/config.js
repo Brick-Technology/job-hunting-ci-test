@@ -18,7 +18,7 @@ export const URL_TRAFFIC_VIEWS = "https://api.github.com/repos/lastsunday/job-hu
 
 export const DEFAULT_DATA_REPO = "job-hunting-data";
 
-export const COMMENT_PAGE_SIZE = 20;
+export const COMMENT_PAGE_SIZE = 30;
 
 export const APP_URL_LATEST_VERSION = "https://api.github.com/repos/lastsunday/job-hunting/releases/latest";
 

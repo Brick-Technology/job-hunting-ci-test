@@ -1,19 +1,20 @@
 import { ConfigApi } from "@/common/api";
 import { EXCEPTION, GithubApi } from "@/common/api/github";
+import { COMMENT_PAGE_SIZE } from "@/common/config";
 import { Config } from "@/common/data/domain/config";
 import { errorLog } from "@/common/log";
+import { randomDelay } from "@/common/utils";
 import type { CascaderProps } from 'antd';
 import { Cascader, Empty, Flex, FloatButton, Modal, Pagination, Spin, message } from 'antd';
 import React from 'react';
 import { IssueData } from '../data/IssueData';
+import { IssueEditData } from "../data/IssueEditData";
 import { PageInfo } from '../data/PageInfo';
 import { useLocation } from "../hooks/location";
 import { BBSViewDTO } from "./bbs/BBSViewDTO";
 import Issue from './bbs/Issue';
-import IssueEdit from "./bbs/IssueEdit";
-import { IssueEditData } from "../data/IssueEditData";
-import { randomDelay } from "@/common/utils";
 import IssueCommentView from "./bbs/IssueCommentView";
+import IssueEdit from "./bbs/IssueEdit";
 const { getAllData, getLocationId } = useLocation();
 
 const CONFIG_KEY_VIEW_BBS = "CONFIG_KEY_VIEW_BBS";
@@ -24,8 +25,6 @@ interface Option {
 }
 
 const options: Option[] = [...getAllData()];
-
-const PAGE_SIZE = 10;
 
 const saveConfig = async (value: string[]) => {
   let configFromStorage = await ConfigApi.getConfigByKey(CONFIG_KEY_VIEW_BBS);
@@ -50,10 +49,12 @@ const saveConfig = async (value: string[]) => {
 
 const BbsView: React.FC = () => {
 
+  const [pageSize, setPageSize] = useState(COMMENT_PAGE_SIZE);
+
   const [selection, setSelection] = useState([]);
   const cascaderRef = useRef<Cascader>();
   const [searchParam, setSearchParam] = useState({
-    first: PAGE_SIZE,
+    first: COMMENT_PAGE_SIZE,
     after: null,
     last: null,
     before: null,
@@ -97,7 +98,7 @@ const BbsView: React.FC = () => {
 
   useEffect(() => {
     setSearchParam({
-      first: PAGE_SIZE,
+      first: pageSize,
       after: null,
       last: null,
       before: null,
@@ -154,6 +155,7 @@ const BbsView: React.FC = () => {
       searchParam.before = pageInfo ? pageInfo.startCursor : null;
       setCurrentPage(currentPage - 1);
     }
+    setPageSize(pageSize);
     setSearchParam(Object.assign({}, searchParam));
   }
 
@@ -207,7 +209,7 @@ const BbsView: React.FC = () => {
             )) : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
           }
           <Flex>
-            <Pagination simple current={currentPage} total={total} pageSize={PAGE_SIZE} onChange={onPageChange} />
+            <Pagination simple current={currentPage} total={total} pageSize={pageSize} onChange={onPageChange} />
           </Flex>
         </Flex>
       </Spin>
