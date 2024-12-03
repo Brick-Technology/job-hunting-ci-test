@@ -117,8 +117,9 @@ const columns: TableColumnsType<JobData> = [
   },
 ];
 
-const genFields = (expand: boolean): JSX.Element[] => {
-  const commonList = [
+const searchFields =
+{
+  common: [
     <Col span={8} key="name">
       <Form.Item
         name={`name`}
@@ -143,37 +144,32 @@ const genFields = (expand: boolean): JSX.Element[] => {
         <Input placeholder="请输入地区" />
       </Form.Item>
     </Col>,
-  ];
-
-  const expandList = [
-    <Col span={8} key="address">
-      <Form.Item
-        name={`address`}
-        label={`地址`}
-      >
-        <Input placeholder="请输入地址" />
-      </Form.Item>
-    </Col>,
-    <Col span={8} key="createDatetime">
-      <Form.Item
-        name={`createDatetime`}
-        label={`首次扫描时间`}
-      >
-        <RangePicker />
-      </Form.Item>
-    </Col>,
-    <Col span={8} key="publishDatetime">
-      <Form.Item
-        name={`publishDatetime`}
-        label={`发布时间`}
-      >
-        <RangePicker />
-      </Form.Item>
-    </Col>,
-  ]
-
-  return expand ? [...commonList, ...expandList] : [...commonList];
-};
+  ],
+  expand: [<Col span={8} key="address">
+    <Form.Item
+      name={`address`}
+      label={`地址`}
+    >
+      <Input placeholder="请输入地址" />
+    </Form.Item>
+  </Col>,
+  <Col span={8} key="createDatetime">
+    <Form.Item
+      name={`createDatetime`}
+      label={`首次扫描时间`}
+    >
+      <RangePicker />
+    </Form.Item>
+  </Col>,
+  <Col span={8} key="publishDatetime">
+    <Form.Item
+      name={`publishDatetime`}
+      label={`发布时间`}
+    >
+      <RangePicker />
+    </Form.Item>
+  </Col>,]
+}
 
 const fillSearchParam = (searchParam, values) => {
   const { name, location, address, companyName, createDatetime, publishDatetime } = values;
@@ -205,7 +201,7 @@ const JobView: React.FC = () => {
     {contextHolder}
     <BasicTable searchProps={{
       columns,
-      genFields,
+      searchFields,
       fillSearchParam,
       convertSortField,
       search: async (searchParam) => {

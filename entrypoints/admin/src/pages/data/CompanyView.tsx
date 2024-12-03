@@ -80,31 +80,25 @@ const columns: TableColumnsType<JobData> = [
   },
 ];
 
-const genFields = (expand: boolean): JSX.Element[] => {
-  const commonList = [
-    <Col span={8} key="name">
-      <Form.Item
-        name={`name`}
-        label={`公司名`}
-      >
-        <Input placeholder="请输入公司名" />
-      </Form.Item>
-    </Col>,
-  ];
-
-  const expandList = [
-    <Col span={8} key="startDate">
-      <Form.Item
-        name={`startDate`}
-        label={`成立时间`}
-      >
-        <RangePicker />
-      </Form.Item>
-    </Col>,
-  ]
-
-  return expand ? [...commonList, ...expandList] : [...commonList];
-};
+const searchFields =
+{
+  common: [<Col span={8} key="name">
+    <Form.Item
+      name={`name`}
+      label={`公司名`}
+    >
+      <Input placeholder="请输入公司名" />
+    </Form.Item>
+  </Col>,
+  <Col span={8} key="startDate">
+    <Form.Item
+      name={`startDate`}
+      label={`成立时间`}
+    >
+      <RangePicker />
+    </Form.Item>
+  </Col>,],
+}
 
 const fillSearchParam = (searchParam, values) => {
   const { name, startDate } = values;
@@ -127,7 +121,7 @@ const CompanyView: React.FC = () => {
     {contextHolder}
     <BasicTable searchProps={{
       columns,
-      genFields,
+      searchFields,
       fillSearchParam,
       convertSortField,
       search: async (searchParam) => {

@@ -25,11 +25,15 @@ interface TableParams {
 export type BasicTableProps = {
     searchProps: {
         columns: TableColumnsType<any>,
-        genFields: (expand: boolean) => JSX.Element[],
+        searchFields: {
+            common: JSX.Element[]
+            expand?: JSX.Element[]
+        },
         fillSearchParam: (searchParam, values: any) => any,
         convertSortField: (key: any) => string,
         search: (searchParam) => Promise<any>,
         convertToDataList: (data: any) => any,
+        rowKeyFunction?: (record) => string;
     },
     expandedRowRender?: (record) => JSX.Element,
     exportProps: {
@@ -40,7 +44,7 @@ export type BasicTableProps = {
 
 const BasicTable: React.FC<BasicTableProps> = ({ searchProps, expandedRowRender, exportProps }) => {
 
-    const { columns, genFields, fillSearchParam, convertSortField, search, convertToDataList } = searchProps;
+    const { columns, searchFields, fillSearchParam, convertSortField, search, convertToDataList, rowKeyFunction } = searchProps;
     const { dataToExcelJSONArray, title } = exportProps;
 
     const [dataSource, setDataSource] = useState<any>();
@@ -49,7 +53,7 @@ const BasicTable: React.FC<BasicTableProps> = ({ searchProps, expandedRowRender,
     const [searchParam, setSearchParam] = useState<any>({
         pageNum: 1,
         pageSize: UI_DEFAULT_PAGE_SIZE,
-        orderByColumn: "update_datetime",
+        orderByColumn: "updateDatetime",
         orderBy: "DESC",
     });
     const [tableParams, setTableParams] = useState<TableParams>({
@@ -102,7 +106,7 @@ const BasicTable: React.FC<BasicTableProps> = ({ searchProps, expandedRowRender,
                 searchParam.orderBy = "ASC";
             }
         } else {
-            searchParam.orderByColumn = "update_datetime"
+            searchParam.orderByColumn = "updateDatetime"
             searchParam.orderBy = "DESC";
         }
         setSearchParam(searchParam);
@@ -140,6 +144,14 @@ const BasicTable: React.FC<BasicTableProps> = ({ searchProps, expandedRowRender,
         }
     }
 
+    const createSearchField = () => {
+        if (searchFields.expand && expand) {
+            return [...searchFields.common, ...searchFields.expand];
+        } else {
+            return [...searchFields.common];
+        }
+    }
+
     return <>
         <Flex vertical>
             <Space size="small" direction="vertical">
@@ -149,7 +161,7 @@ const BasicTable: React.FC<BasicTableProps> = ({ searchProps, expandedRowRender,
                     borderRadius: token.borderRadiusLG,
                     padding: 10,
                 }} onFinish={onFinish}>
-                    <Row gutter={24}>{genFields(expand)}</Row>
+                    <Row gutter={24}>{createSearchField()}</Row>
                     <div style={{ textAlign: 'right' }}>
                         <Space size="small">
                             <Button type="dashed" loading={exportLoading} onClick={exportData}>
@@ -165,19 +177,23 @@ const BasicTable: React.FC<BasicTableProps> = ({ searchProps, expandedRowRender,
                             >
                                 清除
                             </Button>
-                            <a
-                                style={{ fontSize: 12 }}
-                                onClick={() => {
-                                    setExpand(!expand);
-                                }}
-                            >
-                                <DownOutlined rotate={expand ? 180 : 0} /> 折叠
-                            </a>
+                            {
+                                searchFields.expand && searchFields.expand.length > 0 ? <a
+                                    style={{ fontSize: 12 }}
+                                    onClick={() => {
+                                        setExpand(!expand);
+                                    }}
+                                >
+                                    <DownOutlined rotate={expand ? 180 : 0} /> 折叠
+                                </a> : null
+                            }
                         </Space>
                     </div>
                 </Form>
                 <Table<any>
-                    rowKey={(record) => record.id}
+                    rowKey={rowKeyFunction ? (record) => {
+                        return rowKeyFunction(record);
+                    } : (record) => record.id}
                     columns={columns}
                     dataSource={dataSource}
                     pagination={tableParams.pagination}

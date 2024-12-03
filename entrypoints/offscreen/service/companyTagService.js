@@ -207,8 +207,14 @@ export const CompanyTagService = {
                 },
                 genSqlSearchQueryFunction: () => {
                     let whereCondition = "";
+                    if (param.tagNames && param.tagNames.length > 0) {
+                        const tagIds = param.tagNames.map(item => { return genIdFromText(item) });
+                        const ids = "'" + tagIds.join("','") + "'";
+                        whereCondition +=
+                            ` AND t1.tag_id IN (${ids})`;
+                    }
                     if (param.tagIds && param.tagIds.length > 0) {
-                        let ids = "'" + param.tagIds.join("','") + "'";
+                        const ids = "'" + param.tagIds.join("','") + "'";
                         whereCondition +=
                             ` AND t1.tag_id IN (${ids})`;
                     }
@@ -225,10 +231,6 @@ export const CompanyTagService = {
                     if (param.companyName) {
                         whereCondition +=
                             " AND companyName LIKE '%" + param.companyName + "%' ";
-                    }
-                    if (param.tagIds && param.tagIds.length > 0) {
-                        whereCondition +=
-                            ` AND COUNT(DISTINCT t1.tag_id) = ${param.tagIds.length}`;
                     }
                     if (param.startDatetimeForUpdate) {
                         whereCondition +=

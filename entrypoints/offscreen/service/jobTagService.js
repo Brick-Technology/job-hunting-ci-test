@@ -51,6 +51,17 @@ export const JobTagService = {
                         whereCondition +=
                             ` AND t1.tag_id IN (${ids})`;
                     }
+                    if (param.tagNames && param.tagNames.length > 0) {
+                        const tagIds = param.tagNames.map(item => { return genIdFromText(item) });
+                        const ids = "'" + tagIds.join("','") + "'";
+                        whereCondition +=
+                            ` AND t1.tag_id IN (${ids})`;
+                    }
+                    if (param.tagIds && param.tagIds.length > 0) {
+                        const ids = "'" + param.tagIds.join("','") + "'";
+                        whereCondition +=
+                            ` AND t1.tag_id IN (${ids})`;
+                    }
                     if (whereCondition.startsWith(" AND")) {
                         whereCondition = whereCondition.replace("AND", "");
                         whereCondition = " WHERE " + whereCondition;
@@ -61,10 +72,6 @@ export const JobTagService = {
                 },
                 genSearchWhereConditionSqlFunction: () => {
                     let whereCondition = "";
-                    if (param.tagIds && param.tagIds.length > 0) {
-                        whereCondition +=
-                            ` AND COUNT(DISTINCT t1.tag_id) = ${param.tagIds.length}`;
-                    }
                     if (param.startDatetimeForUpdate) {
                         whereCondition +=
                             " AND updateDatetime >= '" +
