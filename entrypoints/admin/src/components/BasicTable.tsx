@@ -6,13 +6,14 @@ import {
     Row,
     Space, Table, TableColumnsType, TablePaginationConfig,
     TableProps,
-    theme
+    theme,
+    Typography
 } from "antd";
 import { SorterResult } from "antd/es/table/interface";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import { utils, writeFileXLSX } from "xlsx";
-
+const { Text } = Typography;
 dayjs.extend(duration)
 
 interface TableParams {
@@ -194,7 +195,11 @@ const BasicTable: React.FC<BasicTableProps> = ({ searchProps, expandedRowRender,
                     rowKey={rowKeyFunction ? (record) => {
                         return rowKeyFunction(record);
                     } : (record) => record.id}
-                    columns={columns}
+                    columns={[...[{
+                        title: '#',
+                        render: (value: string, record, index) => <Text>{index + 1 + ((tableParams.pagination.current - 1) * tableParams.pagination.pageSize)}</Text>,
+                        minWidth: 50,
+                    }], ...columns]}
                     dataSource={dataSource}
                     pagination={tableParams.pagination}
                     loading={loading}
