@@ -1,12 +1,16 @@
-import { JobApi } from "@/common/api";
+import { JobApi, TagApi } from "@/common/api";
 import { jobDataToExcelJSONArray } from "@/common/excel";
 import { dateToStr } from "@/common/utils";
 import {
+  Button,
   Col,
   DatePicker,
   Form,
   Input,
+  Modal,
+  Space,
   TableColumnsType,
+  Tag,
   Typography, message
 } from "antd";
 import dayjs from "dayjs";
@@ -16,106 +20,15 @@ import JobItemTable from "../../components/JobItemTable";
 import { CompanyData } from "../../data/CompanyData";
 import { JobData } from "../../data/JobData";
 import { useJob } from "../../hooks/job";
+import { JobTagEditData } from "../../data/JobTagEditData";
+import { WhitelistData } from "../../data/WhitelistData";
+import JobTagEdit from "./JobTagEdit";
+import { JobTagBO } from "@/common/data/bo/jobTagBO";
 
 const { RangePicker } = DatePicker;
 const { Text } = Typography;
 const { convertToJobDataList, platformFormat, convertSortField } = useJob();
 dayjs.extend(duration)
-
-const columns: TableColumnsType<JobData> = [
-  {
-    title: '名称',
-    dataIndex: 'name',
-    render: (text: string) => <Text>{text}</Text>,
-    minWidth: 200,
-  },
-  {
-    title: '公司',
-    dataIndex: 'company',
-    render: (value: CompanyData) => <Text>{value.name}</Text>,
-    minWidth: 200,
-  },
-  {
-    title: '发布时间',
-    dataIndex: 'publishDatetime',
-    render: (value: Date) => <Text title={dateToStr(value)}>{dateToStr(value, "YYYY-MM-DD")}</Text>,
-    minWidth: 120,
-    sorter: true,
-  },
-  {
-    title: '地区',
-    dataIndex: 'location',
-    render: (text: string) => <Text>{text}</Text>,
-    minWidth: 100,
-  },
-  {
-    title: '最低薪资',
-    dataIndex: 'salaryMin',
-    render: (text: string) => <Text>{text}</Text>,
-    minWidth: 120,
-    sorter: true,
-  },
-  {
-    title: '最高薪资',
-    dataIndex: 'salaryMax',
-    render: (text: string) => <Text>{text}</Text>,
-    minWidth: 120,
-    sorter: true,
-  },
-  {
-    title: '几薪',
-    dataIndex: 'salaryTotalMonth',
-    render: (text: string) => <Text>{text}</Text>,
-    minWidth: 80,
-    sorter: true,
-  },
-  {
-    title: '职位标签数',
-    dataIndex: 'jobTagList',
-    render: (value: { tagName: string }[]) => <Text>{value?.length}</Text>,
-    minWidth: 100,
-  },
-  {
-    title: '公司标签数',
-    dataIndex: 'company',
-    render: (value: CompanyData) => <Text>{value.companyTagList?.length}</Text>,
-    minWidth: 100,
-  },
-  {
-    title: '学历',
-    dataIndex: 'degree',
-    render: (text: string) => <Text>{text}</Text>,
-    minWidth: 80,
-    sorter: true,
-  },
-  {
-    title: '招聘平台',
-    dataIndex: 'platform',
-    render: (text: string) => <Text>{platformFormat(text)}</Text>,
-    minWidth: 100,
-  },
-  {
-    title: '首次扫描时间',
-    dataIndex: 'createDatetime',
-    render: (value: Date) => <Text title={dateToStr(value)}>{dateToStr(value, "YYYY-MM-DD")}</Text>,
-    minWidth: 120,
-    sorter: true,
-  },
-  {
-    title: '查看数',
-    dataIndex: 'browseCount',
-    render: (text: string) => <Text>{text}</Text>,
-    minWidth: 80,
-    sorter: true,
-  },
-  {
-    title: '最近查看时间',
-    dataIndex: 'browseTime',
-    render: (value?: Date) => <Text title={dateToStr(value)}>{dateToStr(value, "YYYY-MM-DD")}</Text>,
-    minWidth: 120,
-    sorter: true,
-  },
-];
 
 const searchFields =
 {
@@ -196,19 +109,185 @@ const fillSearchParam = (searchParam, values) => {
 const JobView: React.FC = () => {
 
   const [messageApi, contextHolder] = message.useMessage();
+  const [isJobTagEditModalOpen, setIsJobTagEditModalOpen] = useState(false);
+  const [editJobTagData, setEditJobTagData] = useState<JobTagEditData>();
+  const [whitelist, setWhitelist] = useState<WhitelistData[]>([]);
+  const tableRef = useRef();
+
+  const columns: TableColumnsType<JobData> = [
+    {
+      title: '编号',
+      dataIndex: 'id',
+      render: (text: string) => <Text>{text}</Text>,
+      minWidth: 100,
+    },
+    {
+      title: '名称',
+      dataIndex: 'name',
+      render: (text: string) => <Text>{text}</Text>,
+      minWidth: 200,
+    },
+    {
+      title: '公司',
+      dataIndex: 'company',
+      render: (value: CompanyData) => <Text>{value.name}</Text>,
+      minWidth: 200,
+    },
+    {
+      title: '发布时间',
+      dataIndex: 'publishDatetime',
+      render: (value: Date) => <Text title={dateToStr(value)}>{dateToStr(value, "YYYY-MM-DD")}</Text>,
+      minWidth: 120,
+      sorter: true,
+    },
+    {
+      title: '地区',
+      dataIndex: 'location',
+      render: (text: string) => <Text>{text}</Text>,
+      minWidth: 100,
+    },
+    {
+      title: '最低薪资',
+      dataIndex: 'salaryMin',
+      render: (text: string) => <Text>{text}</Text>,
+      minWidth: 120,
+      sorter: true,
+    },
+    {
+      title: '最高薪资',
+      dataIndex: 'salaryMax',
+      render: (text: string) => <Text>{text}</Text>,
+      minWidth: 120,
+      sorter: true,
+    },
+    {
+      title: '几薪',
+      dataIndex: 'salaryTotalMonth',
+      render: (text: string) => <Text>{text}</Text>,
+      minWidth: 80,
+      sorter: true,
+    },
+    {
+      title: '职位标签',
+      dataIndex: 'jobTagList',
+      render: (value: { tagName: string }[]) => {
+        const result = [];
+        if (value && value.length > 0) {
+          value.map((item) => {
+            result.push(
+              <Tag key={item.tagName}>{item.tagName}</Tag>
+            );
+          })
+        }
+        return result;
+      },
+      minWidth: 100,
+    },
+    {
+      title: '公司标签',
+      dataIndex: 'company',
+      render: (value: CompanyData) => {
+        const result = [];
+        if (value && value.companyTagList && value.companyTagList.length > 0) {
+          value.companyTagList.map((item) => {
+            result.push(
+              <Tag key={item.tagName}>{item.tagName}</Tag>
+            );
+          })
+        }
+        return result;
+      },
+      minWidth: 100,
+    },
+    {
+      title: '学历',
+      dataIndex: 'degree',
+      render: (text: string) => <Text>{text}</Text>,
+      minWidth: 80,
+      sorter: true,
+    },
+    {
+      title: '招聘平台',
+      dataIndex: 'platform',
+      render: (text: string) => <Text>{platformFormat(text)}</Text>,
+      minWidth: 100,
+    },
+    {
+      title: '首次扫描时间',
+      dataIndex: 'createDatetime',
+      render: (value: Date) => <Text title={dateToStr(value)}>{dateToStr(value, "YYYY-MM-DD")}</Text>,
+      minWidth: 120,
+      sorter: true,
+    },
+    {
+      title: '查看数',
+      dataIndex: 'browseCount',
+      render: (text: string) => <Text>{text}</Text>,
+      minWidth: 80,
+      sorter: true,
+    },
+    {
+      title: '最近查看时间',
+      dataIndex: 'browseTime',
+      render: (value?: Date) => <Text title={dateToStr(value)}>{dateToStr(value, "YYYY-MM-DD")}</Text>,
+      minWidth: 120,
+      sorter: true,
+    },
+    {
+      title: '操作',
+      key: 'action',
+      fixed: "right",
+      render: (_, record) => (
+        <Space size="middle">
+          <Button type="link" onClick={() => {
+            setEditJobTagData({
+              id: record.id,
+              name: record.name,
+              tags: record.jobTagList?.map(item => item.tagName)
+            });
+            setIsJobTagEditModalOpen(true);
+          }}>编辑职位标签</Button>
+        </Space>
+      ),
+    },
+  ];
+
+  const onJobTagSave = async (data: JobTagEditData) => {
+    const { id, tags } = data;
+    let bo = new JobTagBO();
+    bo.jobId = id;
+    bo.tags = tags;
+    await JobApi.jobTagAddOrUpdate(bo);
+    setIsJobTagEditModalOpen(false);
+    tableRef?.current.refresh();
+  }
+
+  useEffect(() => {
+    const getWhitelist = async () => {
+      let allTags = await TagApi.getAllTag();
+      let tagItems = [];
+      allTags.forEach((item) => {
+        tagItems.push({ value: item.tagName, code: item.tagId });
+      });
+      setWhitelist(tagItems);
+    };
+    getWhitelist();
+  }, []);
 
   return <>
     {contextHolder}
-    <BasicTable searchProps={{
-      columns,
-      searchFields,
-      fillSearchParam,
-      convertSortField,
-      search: async (searchParam) => {
-        return JobApi.searchJob(searchParam);
-      },
-      convertToDataList: convertToJobDataList,
-    }}
+    <BasicTable
+      ref={tableRef}
+      searchProps={{
+        columns,
+        searchFields,
+        fillSearchParam,
+        convertSortField,
+        search: async (searchParam) => {
+          return JobApi.searchJob(searchParam);
+        },
+        convertToDataList: convertToJobDataList,
+      }}
       expandedRowRender={(record) => {
         return <JobItemTable data={record}></JobItemTable>
       }}
@@ -217,6 +296,24 @@ const JobView: React.FC = () => {
         title: "职位"
       }}
     ></BasicTable>
+    <Modal
+      title={"编辑职位标签"}
+      open={isJobTagEditModalOpen}
+      onCancel={() => {
+        setIsJobTagEditModalOpen(false);
+      }}
+      maskClosable={false}
+      footer={null}
+      style={{ maxWidth: "1000px" }}
+      width="80%"
+      destroyOnClose
+    >
+      <JobTagEdit
+        data={editJobTagData}
+        whitelist={whitelist}
+        onSave={onJobTagSave}
+      ></JobTagEdit>
+    </Modal>
   </>
 }
 

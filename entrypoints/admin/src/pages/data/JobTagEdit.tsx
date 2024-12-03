@@ -1,19 +1,20 @@
 import { Flex, Form, FormProps, Input, Select, Space, Spin } from "antd";
 import SubmitButton from "../../components/SubmitButton";
 import { CompanyTagEditData } from "../../data/CompanyTagEditData";
+import { JobTagEditData } from "../../data/JobTagEditData";
 import { WhitelistData } from "../../data/WhitelistData";
 
-export type CompanyTagEditProps = {
-    data: CompanyTagEditData;
+export type JobTagEditProps = {
+    data: JobTagEditData;
     whitelist?: WhitelistData[];
     onSave: (data: CompanyTagEditData) => void;
 };
-const CompanyTagEdit: React.FC<CompanyTagEditProps> = ({ data, whitelist, onSave }) => {
+const JobTagEdit: React.FC<JobTagEditProps> = ({ data, whitelist, onSave }) => {
 
     const [form] = Form.useForm();
     const [loading, setLoading] = useState<boolean>(false);
 
-    const onSaveHandle: FormProps<CompanyTagEditData>["onFinish"] = async (values) => {
+    const onSaveHandle: FormProps<JobTagEditData>["onFinish"] = async (values) => {
         try {
             setLoading(true);
             await onSave(values);
@@ -36,7 +37,14 @@ const CompanyTagEdit: React.FC<CompanyTagEditProps> = ({ data, whitelist, onSave
                 initialValues={data}
             >
                 <Form.Item
-                    label="公司名"
+                    label="职位编号"
+                    name="id"
+                    rules={[{ required: true }]}
+                >
+                    <Input disabled></Input>
+                </Form.Item>
+                <Form.Item
+                    label="职位名"
                     name="name"
                     rules={[{ required: true }]}
                 >
@@ -66,4 +74,4 @@ const CompanyTagEdit: React.FC<CompanyTagEditProps> = ({ data, whitelist, onSave
         </Spin>
     </>
 }
-export default CompanyTagEdit;
+export default JobTagEdit;

@@ -73,22 +73,28 @@ const CompanyView: React.FC = () => {
 
   const columns: TableColumnsType<CompanyData> = [
     {
+      title: '编号',
+      dataIndex: 'id',
+      render: (text: string) => <Text>{text}</Text>,
+      minWidth: 100,
+    },
+    {
       title: '公司全称',
       dataIndex: 'name',
       render: (value: string) => <Text>{value}</Text>,
-      minWidth: 200,
+      minWidth: 150,
     },
     {
-      title: '公司经营状态',
+      title: '经营状态',
       dataIndex: 'status',
       render: (value: string) => <Text>{value}</Text>,
-      minWidth: 100,
+      minWidth: 80,
     },
     {
       title: '所属行业',
       dataIndex: 'industry',
       render: (value: string) => <Text>{value}</Text>,
-      minWidth: 150,
+      minWidth: 100,
     },
     {
       title: '成立时间',
@@ -129,7 +135,7 @@ const CompanyView: React.FC = () => {
       title: '统一社会信用代码',
       dataIndex: 'unifiedCode',
       render: (text: string) => <Text>{text}</Text>,
-      minWidth: 160,
+      minWidth: 100,
     },
     {
       title: '法人',
@@ -141,12 +147,13 @@ const CompanyView: React.FC = () => {
       title: '更新时间',
       dataIndex: 'updateDatetime',
       render: (value: Date) => <Text title={dateToStr(value)}>{dateToStr(value, "YYYY-MM-DD")}</Text>,
-      minWidth: 100,
+      minWidth: 120,
       sorter: true,
     },
     {
       title: '操作',
       key: 'action',
+      fixed: "right",
       render: (_, record) => (
         <Space size="middle">
           <Button type="link" onClick={() => {
