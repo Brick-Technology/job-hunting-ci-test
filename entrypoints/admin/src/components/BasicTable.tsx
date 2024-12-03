@@ -12,6 +12,7 @@ import {
 import { SorterResult } from "antd/es/table/interface";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
+import { forwardRef, useImperativeHandle } from "react";
 import { utils, writeFileXLSX } from "xlsx";
 const { Text } = Typography;
 dayjs.extend(duration)
@@ -43,7 +44,8 @@ export type BasicTableProps = {
     }
 }
 
-const BasicTable: React.FC<BasicTableProps> = ({ searchProps, expandedRowRender, exportProps }) => {
+const BasicTable = forwardRef(function Component(props: BasicTableProps, ref) {
+    const { searchProps, expandedRowRender, exportProps } = props;
 
     const { columns, searchFields, fillSearchParam, convertSortField, search, convertToDataList, rowKeyFunction } = searchProps;
     const { dataToExcelJSONArray, title } = exportProps;
@@ -74,6 +76,12 @@ const BasicTable: React.FC<BasicTableProps> = ({ searchProps, expandedRowRender,
     const [expand, setExpand] = useState(false);
 
     const [exportLoading, setExportLoading] = useState(false);
+
+    useImperativeHandle(ref, () => ({
+        refresh: () => {
+            setRefresh(!refresh);
+        }
+    }));
 
     const fetchData = () => {
         (async () => {
@@ -212,6 +220,6 @@ const BasicTable: React.FC<BasicTableProps> = ({ searchProps, expandedRowRender,
             </Space>
         </Flex>
     </>
-}
+})
 
 export default BasicTable;
