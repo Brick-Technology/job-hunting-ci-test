@@ -159,6 +159,7 @@ export function useJob() {
     const convertSortField = (key: any) => {
         return sortFieldMap[key];
     }
+    
     return { platformFormat, platformLogo, convertToJobDataList, convertToJobData, convertJobDataToGeojson, convertSortField }
 
 }

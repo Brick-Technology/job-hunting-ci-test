@@ -1,4 +1,5 @@
 export type CompanyData = {
+  id: string;
   name: string;
   companyTagList?: { tagName: string }[];
   url?: string;
@@ -17,4 +18,9 @@ export type CompanyData = {
   longitude: number;
   latitude: number;
   desc: string;
+  sourcePlatform: string,
+  sourceRecordId: string,
+  sourceRefreshDatetime: Date,
+  createDatetime: Date,
+  updateDatetime: Date,
 };
