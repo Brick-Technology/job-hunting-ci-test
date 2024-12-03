@@ -7,9 +7,10 @@ import { WhitelistData } from "../../data/WhitelistData";
 export type JobTagEditProps = {
     data: JobTagEditData;
     whitelist?: WhitelistData[];
-    onSave: (data: CompanyTagEditData) => void;
+    onSave: (data: JobTagEditData) => void;
+    mode?: "add" | "update",
 };
-const JobTagEdit: React.FC<JobTagEditProps> = ({ data, whitelist, onSave }) => {
+const JobTagEdit: React.FC<JobTagEditProps> = ({ data, whitelist, onSave, mode = "update" }) => {
 
     const [form] = Form.useForm();
     const [loading, setLoading] = useState<boolean>(false);
@@ -41,18 +42,20 @@ const JobTagEdit: React.FC<JobTagEditProps> = ({ data, whitelist, onSave }) => {
                     name="id"
                     rules={[{ required: true }]}
                 >
-                    <Input disabled></Input>
+                    <Input disabled={mode == "update"}></Input>
                 </Form.Item>
-                <Form.Item
-                    label="职位名"
-                    name="name"
-                    rules={[{ required: true }]}
-                >
-                    <Input disabled></Input>
-                </Form.Item>
+                {
+                    mode == "update" ? <Form.Item
+                        label="职位名"
+                        name="name"
+                    >
+                        <Input disabled></Input>
+                    </Form.Item> : null
+                }
                 <Form.Item
                     label="标签"
                     name="tags"
+                    rules={[{ required: mode == "add" }]}
                 >
                     <Select
                         allowClear

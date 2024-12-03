@@ -1,5 +1,5 @@
 export interface JobTagEditData {
     id: string;
-    name: string;
+    name?: string;
     tags?: string[];
 }

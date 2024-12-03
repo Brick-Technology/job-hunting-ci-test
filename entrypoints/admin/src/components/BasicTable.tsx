@@ -3,13 +3,14 @@ import { DownOutlined } from "@ant-design/icons";
 import {
     Button,
     Flex, Form, GetProp,
+    Popconfirm,
     Row,
     Space, Table, TableColumnsType, TablePaginationConfig,
     TableProps,
     theme,
     Typography
 } from "antd";
-import { SorterResult } from "antd/es/table/interface";
+import { SorterResult, TableRowSelection } from "antd/es/table/interface";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import { forwardRef, useImperativeHandle } from "react";
@@ -42,10 +43,13 @@ export type BasicTableProps = {
         dataToExcelJSONArray: (originalData: any) => any,
         title: string,
     }
+    mode?: Array<"c" | "r" | "u" | "d">,
+    onAdd?: () => void,
+    onDelete?: (keys: React.Key[]) => void,
 }
 
 const BasicTable = forwardRef(function Component(props: BasicTableProps, ref) {
-    const { searchProps, expandedRowRender, exportProps } = props;
+    const { searchProps, expandedRowRender, exportProps, mode, onAdd, onDelete } = props;
 
     const { columns, searchFields, fillSearchParam, convertSortField, search, convertToDataList, rowKeyFunction } = searchProps;
     const { dataToExcelJSONArray, title } = exportProps;
@@ -76,6 +80,9 @@ const BasicTable = forwardRef(function Component(props: BasicTableProps, ref) {
     const [expand, setExpand] = useState(false);
 
     const [exportLoading, setExportLoading] = useState(false);
+    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+    const [addLoading, setAddLoading] = useState(false);
+    const [deleteLoading, setDeleteLoading] = useState(false);
 
     useImperativeHandle(ref, () => ({
         refresh: () => {
@@ -161,6 +168,16 @@ const BasicTable = forwardRef(function Component(props: BasicTableProps, ref) {
         }
     }
 
+    const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
+        setSelectedRowKeys(newSelectedRowKeys);
+    };
+
+    const rowSelection: TableRowSelection<any> = {
+        selectedRowKeys,
+        onChange: onSelectChange,
+    };
+
+    const hasSelected = selectedRowKeys.length > 0;
     return <>
         <Flex vertical>
             <Space size="small" direction="vertical">
@@ -173,6 +190,44 @@ const BasicTable = forwardRef(function Component(props: BasicTableProps, ref) {
                     <Row gutter={24}>{createSearchField()}</Row>
                     <div style={{ textAlign: 'right' }}>
                         <Space size="small">
+                            {mode?.includes("c") ?
+                                <Button type="primary" onClick={async () => {
+                                    if (onAdd) {
+                                        try {
+                                            setAddLoading(true);
+                                            await onAdd();
+                                        } finally {
+                                            setAddLoading(false);
+                                        }
+                                    }
+                                }}>
+                                    新增
+                                </Button> : null
+                            }
+                            {mode?.includes("d") ?
+                                <Popconfirm
+                                    title="删除记录"
+                                    description="确定删除选定的记录？"
+                                    onConfirm={async () => {
+                                        if (onDelete) {
+                                            try {
+                                                setDeleteLoading(true);
+                                                await onDelete(selectedRowKeys);
+                                                setSelectedRowKeys([]);
+                                            } finally {
+                                                setDeleteLoading(false);
+                                            }
+                                        }
+                                    }}
+                                    okText="确定"
+                                    cancelText="取消"
+                                >
+                                    <Button loading={deleteLoading} type="primary" disabled={!hasSelected} danger>
+                                        删除
+                                    </Button>
+                                </Popconfirm>
+                                : null
+                            }
                             <Button type="dashed" loading={exportLoading} onClick={exportData}>
                                 导出
                             </Button>
@@ -216,6 +271,7 @@ const BasicTable = forwardRef(function Component(props: BasicTableProps, ref) {
                     expandable={{
                         expandedRowRender,
                     }}
+                    rowSelection={mode?.includes("d") ? rowSelection : null}
                 />
             </Space>
         </Flex>

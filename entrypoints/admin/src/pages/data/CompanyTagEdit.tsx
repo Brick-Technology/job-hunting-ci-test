@@ -7,8 +7,9 @@ export type CompanyTagEditProps = {
     data: CompanyTagEditData;
     whitelist?: WhitelistData[];
     onSave: (data: CompanyTagEditData) => void;
+    mode?: "add" | "update",
 };
-const CompanyTagEdit: React.FC<CompanyTagEditProps> = ({ data, whitelist, onSave }) => {
+const CompanyTagEdit: React.FC<CompanyTagEditProps> = ({ data, whitelist, onSave, mode = "update" }) => {
 
     const [form] = Form.useForm();
     const [loading, setLoading] = useState<boolean>(false);
@@ -40,11 +41,12 @@ const CompanyTagEdit: React.FC<CompanyTagEditProps> = ({ data, whitelist, onSave
                     name="name"
                     rules={[{ required: true }]}
                 >
-                    <Input disabled></Input>
+                    <Input disabled={mode == "update"}></Input>
                 </Form.Item>
                 <Form.Item
                     label="标签"
                     name="tags"
+                    rules={[{ required: mode == "add" }]}
                 >
                     <Select
                         allowClear
