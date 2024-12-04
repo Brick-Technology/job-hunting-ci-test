@@ -21,7 +21,9 @@
     "@0xecho/button": "^0.0.17",
     "@ant-design/charts": "^2.2.3",
     "@ant-design/icons": "^5.5.1",
+    "@ant-design/pro-components": "^2.8.2",
     "@pansy/lnglat-transform": "^1.0.3",
+    "@tsparticles/react": "^3.0.0",
     "@types/geojson": "^7946.0.14",
     "@uiw/react-markdown-editor": "^6.1.2",
     "@vis.gl/react-maplibre": "1.0.0-alpha.4",
@@ -41,7 +43,7 @@
     "maplibre-gl": "^4.7.1",
     "marked": "^15.0.3",
     "marked-react": "^2.0.0",
-    "puppeteer-core": "^23.3.0",
+    "puppeteer-core": "^23.10.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-draggable": "^4.4.6",
@@ -77,6 +79,6 @@
     "vite-plugin-wasm": "^3.3.0",
     "vite-plugin-web-extension": "^4.1.6",
     "web-ext": "^8.2.0",
-    "wxt": "^0.19.17"
+    "wxt": "^0.19.18"
   }
 }

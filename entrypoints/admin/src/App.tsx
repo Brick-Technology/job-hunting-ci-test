@@ -1,34 +1,48 @@
 import React from "react";
 import { HashRouter, Route, Routes } from "react-router";
+import { useShallow } from 'zustand/shallow';
 import "./App.css";
 import RootLayout from "./layout/RootLayout";
 import BbsView from "./pages/BbsView";
 import DashboardView from "./pages/DashboardView";
-import DataSharePlanView from "./pages/DataSharePlanView";
 import SettingView from "./pages/SettingView";
+import AutomateView from "./pages/assistant/AutomateView";
 import FavoriteJobView from "./pages/assistant/FavoriteJobView";
+import HistoryJobView from "./pages/assistant/HistoryJobView";
 import CompanyTagView from "./pages/data/CompanyTagView";
 import CompanyView from "./pages/data/CompanyView";
 import JobTagView from "./pages/data/JobTagView";
 import JobView from "./pages/data/JobView";
-import HistoryJobView from "./pages/assistant/HistoryJobView";
-import AutomateView from "./pages/assistant/AutomateView";
-import { useShallow } from 'zustand/shallow';
+import PartnerView from "./pages/dataSharePlan/PartnerView";
+import DataSharePlanStatisticView from "./pages/dataSharePlan/StatisticView";
+import TaskView from "./pages/dataSharePlan/TaskView";
+import DataSharePlanWelcomeView from "./pages/dataSharePlan/WelcomeView";
 import useAuthStore from "./store/AuthStore";
+import useDataSharePlanStore from "./store/DataSharePlanStore";
 
 
 const App: React.FC = () => {
 
-  const [init] = useAuthStore(useShallow(((state) => [
+  const [init, setInit] = useState(false);
+
+  const [authStoreInit] = useAuthStore(useShallow(((state) => [
+    state.init,
+  ])));
+  const [dataSharePlanStoreInit] = useDataSharePlanStore(useShallow(((state) => [
     state.init,
   ])));
 
   useEffect(() => {
-    init();
+    const initStore = async () => {
+      await authStoreInit();
+      await dataSharePlanStoreInit();
+      setInit(true);
+      document.getElementById("loading")?.remove()
+    }
+    initStore();
   }, [])
-
   return (
-    <HashRouter>
+    init ? <HashRouter>
       <Routes>
         <Route element={<RootLayout />}>
           <Route index element={<DashboardView />} />
@@ -40,12 +54,15 @@ const App: React.FC = () => {
           <Route path="company" element={<CompanyView />} />
           <Route path="jobTag" element={<JobTagView />} />
           <Route path="companyTag" element={<CompanyTagView />} />
-          <Route path="dataSharePlan" element={<DataSharePlanView />} />
+          <Route path="dataSharePlanWelcome" element={<DataSharePlanWelcomeView />} />
+          <Route path="dataSharePlanStatistic" element={<DataSharePlanStatisticView />} />
+          <Route path="task" element={<TaskView />} />
+          <Route path="partner" element={<PartnerView />} />
           <Route path="setting" element={<SettingView />} />
           <Route path="*" element={<DashboardView />} />
         </Route>
       </Routes>
-    </HashRouter>
+    </HashRouter> : null
   );
 };
 

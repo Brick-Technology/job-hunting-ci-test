@@ -14,6 +14,8 @@ import { Outlet } from "react-router";
 import logo from "../assets/logo.svg";
 import { useNavigate } from "react-router";
 import HeaderRight from "./HeaderRight";
+import useDataSharePlanStore from "../store/DataSharePlanStore";
+import { useShallow } from "zustand/shallow";
 const { Header, Sider, Content } = Layout;
 
 const siderStyle: React.CSSProperties = {
@@ -28,6 +30,20 @@ const RootLayout: React.FC = () => {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
   let navigate = useNavigate();
+
+  const [dataSharePlanEnable] = useDataSharePlanStore(useShallow(((state) => [
+    state.enable,
+  ])));
+
+  const genDataSharePlanMenu = () => {
+    if (dataSharePlanEnable) {
+      return [{ key: "dataSharePlanStatistic", label: "统计" },
+      { key: "task", label: "任务" },
+      { key: "partner", label: "伙伴" },];
+    } else {
+      return [{ key: "dataSharePlanWelcome", label: "欢迎使用" }];
+    }
+  }
 
   return (
     <Layout className="root" hasSider>
@@ -88,6 +104,9 @@ const RootLayout: React.FC = () => {
               key: "dataSharePlan",
               icon: <ShareAltOutlined />,
               label: "数据共享计划",
+              children: [
+                ...genDataSharePlanMenu()
+              ],
             },
             {
               key: "setting",
