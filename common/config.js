@@ -34,5 +34,8 @@ export const TASK_DATA_DOWNLOAD_MAX_DAY = 60;//day
 export const TASK_CHART_DEFAULT_RANGE_DAY = 14;//day
 export const TASK_LOOP_DELAY = 30000;//ms
 
+//图表刷新间隔
+export const CHARTS_LOOP_DELAY = 5000;//ms
+
 export const CONFIG_KEY_DATA_SHARE_PLAN = "CONFIG_KEY_DATA_SHARE_PLAN";
 export const DEFAULT_REPO_TYPE = "GITHUB";
