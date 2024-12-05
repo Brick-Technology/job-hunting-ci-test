@@ -71,7 +71,7 @@ const useDataSharePlanStore = create<DataSharePlanState>()((set) => {
             config.key = CONFIG_KEY_DATA_SHARE_PLAN;
             config.value = JSON.stringify(target)
         } else {
-            config.value = JSON.stringify(Object.assign(target, JSON.parse(config.value)));
+            config.value = JSON.stringify(Object.assign(JSON.parse(config.value), target));
         }
         await ConfigApi.addOrUpdateConfig(config);
     }
