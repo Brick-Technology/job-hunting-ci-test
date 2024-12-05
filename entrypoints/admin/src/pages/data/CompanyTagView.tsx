@@ -157,7 +157,7 @@ const CompanyTagView: React.FC = () => {
   return <>
     {contextHolder}
     <BasicTable
-      mode={["c", "d"]}
+      mode={["r", "c", "d"]}
       onAdd={onCompanyTagAdd}
       onDelete={onCompanyTagDelete}
       ref={tableRef}
@@ -170,8 +170,8 @@ const CompanyTagView: React.FC = () => {
           return CompanyApi.searchCompanyTag(searchParam);
         },
         convertToDataList: convertToCompanyTagDataList,
-        rowKeyFunction: (record) => { return record.companyId },
       }}
+      rowKeyFunction={(record) => { return record.companyId }}
       exportProps={{
         dataToExcelJSONArray: companyTagDataToExcelJSONArray,
         title: "公司标签"

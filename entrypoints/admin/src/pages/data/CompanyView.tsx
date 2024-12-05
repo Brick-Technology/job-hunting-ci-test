@@ -194,6 +194,7 @@ const CompanyView: React.FC = () => {
     {contextHolder}
     <BasicTable
       ref={tableRef}
+      mode={["r"]}
       searchProps={{
         columns,
         searchFields,

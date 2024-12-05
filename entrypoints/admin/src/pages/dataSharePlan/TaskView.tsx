@@ -197,6 +197,7 @@ const TaskView: React.FC = () => {
     return <>
         <BasicTable
             ref={tableRef}
+            mode={["r"]}
             searchProps={{
                 columns,
                 searchFields,

@@ -169,7 +169,7 @@ const JobTagView: React.FC = () => {
     {contextHolder}
     <BasicTable
       ref={tableRef}
-      mode={["c", "d"]}
+      mode={["r", "c", "d"]}
       onAdd={onJobTagAdd}
       onDelete={onJobTagDelete}
       searchProps={{
@@ -181,8 +181,8 @@ const JobTagView: React.FC = () => {
           return await JobApi.jobTagSearch(searchParam);
         },
         convertToDataList: convertToJobTagDataList,
-        rowKeyFunction: (record) => { return record.jobId },
       }}
+      rowKeyFunction={(record) => { return record.jobId }}
       exportProps={{
         dataToExcelJSONArray: jobTagDataToExcelJSONArray,
         title: "职位标签"

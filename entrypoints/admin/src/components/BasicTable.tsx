@@ -36,8 +36,8 @@ export type BasicTableProps = {
         convertSortField?: (key: any) => string,
         search: (searchParam) => Promise<any>,
         convertToDataList?: (data: any) => any,
-        rowKeyFunction?: (record) => string;
     },
+    rowKeyFunction?: (record) => string;
     expandedRowRender?: (record) => JSX.Element,
     exportProps?: {
         dataToExcelJSONArray: (originalData: any) => any,
@@ -46,12 +46,13 @@ export type BasicTableProps = {
     mode?: Array<"c" | "r" | "u" | "d">,
     onAdd?: () => void,
     onDelete?: (keys: React.Key[]) => void,
+    additionMenu?: JSX.Element,
 }
 
 const BasicTable = forwardRef(function Component(props: BasicTableProps, ref) {
-    const { searchProps, expandedRowRender, exportProps, mode, onAdd, onDelete } = props;
+    const { searchProps, expandedRowRender, exportProps, mode, onAdd, onDelete, rowKeyFunction, additionMenu } = props;
 
-    const { columns, searchFields, fillSearchParam, convertSortField, search, convertToDataList, rowKeyFunction } = searchProps;
+    const { columns, searchFields, fillSearchParam, convertSortField, search, convertToDataList } = searchProps;
     const { dataToExcelJSONArray, title } = exportProps || {};
 
     const [dataSource, setDataSource] = useState<any>();
@@ -181,17 +182,20 @@ const BasicTable = forwardRef(function Component(props: BasicTableProps, ref) {
     return <>
         <Flex vertical>
             <Space size="small" direction="vertical">
-                <Form form={form} name="advanced_search" style={{
+                {mode?.length > 0 ? <Form form={form} name="advanced_search" style={{
                     maxWidth: 'none',
                     background: token.colorFillAlter,
                     borderRadius: token.borderRadiusLG,
                     padding: 10,
                 }} onFinish={onFinish}>
-                    <Row gutter={24}>{createSearchField()}</Row>
+                    <Row gutter={24}>{mode?.includes("r") ? createSearchField() : null}</Row>
                     <div style={{ textAlign: 'right' }}>
                         <Space size="small">
+                            <Flex>
+                                {additionMenu ? additionMenu : null}
+                            </Flex>
                             {mode?.includes("c") ?
-                                <Button type="primary" onClick={async () => {
+                                <Button type="primary" loading={addLoading} onClick={async () => {
                                     if (onAdd) {
                                         try {
                                             setAddLoading(true);
@@ -231,29 +235,33 @@ const BasicTable = forwardRef(function Component(props: BasicTableProps, ref) {
                             {exportProps ? <Button type="dashed" loading={exportLoading} onClick={exportData}>
                                 导出
                             </Button> : null}
-                            <Button type="primary" htmlType="submit">
-                                查询
-                            </Button>
-                            <Button
-                                onClick={() => {
-                                    form.resetFields();
-                                }}
-                            >
-                                清除
-                            </Button>
-                            {
-                                searchFields.expand && searchFields.expand.length > 0 ? <a
-                                    style={{ fontSize: 12 }}
-                                    onClick={() => {
-                                        setExpand(!expand);
-                                    }}
-                                >
-                                    <DownOutlined rotate={expand ? 180 : 0} /> 折叠
-                                </a> : null
-                            }
+                            {mode?.includes("r") ?
+                                <>
+                                    <Button type="primary" htmlType="submit">
+                                        查询
+                                    </Button>
+                                    <Button
+                                        onClick={() => {
+                                            form.resetFields();
+                                        }}
+                                    >
+                                        清除
+                                    </Button>
+                                    {
+                                        searchFields.expand && searchFields.expand.length > 0 ? <a
+                                            style={{ fontSize: 12 }}
+                                            onClick={() => {
+                                                setExpand(!expand);
+                                            }}
+                                        >
+                                            <DownOutlined rotate={expand ? 180 : 0} /> 折叠
+                                        </a> : null
+                                    }
+                                </> : null}
                         </Space>
                     </div>
                 </Form>
+                    : null}
                 <Table<any>
                     rowKey={rowKeyFunction ? (record) => {
                         return rowKeyFunction(record);

@@ -1,4 +1,5 @@
 import { JobApi, TagApi } from "@/common/api";
+import { JobTagBO } from "@/common/data/bo/jobTagBO";
 import { jobDataToExcelJSONArray } from "@/common/excel";
 import { dateToStr } from "@/common/utils";
 import {
@@ -19,11 +20,10 @@ import BasicTable from "../../components/BasicTable";
 import JobItemTable from "../../components/JobItemTable";
 import { CompanyData } from "../../data/CompanyData";
 import { JobData } from "../../data/JobData";
-import { useJob } from "../../hooks/job";
 import { JobTagEditData } from "../../data/JobTagEditData";
 import { WhitelistData } from "../../data/WhitelistData";
+import { useJob } from "../../hooks/job";
 import JobTagEdit from "./JobTagEdit";
-import { JobTagBO } from "@/common/data/bo/jobTagBO";
 
 const { RangePicker } = DatePicker;
 const { Text } = Typography;
@@ -278,6 +278,7 @@ const JobView: React.FC = () => {
     {contextHolder}
     <BasicTable
       ref={tableRef}
+      mode={["r"]}
       searchProps={{
         columns,
         searchFields,
