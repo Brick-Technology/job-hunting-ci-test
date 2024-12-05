@@ -88,6 +88,8 @@ const BbsView: React.FC = () => {
         if (configValue && configValue.value) {
           let config = JSON.parse(configValue.value);
           setSelection(config.location)
+        } else {
+          setSelection(["北京市"])
         }
       } catch (e) {
         errorLog(e);
