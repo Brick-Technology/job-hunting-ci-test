@@ -1,5 +1,21 @@
 import { genRangeDate } from "@/common/utils";
 import { SeriesData, StackBarData } from "../data/chart/StackBarData";
+import {
+    TASK_STATUS_CANCEL,
+    TASK_STATUS_ERROR,
+    TASK_STATUS_FINISHED,
+    TASK_STATUS_FINISHED_BUT_ERROR,
+    TASK_STATUS_READY, TASK_STATUS_RUNNING,
+    TASK_TYPE_COMPANY_DATA_DOWNLOAD,
+    TASK_TYPE_COMPANY_DATA_MERGE,
+    TASK_TYPE_COMPANY_DATA_UPLOAD,
+    TASK_TYPE_COMPANY_TAG_DATA_DOWNLOAD,
+    TASK_TYPE_COMPANY_TAG_DATA_MERGE,
+    TASK_TYPE_COMPANY_TAG_DATA_UPLOAD,
+    TASK_TYPE_JOB_DATA_DOWNLOAD,
+    TASK_TYPE_JOB_DATA_MERGE,
+    TASK_TYPE_JOB_DATA_UPLOAD
+} from "@/common";
 
 export function useDataSharePlan() {
 
@@ -77,9 +93,105 @@ export function useDataSharePlan() {
         }
     }
 
+    const typeWhitelist = [
+        { value: "职位数据上传", code: TASK_TYPE_JOB_DATA_UPLOAD },
+        { value: "公司数据上传", code: TASK_TYPE_COMPANY_DATA_UPLOAD },
+        { value: "公司标签数据上传", code: TASK_TYPE_COMPANY_TAG_DATA_UPLOAD },
+        { value: "职位数据下载", code: TASK_TYPE_JOB_DATA_DOWNLOAD },
+        { value: "公司数据下载", code: TASK_TYPE_COMPANY_DATA_DOWNLOAD },
+        { value: "公司标签数据下载", code: TASK_TYPE_COMPANY_TAG_DATA_DOWNLOAD },
+        { value: "职位数据合并", code: TASK_TYPE_JOB_DATA_MERGE },
+        { value: "公司数据合并", code: TASK_TYPE_COMPANY_DATA_MERGE },
+        { value: "公司标签数据合并", code: TASK_TYPE_COMPANY_TAG_DATA_MERGE },
+    ];
+
+    const taskCodeNameMap = new Map();
+    typeWhitelist.forEach((item) => {
+        taskCodeNameMap.set(item.code, item.value);
+    });
+
+    const taskFormat = (value: string) => {
+        if (taskCodeNameMap.has(value)) {
+            return taskCodeNameMap.get(value);
+        } else {
+            return value;
+        }
+    }
+
+    const statusWhitelist = [
+        { value: "准备", code: TASK_STATUS_READY },
+        { value: "运行中", code: TASK_STATUS_RUNNING },
+        { value: "完成", code: TASK_STATUS_FINISHED },
+        { value: "异常完成", code: TASK_STATUS_FINISHED_BUT_ERROR },
+        { value: "错误", code: TASK_STATUS_ERROR },
+        { value: "取消", code: TASK_STATUS_CANCEL }
+    ];
+
+    const statusCodeNameMap = new Map();
+    statusWhitelist.forEach((item) => {
+        statusCodeNameMap.set(item.code, item.value);
+    });
+
+    const statusFormat = (value: string) => {
+        if (statusCodeNameMap.has(value)) {
+            return statusCodeNameMap.get(value);
+        } else {
+            return value;
+        }
+    }
+
+    const getColorForStatus = (value: string): string => {
+        switch (value) {
+            case TASK_STATUS_READY:
+                return "#73c0de";
+            case TASK_STATUS_RUNNING:
+                return "#5470c6";
+            case TASK_STATUS_FINISHED:
+                return "#91cc75";
+            case TASK_STATUS_FINISHED_BUT_ERROR:
+                return "#fac858";
+            case TASK_STATUS_ERROR:
+                return "#ee6666";
+            default:
+                return "#111111";
+        }
+    }
+
+    const getIconStringForStatus = (value: string) => {
+        switch (value) {
+            case TASK_STATUS_READY:
+                return "arcticons:ready-for";
+            case TASK_STATUS_RUNNING:
+                return "mdi:play";
+            case TASK_STATUS_FINISHED:
+                return "mdi:success-circle";
+            case TASK_STATUS_FINISHED_BUT_ERROR:
+                return "mdi:alert-circle-success";
+            case TASK_STATUS_ERROR:
+                return "ix:error-filled";
+            default:
+                return "";
+        }
+    }
+
+    const isDownloadType = (value: string) => {
+        return value == TASK_TYPE_JOB_DATA_DOWNLOAD || value == TASK_TYPE_COMPANY_DATA_DOWNLOAD || value == TASK_TYPE_COMPANY_TAG_DATA_DOWNLOAD;
+    }
+
+    const isUploadType = (value: string) => {
+        return value == TASK_TYPE_JOB_DATA_UPLOAD || value == TASK_TYPE_COMPANY_DATA_UPLOAD || value == TASK_TYPE_COMPANY_TAG_DATA_UPLOAD;
+    }
+
+    const isMergeType = (value: string) => {
+        return value == TASK_TYPE_JOB_DATA_MERGE || value == TASK_TYPE_COMPANY_DATA_MERGE || value == TASK_TYPE_COMPANY_TAG_DATA_MERGE;
+    };
+
     return {
         convertToChartData, convertUploadName, convertStatusName,
-        STATUS_COLOR_OBJECT, STATUS_NAME_OBJECT, UPLOAD_NAME_OBJECT
+        STATUS_COLOR_OBJECT, STATUS_NAME_OBJECT, UPLOAD_NAME_OBJECT,
+        typeWhitelist, taskFormat, statusWhitelist, statusFormat,
+        getColorForStatus, getIconStringForStatus,
+        isDownloadType, isUploadType, isMergeType
     }
 
 }

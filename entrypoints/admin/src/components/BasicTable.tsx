@@ -33,13 +33,13 @@ export type BasicTableProps = {
             expand?: JSX.Element[]
         },
         fillSearchParam: (searchParam, values: any) => any,
-        convertSortField: (key: any) => string,
+        convertSortField?: (key: any) => string,
         search: (searchParam) => Promise<any>,
-        convertToDataList: (data: any) => any,
+        convertToDataList?: (data: any) => any,
         rowKeyFunction?: (record) => string;
     },
     expandedRowRender?: (record) => JSX.Element,
-    exportProps: {
+    exportProps?: {
         dataToExcelJSONArray: (originalData: any) => any,
         title: string,
     }
@@ -52,7 +52,7 @@ const BasicTable = forwardRef(function Component(props: BasicTableProps, ref) {
     const { searchProps, expandedRowRender, exportProps, mode, onAdd, onDelete } = props;
 
     const { columns, searchFields, fillSearchParam, convertSortField, search, convertToDataList, rowKeyFunction } = searchProps;
-    const { dataToExcelJSONArray, title } = exportProps;
+    const { dataToExcelJSONArray, title } = exportProps || {};
 
     const [dataSource, setDataSource] = useState<any>();
     const [originalData, setOriginalData] = useState();
@@ -94,7 +94,7 @@ const BasicTable = forwardRef(function Component(props: BasicTableProps, ref) {
         (async () => {
             setLoading(true);
             let searchResult = await search(searchParam);
-            setDataSource(convertToDataList(searchResult.items));
+            setDataSource(convertToDataList ? convertToDataList(searchResult.items) : searchResult.items);
             setOriginalData(searchResult.items);
             setLoading(false);
             tableParams.pagination.total = searchResult.total;
@@ -114,7 +114,7 @@ const BasicTable = forwardRef(function Component(props: BasicTableProps, ref) {
     const handleTableChange: TableProps<any>['onChange'] = (pagination, filters, sorter) => {
         searchParam.pageNum = pagination.current;
         searchParam.pageSize = pagination.pageSize;
-        if (tableParams.sortField && tableParams.sortOrder) {
+        if (tableParams.sortField && tableParams.sortOrder && convertSortField) {
             searchParam.orderByColumn = convertSortField(tableParams.sortField);
             if (tableParams.sortOrder === "descend") {
                 searchParam.orderBy = "DESC";
@@ -228,9 +228,9 @@ const BasicTable = forwardRef(function Component(props: BasicTableProps, ref) {
                                 </Popconfirm>
                                 : null
                             }
-                            <Button type="dashed" loading={exportLoading} onClick={exportData}>
+                            {exportProps ? <Button type="dashed" loading={exportLoading} onClick={exportData}>
                                 导出
-                            </Button>
+                            </Button> : null}
                             <Button type="primary" htmlType="submit">
                                 查询
                             </Button>
