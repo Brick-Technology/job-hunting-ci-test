@@ -1,5 +1,5 @@
-import { create } from 'zustand'
 import { AuthApi, UserApi } from "@/common/api";
+import { create } from 'zustand';
 
 interface AuthState {
     auth: boolean,
@@ -8,6 +8,7 @@ interface AuthState {
     init: () => Promise<void>,
     login: () => Promise<void>,
     logout: () => Promise<void>,
+    installAndLogin: () => Promise<void>,
 }
 
 const useAuthStore = create<AuthState>()((set) => {
@@ -35,6 +36,10 @@ const useAuthStore = create<AuthState>()((set) => {
         logout: async () => {
             await AuthApi.authSetToken(null);
             await UserApi.userSet(null);
+            await _init();
+        },
+        installAndLogin: async () => {
+            await AuthApi.authInstallAndLogin();
             await _init();
         },
     }
