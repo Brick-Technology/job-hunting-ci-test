@@ -1,13 +1,16 @@
 import { ShareAltOutlined, UserOutlined } from '@ant-design/icons';
-import { Avatar, Flex, Popconfirm, Tooltip, Typography } from 'antd';
+import { Avatar, Flex, message, Modal, Popconfirm, Tag, Tooltip, Typography } from 'antd';
 import React from 'react';
 import styles from "./HeaderRight.module.css";
 const { Text } = Typography;
 
+import { Icon } from '@iconify/react';
 import Link from 'antd/es/typography/Link';
+import Markdown from 'marked-react';
 import { useShallow } from 'zustand/shallow';
 import useAuthStore from "../store/AuthStore";
 import useDataSharePlanStore from '../store/DataSharePlanStore';
+import useSystemStore from '../store/SystemStore';
 const HeaderRight: React.FC = () => {
 
     const [auth, login, logout, username, avatar] = useAuthStore(useShallow(((state) => [
@@ -22,13 +25,33 @@ const HeaderRight: React.FC = () => {
         state.enable,
     ])));
 
+    const [versionObject, newVersion, latestVersion, latestVersionCreatedAt, latestChangelogContent, query, downloadLatest] = useSystemStore(useShallow((state => [
+        state.versionObject,
+        state.newVersion,
+        state.latestVersion,
+        state.latestVersionCreatedAt,
+        state.latestChangelogContent,
+        state.query,
+        state.downloadLatest,
+    ])));
+
+    const [isLatestChangelogContentModalOpen, setIsLatestChangelogContentModalOpen] = useState(false);
+    const [messageApi, contextHolder] = message.useMessage();
+
+    useEffect(() => {
+        query();
+    }, [])
+
     return (
         <Flex gap="small" align="center" className={styles.root}>
-            <Flex gap={5} align="end" vertical>
-                <Flex>
-                    <></>
+            {contextHolder}
+            <Flex gap={5} vertical>
+                <Flex justify="end">
+                    {newVersion ? <Tag style={{ cursor: "pointer" }} onClick={() => {
+                        setIsLatestChangelogContentModalOpen(true);
+                    }} color="yellow"><Flex align="center"><Icon icon="mdi:arrow-up-bold-box"></Icon>发现新版本</Flex></Tag> : null}
                 </Flex>
-                <Flex>
+                <Flex justify="end">
                     {
                         enable ? <Tooltip color="green" title="数据共享计划：开启"><ShareAltOutlined style={{ color: "green", fontSize: "18px" }} /></Tooltip>
                             : null
@@ -53,6 +76,27 @@ const HeaderRight: React.FC = () => {
                     login();
                 }} size="large" icon={auth ? <UserOutlined /> : null} src={auth ? avatar : null} />
             }
+            <Modal
+                title={`新版本详情[${latestVersion}]${latestVersionCreatedAt}`}
+                width="80%"
+                destroyOnClose
+                open={isLatestChangelogContentModalOpen}
+                onCancel={() => {
+                    setIsLatestChangelogContentModalOpen(false);
+                }}
+                okText="下载新版本"
+                onOk={() => {
+                    try {
+                        downloadLatest(versionObject);
+                    } catch (e) {
+                        messageApi.error(e);
+                    }
+                }}
+            >
+                <Markdown>
+                    {latestChangelogContent}
+                </Markdown>
+            </Modal>
         </Flex>
     );
 };

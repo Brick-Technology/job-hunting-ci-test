@@ -1,5 +1,4 @@
 import { APP_ID } from "@/common/config";
-import { dateToStr } from "@/common/utils";
 import { CheckCard } from '@ant-design/pro-components';
 import { Icon } from '@iconify/react';
 import { Button, Card, Flex, Modal, Tooltip, Typography, message } from 'antd';
@@ -7,9 +6,9 @@ import Markdown from "marked-react";
 import React from 'react';
 import { useShallow } from 'zustand/shallow';
 import { useData } from '../hooks/data';
-import { useSystem } from "../hooks/system";
 import useAuthStore from '../store/AuthStore';
 import useDataSharePlanStore from '../store/DataSharePlanStore';
+import useSystemStore from "../store/SystemStore";
 import DataBackupRestore from './setting/DataBackupRestore';
 import DatabaseBackupRestore from './setting/DatabaseBackupRestore';
 const { Text, Link } = Typography;
@@ -37,18 +36,20 @@ const SettingView: React.FC = () => {
   const [changelogContent, setChangelogContent] = useState("");
   const [isLicenseModalOpen, setIsLicenseModalOpen] = useState(false);
   const [licenseContent, setLicenseContent] = useState("");
-  const { queryVersion, checkNewVersion, downloadLatest } = useSystem();
-
-  const [versionObject, setVersionObject] = useState();
   const [versionChecking, setVersionChecking] = useState(false);
   const [checkingVersionText, setCheckingVersionText] = useState("");
-  const [newVersion, setNewVersion] = useState(false);
-  const [latestVersion, setLatestVersion] = useState("");
-  const [latestVersionCreatedAt, setLatestVersionCreatedAt] = useState("");
-  const [latestChangelogContent, setLatestChangelogContent] = useState("");
   const [isLatestChangelogContentModalOpen, setIsLatestChangelogContentModalOpen] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
   const [refreshCheckVersion, setRefreshCheckVersion] = useState(false);
+  const [versionObject, newVersion, latestVersion, latestVersionCreatedAt, latestChangelogContent, query, downloadLatest] = useSystemStore(useShallow((state => [
+    state.versionObject,
+    state.newVersion,
+    state.latestVersion,
+    state.latestVersionCreatedAt,
+    state.latestChangelogContent,
+    state.query,
+    state.downloadLatest,
+  ])));
 
   useEffect(() => {
     setDataSharePlanEnable(enable);
@@ -62,24 +63,11 @@ const SettingView: React.FC = () => {
     setVersionChecking(true);
     setCheckingVersionText("正检查新版本");
     try {
-      await checkVersion();
+      await query();
       setCheckingVersionText("已是最新版本，点击再检查");
       setVersionChecking(false);
     } catch (e) {
       setCheckingVersionText("版本检查失败，请点击再次检查");
-    }
-  }
-
-  const checkVersion = async () => {
-    try {
-      const versionObject = await queryVersion();
-      setVersionObject(versionObject);
-      setNewVersion(checkNewVersion(versionObject));
-      setLatestVersion(versionObject.tag_name);
-      setLatestVersionCreatedAt(versionObject.created_at);
-      setLatestChangelogContent(versionObject.body);
-    } catch (e) {
-      throw e;
     }
   }
 
@@ -153,7 +141,7 @@ const SettingView: React.FC = () => {
             <Text type="success">版本 {version}</Text>
             {versionChecking ? <Text type="secondary">{checkingVersionText}</Text> : <>
               {newVersion ? <Flex gap={10}>
-                <Text type="warning">发现新版本[{latestVersion}]{dateToStr(latestVersionCreatedAt, "YYYY-MM-DD")}</Text>
+                <Text type="warning">发现新版本[{latestVersion}]{latestVersionCreatedAt}</Text>
                 <Button type="primary" size="small" onClick={() => {
                   setIsLatestChangelogContentModalOpen(true);
                 }}>查看新版本详情</Button>

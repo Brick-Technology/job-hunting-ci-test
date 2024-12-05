@@ -1,8 +1,20 @@
 import { GithubApi } from "@/common/api/github";
+import { dateToStr } from "@/common/utils";
 import semver from "semver";
+import { create } from 'zustand';
 const version = __APP_VERSION__;
 
-export function useSystem() {
+interface SystemState {
+    versionObject: any,
+    newVersion: boolean,
+    latestVersion: string,
+    latestVersionCreatedAt: string,
+    latestChangelogContent: string,
+    query: () => Promise<void>,
+    downloadLatest: (value: any) => Promise<void>,
+}
+
+const useSystemStore = create<SystemState>()((set) => {
 
     const queryVersion = async () => {
         return await GithubApi.queryVersion();
@@ -33,6 +45,19 @@ export function useSystem() {
         }
     }
 
-    return { queryVersion, checkNewVersion, getLatestAssets, downloadLatest }
+    return {
+        query: async () => {
+            const versionObject = await queryVersion();
+            set(() => ({
+                versionObject,
+                newVersion: checkNewVersion(versionObject),
+                latestVersion: versionObject.tag_name,
+                latestVersionCreatedAt: dateToStr(versionObject.created_at, "YYYY-MM-DD"),
+                latestChangelogContent: versionObject.body,
+            }));
+        },
+        downloadLatest,
+    }
+})
 
-}
+export default useSystemStore;
