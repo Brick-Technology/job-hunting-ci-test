@@ -11,6 +11,8 @@ import { useShallow } from 'zustand/shallow';
 import useAuthStore from "../store/AuthStore";
 import useDataSharePlanStore from '../store/DataSharePlanStore';
 import useSystemStore from '../store/SystemStore';
+import { convertToAbbreviation } from "@/common/utils";
+
 const HeaderRight: React.FC = () => {
 
     const [auth, login, logout, username, avatar] = useAuthStore(useShallow(((state) => [
@@ -25,15 +27,37 @@ const HeaderRight: React.FC = () => {
         state.enable,
     ])));
 
-    const [versionObject, newVersion, latestVersion, latestVersionCreatedAt, latestChangelogContent, query, downloadLatest] = useSystemStore(useShallow((state => [
-        state.versionObject,
-        state.newVersion,
-        state.latestVersion,
-        state.latestVersionCreatedAt,
-        state.latestChangelogContent,
-        state.query,
-        state.downloadLatest,
-    ])));
+    const [versionObject,
+        newVersion,
+        latestVersion,
+        latestVersionCreatedAt,
+        latestChangelogContent,
+        query,
+        downloadLatest] = useSystemStore(useShallow((state => [
+            state.versionObject,
+            state.newVersion,
+            state.latestVersion,
+            state.latestVersionCreatedAt,
+            state.latestChangelogContent,
+            state.query,
+            state.downloadLatest,
+        ])));
+
+    const [dataSharePartnerCount,
+        uploadRecordTotalCountToday,
+        downloadFileTotalCountToday,
+        mergeRecordTotalCountToday,
+        uploadRecordTotalCountAll,
+        downloadFileTotalCountAll,
+        mergeRecordTotalCountAll,] = useDataSharePlanStore(useShallow((state => [
+            state.dataSharePartnerCount,
+            state.uploadRecordTotalCountToday,
+            state.downloadFileTotalCountToday,
+            state.mergeRecordTotalCountToday,
+            state.uploadRecordTotalCountAll,
+            state.downloadFileTotalCountAll,
+            state.mergeRecordTotalCountAll,
+        ])));
 
     const [isLatestChangelogContentModalOpen, setIsLatestChangelogContentModalOpen] = useState(false);
     const [messageApi, contextHolder] = message.useMessage();
@@ -53,7 +77,37 @@ const HeaderRight: React.FC = () => {
                 </Flex>
                 <Flex justify="end">
                     {
-                        enable ? <Tooltip color="green" title="数据共享计划：开启"><ShareAltOutlined style={{ color: "green", fontSize: "18px" }} /></Tooltip>
+                        enable ?
+                            <Flex gap={5}>
+                                <Tooltip color="green" title="数据共享计划：开启"><ShareAltOutlined style={{ color: "green", fontSize: "18px" }} /></Tooltip>
+                                <Flex gap={5}>
+                                    <Tooltip title="上传记录数[今天/总计]">
+                                        <Tag className={styles.tag} ><Icon icon="material-symbols:cloud-upload" /> {
+                                            convertToAbbreviation(uploadRecordTotalCountToday) ?? '-'}/{
+                                                convertToAbbreviation(uploadRecordTotalCountAll) ?? '-'}
+                                        </Tag>
+                                    </Tooltip>
+                                    <Tooltip title="下载文件数[今天/总计)]">
+                                        <Tag className={styles.tag}>
+                                            <Icon icon="material-symbols:cloud-download" />{
+                                                convertToAbbreviation(downloadFileTotalCountToday) ?? '-'}/{
+                                                convertToAbbreviation(downloadFileTotalCountAll) ?? '-'}
+                                        </Tag>
+                                    </Tooltip>
+                                    <Tooltip title="合并记录数[今天/总计]">
+                                        <Tag className={styles.tag}>
+                                            <Icon icon="material-symbols:merge" />{
+                                                convertToAbbreviation(mergeRecordTotalCountToday) ?? '-'}/{
+                                                convertToAbbreviation(mergeRecordTotalCountAll) ?? '-'}
+                                        </Tag>
+                                    </Tooltip>
+                                    <Tooltip title="伙伴数">
+                                        <Tag className={styles.tag}>
+                                            <Icon icon="carbon:partnership" />{dataSharePartnerCount}
+                                        </Tag>
+                                    </Tooltip>
+                                </Flex>
+                            </Flex>
                             : null
                     }
                 </Flex>

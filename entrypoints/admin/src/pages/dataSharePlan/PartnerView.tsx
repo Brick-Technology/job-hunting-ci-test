@@ -27,7 +27,6 @@ const fillSearchParam = (searchParam, values) => {
         searchParam.startDatetimeForUpdate = null;
         searchParam.endDatetimeForUpdate = null;
     }
-    console.log(values)
 }
 
 const PartnerView: React.FC = () => {

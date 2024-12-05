@@ -36,6 +36,8 @@ export const TASK_LOOP_DELAY = 30000;//ms
 
 //图表刷新间隔
 export const CHARTS_LOOP_DELAY = 5000;//ms
+//全局统计间隔
+export const GLOBAL_STATISTIC_LOOP_DELAY = 30000;//ms
 
 export const CONFIG_KEY_DATA_SHARE_PLAN = "CONFIG_KEY_DATA_SHARE_PLAN";
 export const DEFAULT_REPO_TYPE = "GITHUB";
