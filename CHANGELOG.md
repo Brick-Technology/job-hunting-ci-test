@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## WIP
+## 2.0.0(2024-12-06)
 
 ### 💣 BREAKING CHANGES
 
