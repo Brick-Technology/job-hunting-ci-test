@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## WIP
+
+### 💣 BREAKING CHANGES
+
+1. Dev framework switch to WXT
+2. Switch admin page js framework from Vue3 to ReactJS
+3. Change UI Design
+
 ## 1.32.2(2024-11-29)
 
 ### ✏️ Changed

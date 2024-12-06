@@ -1,0 +1,16 @@
+.companyLogo {
+  width: 50px;
+  height: 50px;
+}
+.cardItem {
+  height: 120px;
+}
+.cardLabel{
+  margin-top:5px;
+}
+.flexCenter {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+

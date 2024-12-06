@@ -2,22 +2,9 @@
 
 ## What's in this directory
 
-``` text
-├─ dist-chrome                              // build result folder for chrome
-├─ dist-firefox                             // build result folder for firefox
-├─ docs                                     // readme resource folder
-├─ public                                   // public folder,not compile,just copy to build floder
-│  └─ icons                                 // logo
-│  └─ app.css                               // inject to target web page
-│  └─ proxyAjax.js                          // replace original XMLHttpRequest,hack the web page request
-├─ src                                      // source
-│  └─ background                            // backgournd
-│  └─ common                                // common folder,include api,data,util,log...
-│  └─ contentScript                         // content script
-│  └─ offscreen                             // database,using worker
-│  └─ sidepanel                             // admin page
-│  └─ manifest.json                         // manifest file
-```
+> The **common** folder is custom folder which is share code for all framework(include pure javascript).
+
+Refer to [wxt-project-structure](https://wxt.dev/guide/essentials/project-structure.html) to get started.
 
 ## Test the extension
 
@@ -25,7 +12,7 @@
 2. Open [chrome://extensions](chrome://extensions).
 3. Enable developer mode (top right of page).
 4. Click "Load unpacked extension" (top left page).
-5. Select dist directory.
+5. Select .output/chrome-mv3 directory.
 
 ## Bundle the extension
 
@@ -34,4 +21,4 @@ To package the source code into static files for the Chrome webstore, execute `p
 ## Documentation
 
 Refer to [the Chrome developer documentation](https://developer.chrome.com/docs/extensions/mv3/getstarted/) to get started.
-Refer to [Vite Plugin Web Extension](https://github.com/aklinker1/vite-plugin-web-extension) to get started.
+Refer to [WXT](https://github.com/wxt-dev/wxt) to get started.
