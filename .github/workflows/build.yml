@@ -35,20 +35,20 @@ jobs:
       - name: Package
         run: |
           pnpm install
-          pnpm run build-chrome
-          pnpm run build-firefox
+          pnpm run build
+          pnpm run build:firefox
 
       - name: Deploy chrome dist branch
         uses: JamesIves/github-pages-deploy-action@4.1.4
         with:
           branch: dist/chrome-${{  github.ref_name }}
-          folder: dist-chrome
+          folder: .output/chrome-mv3
 
       - name: Deploy firefox dist branch
         uses: JamesIves/github-pages-deploy-action@4.1.4
         with:
           branch: dist/firefox-${{  github.ref_name }}
-          folder: dist-firefox
+          folder: .output/firefox-mv2
       
       - name: Gen latest changelog
         if: startsWith(github.ref, 'refs/tags/')
@@ -58,8 +58,8 @@ jobs:
       - name: Rename dist
         if: startsWith(github.ref, 'refs/tags/')
         run: |
-          mv dist-chrome job-hunting-extension-chrome-${{  github.ref_name }}
-          mv dist-firefox job-hunting-extension-firefox-${{  github.ref_name }}
+          mv .output/chrome-mv3 job-hunting-extension-chrome-${{  github.ref_name }}
+          mv .output/firefox-mv2 job-hunting-extension-firefox-${{  github.ref_name }}
 
       - name: Zip chrome dist
         uses: montudor/action-zip@v1

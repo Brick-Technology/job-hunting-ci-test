@@ -2,7 +2,7 @@
     <img width="180" src="docs\logo.svg" alt="Vite logo">
 </p>
 
-# Job Hunting - 一款协助找工作的浏览器插件
+# Job Hunting(职位猎人) - 一款协助找工作的浏览器插件
 
 [![build](https://github.com/lastsunday/job-hunting/actions/workflows/build.yml/badge.svg)](https://github.com/lastsunday/job-hunting/actions/workflows/build.yml)
 
@@ -26,38 +26,48 @@
 
 ## 功能列表
 
-1. 显示职位发布时间与自动排序(按职位发布时间,hr 活跃时间（只支持 BOSS）)。
-2. 快捷查询公司信息 🔎（互联网渠道，政府渠道）。
-3. 自动检测公司风评 📡，当前支持：若比邻黑名单，互联网企业黑名单，IT黑名单，信用中国(北京)黑名单。
-4. 自动快速查询公司信息并保存到数据库（BOSS 直聘和猎聘网需手动点击查询）。
-5. 自动查询官网可达性，建站时间和备案信息。
-6. 本地显示职位初次浏览时间，历史浏览次数，职位详情查看次数。
-7. 本地职位记录统计，查询，查询结果导出，地图模式。
-8. 数据备份，数据恢复。
-9. 职位评论，公司评论。（当前采用 GitHub Issues 作为评论平台，请遵守相关法律法规合法留言）
-10. 数据统计图表
-    1. 职位发布时间分析(按月)
-    2. 职位发布时间分析(按周)
-    3. 职位发布时间分析(按日)
-    4. 职位发布时间分析(按小时)
-    5. 职位发布平台分析
-    6. 公司成立年份分段分析
-    7. 公司社保人数分段分析
-    8. 根据指定搜索条件统计薪酬区间职位数（薪酬计算方式：(最低薪资+最高薪资)/2）
-    9. 数据共享任务（任务执行，数据上传，文件下载，数据合并）
-11. 公司自定义标签（可添加，修改，拖拽排序），内置外包公司标签数据，公司标签数据管理页面，公司标签数据导出，导入。
-12. 职位自定义标签（可添加，修改，拖拽排序），职位标签数据管理页面，职位标签数据导出，导入。
-13. 公司数据管理页面，公司数据导出，导入，地图模式。
-14. 增强爱企查企业搜索页面。（显示额外信息，公司数据同步，公司标签编辑）
-15. 首页展示最近查看职位以及在地图上显示，招聘网站和企业搜索网站的快捷入口。
-16. 讨论区板块，根据省市区区分。
-17. 个人助理，设置职位偏好，快速找到感兴趣的职位。
-18. 自动化任务，支持自动浏览职位搜索页。（前程无忧，BOSS直聘，智联招聘，拉勾网，猎聘网）
-19. 数据共享计划
-    1. 支持本地数据同步到GitHub仓库。
-    2. 从其他GitHub仓库同步数据到本地。
-    3. 管理数据共享计划伙伴列表。
-    4. 寻找数据共享计划伙伴。
+1. 招聘网站职位卡片
+
+   1. 显示职位发布时间与自动排序(按职位发布时间,hr 活跃时间（只支持 BOSS）)
+   2. 快捷查询公司信息 🔎（互联网渠道，政府渠道），自动查询官网可达性，建站时间和备案信息
+   3. 自动检测公司风评 📡，当前支持：若比邻黑名单，互联网企业黑名单，IT黑名单，信用中国(北京)黑名单
+   4. 自动快速查询公司信息（BOSS 直聘和猎聘网需手动点击查询）
+   5. 显示职位初次浏览时间，历史浏览次数，职位详情查看次数
+   6. 保存职位数据，公司数据到本地数据库
+   7. 职位评论，公司评论
+   8. 公司自定义标签，职位自定义标签（可添加，修改），内置外包公司标签数据
+
+2. 爱企查公司卡片
+
+   1. 显示额外信息
+   2. 保存公司数据到本地数据库
+   3. 公司标签编辑
+   4. 公司评论
+
+3. 管理页面
+
+   1. 首页展示招聘网站和企业搜索网站的快捷入口
+   2. 数据统计图表
+      1. 职位发布时间分析(按月)
+      2. 职位发布时间分析(按周)
+      3. 职位发布时间分析(按日)
+      4. 职位发布时间分析(按小时)
+      5. 职位发布平台分析
+      6. 公司成立年份分段分析
+      7. 公司社保人数分段分析
+      8. 数据共享任务（任务执行，数据上传，文件下载，数据合并）
+
+
+   3. 数据管理页面（职位，公司，职位标签，公司标签），数据导出，导入
+   4. 个人助理，设置职位偏好，快速找到感兴趣的职位
+   5. 自动化任务，支持自动浏览职位搜索页。（前程无忧，BOSS直聘，智联招聘，拉勾网，猎聘网）
+   6. 讨论区板块，根据省市区区分
+   7. 数据备份，数据恢复
+   8. 数据共享计划
+      1. 支持本地数据同步到GitHub仓库
+      2. 从其他GitHub仓库同步数据到本地
+      3. 管理数据共享计划伙伴列表
+      4. 寻找数据共享计划伙伴
 
 ## Road Map
 
@@ -91,13 +101,13 @@
   - [ ] 暗黑模式
 - [ ] 开发者模式
   - [ ] 批量删除issues
-  - [x] 流量监控
+  - [ ] 流量监控
 
 ## Browsers support
 
-| [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/edge/edge_48x48.png" alt="Edge" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)<br/> Edge | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/chrome/chrome_48x48.png" alt="Chrome" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)<br/>Chrome | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/firefox/firefox_48x48.png" alt="Firefox" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)<br/>Firefox |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Edge                                                                                                                                                                                                   | last version                                                                                                                                                                                                  | last version                                                                                                                                                                                                      |
+| [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/edge/edge_48x48.png" alt="Edge" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)<br/> Edge | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/chrome/chrome_48x48.png" alt="Chrome" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)<br/>Chrome |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| Edge                                                         | last version                                                 |
 
 ## 运行截图
 
@@ -124,19 +134,19 @@
 ### 数据共享计划
 
 <div style="margin-top:30px">
-    <img src="docs\introduction\chrome_extension_data_share_introduction.png" alt="chrome_extension_data_share_introduction" width="600px"/>
+    <img src="docs\introduction\chrome_extension_data_share_introduction.png" alt="chrome_extension_data_share_introduction" width="1000px"/>
 </div>
 
 <div style="margin-top:30px">
-    <img src="docs\introduction\chrome_extension_data_share_statistic.jpg" alt="chrome_extension_data_share_statistic" width="600px"/>
+    <img src="docs\introduction\chrome_extension_data_share_statistic.png" alt="chrome_extension_data_share_statistic" width="1000px"/>
 </div>
 
 <div style="margin-top:30px">
-    <img src="docs\introduction\chrome_extension_data_share_task.png" alt="chrome_extension_data_share_task" width="600px"/>
+    <img src="docs\introduction\chrome_extension_data_share_task.png" alt="chrome_extension_data_share_task" width="1000px"/>
 </div>
 
 <div style="margin-top:30px">
-    <img src="docs\introduction\chrome_extension_data_share_partner.png" alt="chrome_extension_data_share_partner" width="600px"/>
+    <img src="docs\introduction\chrome_extension_data_share_partner.png" alt="chrome_extension_data_share_partner" width="1000px"/>
 </div>
 
 ### 管理页面
@@ -144,68 +154,68 @@
 #### 打开管理页面
 
 <div style="margin-top:30px">
-    <img src="docs\introduction\chrome_extension_sidepanel_open.png" alt="chrome_extension_sidepanel_open" width="600px"/>
+    <img src="docs\introduction\chrome_extension_sidepanel_open.png" alt="chrome_extension_sidepanel_open" width="1000px"/>
 </div>
 
 #### 管理页面首页（需点击插件图标打开）
 
 <div style="margin-top:30px">
-    <img src="docs\introduction\sidepanel_admin_home.jpg" alt="sidepanel_admin_home" width="1000px"/>
+    <img src="docs\introduction\sidepanel_admin_home.png" alt="sidepanel_admin_home" width="1000px"/>
 </div>
 
 #### 个人助理
 
 <div style="margin-top:30px">
-    <img src="docs\introduction\sidepanel_admin_assistant.jpg" alt="sidepanel_admin_assistant" width="1000px"/>
-    <img src="docs\introduction\sidepanel_admin_assistant_favious_setting.jpg" alt="sidepanel_admin_favious_setting" width="1000px"/>
+    <img src="docs\introduction\sidepanel_admin_assistant.png" alt="sidepanel_admin_assistant" width="1000px"/>
+    <img src="docs\introduction\sidepanel_admin_assistant_favious_setting.png" alt="sidepanel_admin_favious_setting" width="1000px"/>
 </div>
 
 #### 自动化
 
 <div style="margin-top:30px">
-    <img src="docs\introduction\gif\sidepanel_admin_auto_mission.gif" alt="sidepanel_admin_auto_mission" width="1000px"/>
+    <img src="docs\introduction\sidepanel_admin_auto_mission.png" alt="sidepanel_admin_auto_mission" width="1000px"/>
 </div>
 
 #### 讨论区
 
 <div style="margin-top:30px">
-    <img src="docs\introduction\sidepanel_admin_comment.jpg" alt="sidepanel_admin_comment" width="1000px"/>
+    <img src="docs\introduction\sidepanel_admin_comment.png" alt="sidepanel_admin_comment" width="1000px"/>
 </div>
 
 #### 职位
 
 <div style="margin-top:30px">
-    <img src="docs\introduction\sidepanel_admin_job.jpg" alt="sidepanel_admin_job" width="1000px"/>
+    <img src="docs\introduction\sidepanel_admin_job.png" alt="sidepanel_admin_job" width="1000px"/>
 </div>
 
 #### 公司管理
 
 <div style="margin-top:30px">
-    <img src="docs\introduction\sidepanel_admin_company.jpg" alt="sidepanel_admin_company" width="1000px"/>
+    <img src="docs\introduction\sidepanel_admin_company.png" alt="sidepanel_admin_company" width="1000px"/>
 </div>
 
 #### 公司标签管理
 
 <div style="margin-top:30px">
-    <img src="docs\introduction\sidepanel_admin_company_tag.jpg" alt="sidepanel_admin_company_tag" width="1000px"/>
+    <img src="docs\introduction\sidepanel_admin_company_tag.png" alt="sidepanel_admin_company_tag" width="1000px"/>
 </div>
 
 #### 职位标签管理
 
 <div style="margin-top:30px">
-    <img src="docs\introduction\sidepanel_admin_job_tag.jpg" alt="sidepanel_admin_job_tag" width="1000px"/>
+    <img src="docs\introduction\sidepanel_admin_job_tag.png" alt="sidepanel_admin_job_tag" width="1000px"/>
 </div>
 
 #### 系统设置
 
 <div style="margin-top:30px">
-    <img src="docs\introduction\sidepanel_admin_setting.jpg" alt="sidepanel_admin_setting" width="1000px"/>
+    <img src="docs\introduction\sidepanel_admin_setting.png" alt="sidepanel_admin_setting" width="1000px"/>
 </div>
 
 
 ## 运行及编译
 
-> 以chrome为例（firefox类似）
+> 以chrome为例
 
 **直接下载 1（尝鲜版）**
 
@@ -234,10 +244,10 @@
 
 ```bash
     pnpm i
-    pnpm run build-chrome
+    pnpm run build
 ```
 
-2. 打开 chrome，选择加载已解压的扩展程序，选择当前项目的 dist-chrome 目录
+2. 打开 chrome，选择加载已解压的扩展程序，选择当前项目的 .output/chrome-mv3 目录
 
 3. 打开页面
    - boss 直聘： <https://www.zhipin.com/web/geek/job>
@@ -253,14 +263,14 @@
 
    ```bash
    pnpm i
-   pnpm run dev-chrome
+   pnpm run dev
    ```
 
 2. chrome 浏览器打开 chrome://extensions/ 页面
 
 3. 点击`加载已解压的扩展程序`
 
-4. 选择项目中生成的 dist-chrome 文件夹即可
+4. 选择项目中生成的 .output/chrome-mv3 文件夹即可
 
 5. 每次保存都会重新编译，扩展程序需要**_重新点一次刷新按钮_**才生效
 
@@ -273,3 +283,5 @@
 5. <https://github.com/it-job-blacklist/996ICU.job.blacklist_company> **_主要城市996公司名单，互联网企业黑名单，找工作防止掉坑_**
 6. <http://www.blackdir.com> **_IT黑名单_**
 7. <https://www.reshot.com> **Free Icons & IllustrationsDesign freely with instant downloads and commercial licenses.**
+8. <https://github.com/wxt-dev/wxt> **Next-gen Web Extension Framework**
+9. <https://github.com/ant-design/ant-design> **An enterprise-class UI design language and React UI library**
