@@ -58,6 +58,7 @@ export default defineConfig({
       copyFileSync(resolve(srcDir, licenseName), resolve(outDir, licenseName));
       if (wxt.config.mode == 'production') {
         copyFileSync(resolve(srcDir, "node_modules", "@sqlite.org", "sqlite-wasm", "sqlite-wasm", "jswasm", "sqlite3.wasm"), resolve(outDir, "assets", "sqlite3.wasm"));
+        copyFileSync(resolve(srcDir, "node_modules", "@sqlite.org", "sqlite-wasm", "sqlite-wasm", "jswasm", "sqlite3-opfs-async-proxy.js"), resolve(outDir, "assets", "sqlite3-opfs-async-proxy.js"));
       }
     },
   },

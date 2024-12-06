@@ -428,7 +428,7 @@ export const Database = {
       let bytesToWrite = await oo.OpfsDb.importDb(JOB_DB_FILE_NAME, dbContent);
       postSuccessMessage(message, bytesToWrite);
     } catch (e) {
-      postErrorMessage(message, "[worker] dbExport error : " + e.message);
+      postErrorMessage(message, "[worker] dbImport error : " + e.message);
     }
   },
   /**
