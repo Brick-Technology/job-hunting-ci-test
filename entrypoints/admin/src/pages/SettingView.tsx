@@ -74,6 +74,66 @@ const SettingView: React.FC = () => {
   return <>
     {contextHolder}
     <Flex gap="small" wrap vertical>
+      <Card title="程序信息" bordered={false} size="small">
+        <Flex gap={10} vertical>
+          <Flex gap={10}>
+            <Text type="success">版本 {version}</Text>
+            {versionChecking ? <Text type="secondary">{checkingVersionText}</Text> : <>
+              {newVersion ? <Flex gap={10}>
+                <Text type="warning">发现新版本[{latestVersion}]{latestVersionCreatedAt}</Text>
+                <Button type="primary" size="small" onClick={() => {
+                  setIsLatestChangelogContentModalOpen(true);
+                }}>查看新版本详情</Button>
+                <Button type="primary" size="small" onClick={() => {
+                  try {
+                    downloadLatest(versionObject);
+                  } catch (e) {
+                    messageApi.error(e);
+                  }
+                }}><Icon icon="mdi:download" />下载新版本</Button>
+              </Flex> : <Text type="success" onClick={() => {
+                setRefreshCheckVersion(!refreshCheckVersion);
+              }}>已是最新版本</Text>}
+            </>}
+          </Flex>
+          <Flex gap={5}>
+            <Button onClick={() => {
+              setIsHowToUpdateModalOpen(true);
+            }}>
+              如何更新程序版本
+              <Icon icon="ph:question" />
+            </Button>
+            <Button onClick={async () => {
+              let changelogUrl = chrome.runtime.getURL("CHANGELOG.md");
+              setChangelogContent(await (await fetch(changelogUrl)).text());
+              setIsVersionDescModalOpen(true);
+            }}>
+              版本说明
+            </Button>
+            <Button onClick={async () => {
+              let licenseUrl = chrome.runtime.getURL("LICENSE");
+              setLicenseContent(await (await fetch(licenseUrl)).text());
+              setIsLicenseModalOpen(true);
+            }}>
+              许可证
+            </Button>
+            <Button onClick={async () => {
+              let packageUrl = chrome.runtime.getURL("package.json");
+              let packageObject = await (await fetch(packageUrl)).json();
+              window.open(packageObject.homepage);
+            }}>
+              访问主页
+            </Button>
+            <Button onClick={async () => {
+              let packageUrl = chrome.runtime.getURL("package.json");
+              let packageObject = await (await fetch(packageUrl)).json();
+              window.open(packageObject.bugs);
+            }}>
+              问题反馈
+            </Button>
+          </Flex>
+        </Flex >
+      </Card >
       <Card title="GitHub App" bordered={false} size="small">
         <Flex vertical gap={5}>
           <Flex>
@@ -135,66 +195,6 @@ const SettingView: React.FC = () => {
             saveDataFunction={saveCompanyTagData} />
         </Flex>
       </Card>
-      <Card title="程序信息" bordered={false} size="small">
-        <Flex gap={10} vertical>
-          <Flex gap={10}>
-            <Text type="success">版本 {version}</Text>
-            {versionChecking ? <Text type="secondary">{checkingVersionText}</Text> : <>
-              {newVersion ? <Flex gap={10}>
-                <Text type="warning">发现新版本[{latestVersion}]{latestVersionCreatedAt}</Text>
-                <Button type="primary" size="small" onClick={() => {
-                  setIsLatestChangelogContentModalOpen(true);
-                }}>查看新版本详情</Button>
-                <Button type="primary" size="small" onClick={() => {
-                  try {
-                    downloadLatest(versionObject);
-                  } catch (e) {
-                    messageApi.error(e);
-                  }
-                }}><Icon icon="mdi:download" />下载新版本</Button>
-              </Flex> : <Text type="success" onClick={() => {
-                setRefreshCheckVersion(!refreshCheckVersion);
-              }}>已是最新版本</Text>}
-            </>}
-          </Flex>
-          <Flex gap={5}>
-            <Button onClick={() => {
-              setIsHowToUpdateModalOpen(true);
-            }}>
-              如何更新程序版本
-              <Icon icon="ph:question" />
-            </Button>
-            <Button onClick={async () => {
-              let changelogUrl = chrome.runtime.getURL("CHANGELOG.md");
-              setChangelogContent(await (await fetch(changelogUrl)).text());
-              setIsVersionDescModalOpen(true);
-            }}>
-              版本说明
-            </Button>
-            <Button onClick={async () => {
-              let licenseUrl = chrome.runtime.getURL("LICENSE");
-              setLicenseContent(await (await fetch(licenseUrl)).text());
-              setIsLicenseModalOpen(true);
-            }}>
-              许可证
-            </Button>
-            <Button onClick={async () => {
-              let packageUrl = chrome.runtime.getURL("package.json");
-              let packageObject = await (await fetch(packageUrl)).json();
-              window.open(packageObject.homepage);
-            }}>
-              访问主页
-            </Button>
-            <Button onClick={async () => {
-              let packageUrl = chrome.runtime.getURL("package.json");
-              let packageObject = await (await fetch(packageUrl)).json();
-              window.open(packageObject.bugs);
-            }}>
-              问题反馈
-            </Button>
-          </Flex>
-        </Flex >
-      </Card >
     </Flex >
     <Modal
       title="如何更新程序版本"
