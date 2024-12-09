@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## WIP
+
+### ✏️ Changed
+
+1. 更新数据共享计划分析图表的布局。
+
+### 🔨 Dependency
+
+1. Add lit ^3.2.1
+2. Add @webcomponents/custom-elements ^1.6.0
+3. Add @unocss/preset-uno ^0.65.1
+4. Add @wxt-dev/unocss ^1.0.0
+5. Add unocss ^0.65.1
+
 ## 2.0.0(2024-12-06)
 
 ### 💣 BREAKING CHANGES

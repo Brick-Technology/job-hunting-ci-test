@@ -1,3 +1,4 @@
+import '@webcomponents/custom-elements';
 import { getBossData } from "./plantforms/boss/index.js";
 import { handleBossRecommendData } from "./plantforms/boss/recommend.js"
 import { getZhiLianData } from "./plantforms/zhilian/index.js";

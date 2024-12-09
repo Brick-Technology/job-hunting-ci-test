@@ -4,15 +4,21 @@
     "allowImportingTsExtensions": true,
     "jsx": "react-jsx",
     "target": "ESNext",
-    "useDefineForClassFields": true,
     "module": "ESNext",
     "moduleResolution": "Node",
+    //https://lit.dev/docs/components/decorators/#decorators-typescript
+    "experimentalDecorators": true,
+    "useDefineForClassFields": false,
     "strict": false,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "lib": ["DOM", "ESNext", "WebWorker"]
+    "lib": [
+      "DOM",
+      "ESNext",
+      "WebWorker"
+    ]
   }
 }

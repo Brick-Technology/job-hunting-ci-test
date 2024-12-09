@@ -89,16 +89,16 @@ const StatisticView: React.FC = () => {
             </Flex>
         </Form>
         <Row>
-            <Col xs={24} sm={24} md={12} lg={12} xl={8} xxl={6}>
+            <Col xs={24} sm={24} md={12} lg={12} xl={12} xxl={12}>
                 {chartTaskStatus ? <Card className={styles.chart} title="任务执行" size="small" bordered={true} ><TaskDataCountChart data={chartTaskStatus} /></Card> : null}
             </Col>
-            <Col xs={24} sm={24} md={12} lg={12} xl={8} xxl={6}>
+            <Col xs={24} sm={24} md={12} lg={12} xl={12} xxl={12}>
                 {chartUploadData ? <Card className={styles.chart} title="数据上传" size="small" bordered={true} ><TaskDataCountChart data={chartUploadData} /></Card> : null}
             </Col>
-            <Col xs={24} sm={24} md={12} lg={12} xl={8} xxl={6}>
+            <Col xs={24} sm={24} md={12} lg={12} xl={12} xxl={12}>
                 {chartDownloadData ? <Card className={styles.chart} title="文件下载" size="small" bordered={true} ><TaskDataCountChart data={chartDownloadData} /></Card> : null}
             </Col>
-            <Col xs={24} sm={24} md={12} lg={12} xl={8} xxl={6}>
+            <Col xs={24} sm={24} md={12} lg={12} xl={12} xxl={12}>
                 {chartMergeData ? <Card className={styles.chart} title="数据合并" size="small" bordered={true} ><TaskDataCountChart data={chartMergeData} /></Card> : null}
             </Col>
         </Row>

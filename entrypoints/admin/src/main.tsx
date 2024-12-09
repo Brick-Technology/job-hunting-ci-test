@@ -6,6 +6,7 @@ import { initBridge } from "@/common/api/common";
 import { ConfigProvider } from "antd";
 import zhCN from "antd/es/locale/zh_CN";
 import 'dayjs/locale/zh-cn';
+import 'uno.css';
 
 async function init() {
   await initBridge();
