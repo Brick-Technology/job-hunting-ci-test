@@ -7,10 +7,10 @@ import { defineConfig } from 'wxt';
 // See https://wxt.dev/api/config.html
 export default defineConfig({
   extensionApi: 'chrome',
-  modules: ['@wxt-dev/module-react', '@wxt-dev/unocss'],
+  modules: ['@wxt-dev/unocss','@wxt-dev/module-react'],
   unocss: {
     configOrPath: {
-      mode: 'shadow-dom',
+      // mode: 'shadow-dom',
     }
   },
   manifest: {
@@ -73,10 +73,7 @@ export default defineConfig({
         __APP_VERSION__: JSON.stringify(process.env.npm_package_version),
       },
       build: {
-        cssMinify: "lightningcss",
-        rollupOptions: {
-          external: ['uno.css'],
-        },
+        cssMinify: "lightningcss"
       },
       css: {
         lightningcss: {

@@ -1,6 +1,14 @@
 # CHANGELOG
 
-## 2.0.1(2024-12-16)
+## WIP
+
+### 🔗 Build
+
+1. 修复admin页面unocss导入异常的问题
+
+### 🔨 Dependency
+
+1. Update wxt ^0.19.22
 
 ### ✏️ Changed
 

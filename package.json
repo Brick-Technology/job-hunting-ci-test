@@ -86,6 +86,6 @@
     "vite-plugin-wasm": "^3.3.0",
     "vite-plugin-web-extension": "^4.1.6",
     "web-ext": "^8.2.0",
-    "wxt": "^0.19.18"
+    "wxt": "^0.19.22"
   }
 }
