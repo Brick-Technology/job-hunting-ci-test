@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## WIP
+## 2.0.1(2024-12-16)
 
 ### ✏️ Changed
 
