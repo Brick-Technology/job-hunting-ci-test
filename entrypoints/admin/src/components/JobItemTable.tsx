@@ -1,11 +1,11 @@
-import { dateToStr } from "@/common/utils";
+import { cleanHTMLTag, dateToStr } from "@/common/utils";
 import { QuestionCircleOutlined } from "@ant-design/icons";
 import { Descriptions, DescriptionsProps, Tag, Typography } from "antd";
 import Link from "antd/es/typography/Link";
 import Markdown from "marked-react";
-import { useJob } from "../hooks/job";
 import { CompanyData } from "../data/CompanyData";
 import { JobData } from "../data/JobData";
+import { useJob } from "../hooks/job";
 import styles from "./JobItemTable.module.css";
 const { platformFormat } = useJob();
 const { Text } = Typography;
@@ -185,10 +185,10 @@ const JobItemTable: React.FC<JobItemTableProps> = (props) => {
         <>
           {skillTagList
             ? skillTagList.map((item, index) => (
-                <Tag bordered={false} key={index} color="processing">
-                  {item}
-                </Tag>
-              ))
+              <Tag bordered={false} key={index} color="processing">
+                {item}
+              </Tag>
+            ))
             : `无`}
         </>
       ),
@@ -201,10 +201,10 @@ const JobItemTable: React.FC<JobItemTableProps> = (props) => {
         <>
           {welfareTagList
             ? welfareTagList.map((item, index) => (
-                <Tag bordered={false} key={index} color="gold">
-                  {item}
-                </Tag>
-              ))
+              <Tag bordered={false} key={index} color="gold">
+                {item}
+              </Tag>
+            ))
             : `无`}
         </>
       ),
@@ -217,10 +217,10 @@ const JobItemTable: React.FC<JobItemTableProps> = (props) => {
         <>
           {jobTagList
             ? jobTagList.map((item, index) => (
-                <Tag key={index} color="processing">
-                  {item.tagName}
-                </Tag>
-              ))
+              <Tag key={index} color="processing">
+                {item.tagName}
+              </Tag>
+            ))
             : `无`}
         </>
       ),
@@ -233,10 +233,10 @@ const JobItemTable: React.FC<JobItemTableProps> = (props) => {
         <>
           {companyTagList
             ? companyTagList.map((item, index) => (
-                <Tag key={index} color="warning">
-                  {item.tagName}
-                </Tag>
-              ))
+              <Tag key={index} color="warning">
+                {item.tagName}
+              </Tag>
+            ))
             : `无`}
         </>
       ),
@@ -248,7 +248,7 @@ const JobItemTable: React.FC<JobItemTableProps> = (props) => {
       children: (
         <>
           <Markdown gfm={true} breaks={true} isInline={true}>
-            {desc}
+            {cleanHTMLTag(desc)}
           </Markdown>
         </>
       ),

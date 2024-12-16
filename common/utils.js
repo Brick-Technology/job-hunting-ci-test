@@ -1,6 +1,6 @@
+import sha256 from "crypto-js/sha256";
 import dayjs from "dayjs";
 import { v4 as uuidv4 } from "uuid";
-import sha256 from "crypto-js/sha256";
 
 export function createScript(src) {
   const script = document.createElement("script");
@@ -249,4 +249,8 @@ export function convertToAbbreviation(number) {
 
 export function isToday(value) {
   return dayjs().startOf("day").isSame(dayjs(value).startOf("day"));
+}
+
+export function cleanHTMLTag(value) {
+  return value.replaceAll("<br>", "").replaceAll("<br />", "").replaceAll("<p>", "").replaceAll("</p>", "").replaceAll("&nbsp;", "");
 }

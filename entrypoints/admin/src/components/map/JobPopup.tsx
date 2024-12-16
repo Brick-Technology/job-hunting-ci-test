@@ -1,4 +1,4 @@
-import { dateToStr } from "@/common/utils";
+import { cleanHTMLTag, dateToStr } from "@/common/utils";
 import { Popup } from "@vis.gl/react-maplibre";
 import { Flex, Tag, Typography } from "antd";
 import Link from "antd/es/typography/Link";
@@ -41,7 +41,7 @@ const JobPopup: React.FC<JobPopupProps> = ({ data, onClick }) => {
         latitude={Number(latitude)}
         onClose={() => onClick(data)}
       >
-        <Flex vertical title={desc}>
+        <Flex vertical title={cleanHTMLTag(desc)}>
           <Flex>
             <Text>职位名：</Text>
             <Link style={{ flex: 1 }} ellipsis target="_blank" href={url}>

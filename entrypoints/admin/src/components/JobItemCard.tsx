@@ -1,7 +1,7 @@
 import { Flex, Tag, Typography } from "antd";
 const { Text } = Typography;
 
-import { convertTimeOffsetToHumanReadable, isToday } from "@/common/utils";
+import { cleanHTMLTag, convertTimeOffsetToHumanReadable, isToday } from "@/common/utils";
 import Link from "antd/es/typography/Link";
 import styles from "./JobItemCard.module.css";
 
@@ -179,8 +179,8 @@ const JobItemCard: React.FC<JobItemCardProps> = (props) => {
           </Text>
         </Flex>
         <Flex className={`${styles.marginTop} ${styles.item}`}>
-          <Paragraph ellipsis={{ rows: 3, expandable: false }} title={desc}>
-            {desc}
+          <Paragraph ellipsis={{ rows: 3, expandable: false }} title={cleanHTMLTag(desc)}>
+            {cleanHTMLTag(desc)}
           </Paragraph>
         </Flex>
         <Flex
@@ -205,7 +205,7 @@ const JobItemCard: React.FC<JobItemCardProps> = (props) => {
             justify="end"
             style={{ overflow: "hidden" }}
           >
-            <Text ellipsis>{`${bossName}【${bossPosition}】`}</Text>
+            <Text ellipsis>{`${bossName}【${bossPosition ?? ""}】`}</Text>
             <img
               className={styles.platformLogo}
               src={platformLogo(platform)}
