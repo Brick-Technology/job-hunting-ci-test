@@ -7,6 +7,7 @@ import { ChangeLogV4 } from './changeLog/changeLogV4';
 import { ChangeLogV5 } from './changeLog/changeLogV5';
 import { ChangeLogV6 } from './changeLog/changeLogV6';
 import { ChangeLogV7 } from './changeLog/changeLogV7';
+import { ChangeLogV8 } from './changeLog/changeLogV8';
 import { initChangeLog, getChangeLogList } from "./changeLog";
 import { bytesToBase64, base64ToBytes } from "../../common/utils/base64.js";
 import JSZip from "jszip";
@@ -365,6 +366,7 @@ export const Database = {
       changelogList.push(new ChangeLogV5());
       changelogList.push(new ChangeLogV6());
       changelogList.push(new ChangeLogV7());
+      changelogList.push(new ChangeLogV8());
       initChangeLog(changelogList);
       sqlite3InitModule({
         print: debugLog,

@@ -2,6 +2,10 @@
 
 ## WIP
 
+### ⭐ Added
+
+1. (ContentScript)记录职位技能标签，职位福利标签
+
 ### 🐛 Fixed
 
 1. (Sidepanel)修复自动化访问搜索页面时出现的网络错误提示（执行自动化任务前清理网站的cookies（51JOB））

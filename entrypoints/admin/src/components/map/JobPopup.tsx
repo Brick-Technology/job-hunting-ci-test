@@ -1,11 +1,11 @@
-import * as React from "react";
-import { JobData } from "../../data/JobData";
+import { dateToStr } from "@/common/utils";
 import { Popup } from "@vis.gl/react-maplibre";
 import { Flex, Tag, Typography } from "antd";
 import Link from "antd/es/typography/Link";
-const { Text } = Typography;
-import { dateToStr } from "@/common/utils";
+import * as React from "react";
+import { JobData } from "../../data/JobData";
 import { useJob } from "../../hooks/job";
+const { Text } = Typography;
 
 const { platformFormat } = useJob();
 
@@ -27,6 +27,8 @@ const JobPopup: React.FC<JobPopupProps> = ({ data, onClick }) => {
     platform,
     address,
     jobTagList,
+    skillTagList,
+    welfareTagList,
   } = data;
   const { name: companyName, companyTagList } = data.company ?? {};
   return (
@@ -71,6 +73,43 @@ const JobPopup: React.FC<JobPopupProps> = ({ data, onClick }) => {
           <Flex>
             <Text>公司名：</Text>
             <Text ellipsis>{companyName}</Text>
+          </Flex>
+          <Flex style={{ marginTop: "5px" }} wrap={true} gap={2}>
+            {skillTagList != null ? (
+              <>
+                <Text>技能标签：</Text>
+                {skillTagList.map((item, index) => (
+                  <Tag bordered={false} color="processing" key={`${index}`}>
+                    {item}
+                  </Tag>
+                ))}
+              </>
+            ) : null}
+          </Flex>
+          <Flex style={{ marginTop: "5px" }} wrap={true} gap={2}>
+            {welfareTagList != null ? (
+              <>
+                <Text>福利标签：</Text>
+                {welfareTagList.map((item, index) => (
+                  <Tag bordered={false} color="gold" key={`${index}`}>
+                    {item}
+                  </Tag>
+                ))}
+              </>
+            ) : null}
+          </Flex>
+
+          <Flex style={{ marginTop: "5px" }}>
+            {jobTagList != null ? (
+              <>
+                <Text>职位标签：</Text>
+                {jobTagList.map((item, index) => (
+                  <Tag color="#1677ff" key={`${index}`}>
+                    {item.tagName}
+                  </Tag>
+                ))}
+              </>
+            ) : null}
           </Flex>
           <Flex style={{ marginTop: "5px" }}>
             {jobTagList != null ? (

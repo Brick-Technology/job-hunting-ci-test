@@ -21,4 +21,6 @@ export class Job{
     createDatetime;
     updateDatetime;
     isFullCompanyName;
+    skillTag;
+    welfareTag;
 }

@@ -1,33 +1,33 @@
+import sha256 from "crypto-js/sha256";
+import dayjs from "dayjs";
 import {
   PLATFORM_51JOB,
-  PLATFORM_BOSS,
-  PLATFORM_LAGOU,
-  PLATFORM_ZHILIAN,
-  PLATFORM_JOBSDB,
-  PLATFORM_LIEPIN,
   PLATFORM_AIQICHA,
+  PLATFORM_BOSS,
+  PLATFORM_JOBSDB,
+  PLATFORM_LAGOU,
+  PLATFORM_LIEPIN,
+  PLATFORM_ZHILIAN,
 } from "../../common";
-import {
-  JOB_STATUS_DESC_NEWEST
-} from "./common";
-import { Job } from "../../common/data/domain/job";
 import { CompanyApi, JobApi } from "../../common/api";
-import { infoLog } from "../../common/log";
-import dayjs from "dayjs";
-import sha256 from "crypto-js/sha256";
+import { httpFetchGetText } from "../../common/api/common";
+import { CompanyTagBO } from "../../common/data/bo/companyTagBO";
 import { Company } from "../../common/data/domain/company";
+import { Job } from "../../common/data/domain/job";
+import { infoLog } from "../../common/log";
 import {
   convertDateStringToDateObject,
   convertPureJobDetailUrl,
 } from "../../common/utils";
-import { CompanyTagBO } from "../../common/data/bo/companyTagBO";
-import { httpFetchGetText } from "../../common/api/common";
+import {
+  JOB_STATUS_DESC_NEWEST
+} from "./common";
 
 const SALARY_MATCH = /(?<min>[0-9\.]*)(?<minUnit>\D*)(?<max>[0-9\.]*)(?<maxUnit>\D*)(?<month>\d*)/;
 const JOB_YEAR_MATCH = /(?<min>[0-9\.]*)\D*(?<max>[0-9\.]*)/;
 const AIQICHA_PAGE_DATA_MATCH = /window.pageData = (?<data>\{.*\})/;
 
-import { bd09ToWgs84, gcj02ToWgs84 } from '@pansy/lnglat-transform'
+import { bd09ToWgs84, gcj02ToWgs84 } from '@pansy/lnglat-transform';
 
 //请求中断列表
 let abortFunctionHandlerMap = new Map();
@@ -284,6 +284,8 @@ function handleLagouData(list) {
       salary,
       publisherId,
       createTime,
+      positionLables,
+      companyLabelList,
     } = item;
     job.jobId = genId(positionId, PLATFORM_LAGOU);
     job.jobPlatform = PLATFORM_LAGOU;
@@ -323,6 +325,8 @@ function handleLagouData(list) {
     job.bossCompanyName = companyFullName;
     job.bossPosition = null;
     job.isFullCompanyName = true;
+    job.skillTag = positionLables.length > 0 ? positionLables.join(",") : "";
+    job.welfareTag = companyLabelList.length > 0 ? companyLabelList.join(",") : "";
     jobs.push(job);
   }
   return jobs;
@@ -348,6 +352,8 @@ function handleZhilianData(list) {
       salaryCount,
       latitude,
       longitude,
+      skillLabel,
+      welfareTagList,
     } = item;
     const { staffName, hrJob } = item.staffCard;
     job.jobId = genId(jobId, PLATFORM_ZHILIAN);
@@ -394,6 +400,8 @@ function handleZhilianData(list) {
     job.bossCompanyName = companyName;
     job.bossPosition = hrJob;
     job.isFullCompanyName = true;
+    job.skillTag = skillLabel.length > 0 ? skillLabel.map(item => item.value).join(",") : "";
+    job.welfareTag = welfareTagList.length > 0 ? welfareTagList.join(",") : "";
     jobs.push(job);
   }
   return jobs;
@@ -407,7 +415,7 @@ function handleBossData(list) {
     const { encryptJobId, jobUrl, jobName,
       brandName, cityName, areaDistrict, businessDistrict, address,
       postDescription, jobDegree, jobExperience,
-      salaryDesc, bossName, bossTitle,
+      salaryDesc, bossName, bossTitle, skills, welfareList
     } = item;
     const {
       latitude, longitude
@@ -465,6 +473,8 @@ function handleBossData(list) {
     job.bossCompanyName = brandName;
     job.bossPosition = bossTitle;
     job.isFullCompanyName = false;
+    job.skillTag = skills.length > 0 ? skills.join(",") : "";
+    job.welfareTag = welfareList.length > 0 ? welfareList.join(",") : "";
     jobs.push(job);
   }
   return jobs;
@@ -492,6 +502,8 @@ function handle51JobData(list) {
       confirmDateString,
       provideSalaryString,
       workYearString,
+      jobWelfareCodeDataList,
+      jobTagsList,
     } = item;
     job.jobId = genId(jobId, PLATFORM_51JOB);
     job.jobPlatform = PLATFORM_51JOB;
@@ -530,6 +542,8 @@ function handle51JobData(list) {
     job.bossCompanyName = fullCompanyName;
     job.bossPosition = hrPosition;
     job.isFullCompanyName = true;
+    job.welfareTag = jobWelfareCodeDataList.length > 0 ? jobWelfareCodeDataList.map(item => item.chineseTitle).join(",") : "";
+    job.skillTag = jobTagsList.length > 0 ? jobTagsList.map(item => item.jobTagName).filter(item => !job.welfareTag.includes(item)).join(",") : "";
     jobs.push(job);
   }
   return jobs;

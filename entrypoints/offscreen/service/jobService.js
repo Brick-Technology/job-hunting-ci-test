@@ -171,7 +171,7 @@ export const JobService = {
       );
       let tempResultMap = new Map();
       const SQL_QUERY_JOB =
-        "SELECT job_id,job_platform,job_url,job_name,job_company_name,job_location_name,job_address,job_longitude,job_latitude,job_description,job_degree_name,job_year,job_salary_min,job_salary_max,job_salary_total_month,job_first_publish_datetime,boss_name,boss_company_name,boss_position,create_datetime,update_datetime,is_full_company_name FROM job WHERE job_id in (" +
+        "SELECT job_id,job_platform,job_url,job_name,job_company_name,job_location_name,job_address,job_longitude,job_latitude,job_description,job_degree_name,job_year,job_salary_min,job_salary_max,job_salary_total_month,job_first_publish_datetime,boss_name,boss_company_name,boss_position,create_datetime,update_datetime,is_full_company_name,skill_tag,welfare_tag FROM job WHERE job_id in (" +
         ids +
         ")";
       let rows = [];
@@ -628,7 +628,7 @@ async function insertOrUpdateJobAndBrowseHistory(param, now) {
 
 async function _insertOrUpdateJob(param, now, { update = true } = {}) {
   let rows = [];
-  const SQL_JOB_BY_ID = `SELECT job_id,job_platform,job_url,job_name,job_company_name,job_location_name,job_address,job_longitude,job_latitude,job_description,job_degree_name,job_year,job_salary_min,job_salary_max,job_salary_total_month,job_first_publish_datetime,boss_name,boss_company_name,boss_position,create_datetime,update_datetime,is_full_company_name FROM job WHERE job_id = ?`;
+  const SQL_JOB_BY_ID = `SELECT job_id,job_platform,job_url,job_name,job_company_name,job_location_name,job_address,job_longitude,job_latitude,job_description,job_degree_name,job_year,job_salary_min,job_salary_max,job_salary_total_month,job_first_publish_datetime,boss_name,boss_company_name,boss_position,create_datetime,update_datetime,is_full_company_name,skill_tag,welfare_tag FROM job WHERE job_id = ?`;
   (await getDb()).exec({
     sql: SQL_JOB_BY_ID,
     rowMode: "object",
@@ -639,7 +639,7 @@ async function _insertOrUpdateJob(param, now, { update = true } = {}) {
     if (update) {
       if (!param.updateDatetime) {
         const SQL_UPDATE_JOB = `
-    UPDATE job SET job_platform=$job_platform,job_url=$job_url,job_name=$job_name,job_company_name=$job_company_name,job_location_name=$job_location_name,job_address=$job_address,job_longitude=$job_longitude,job_latitude=$job_latitude,job_description=$job_description,job_degree_name=$job_degree_name,job_year=$job_year,job_salary_min=$job_salary_min,job_salary_max=$job_salary_max,job_salary_total_month=$job_salary_total_month,job_first_publish_datetime=$job_first_publish_datetime,boss_name=$boss_name,boss_company_name=$boss_company_name,boss_position=$boss_position,update_datetime=$update_datetime,is_full_company_name=$is_full_company_name WHERE job_id = $job_id;
+    UPDATE job SET job_platform=$job_platform,job_url=$job_url,job_name=$job_name,job_company_name=$job_company_name,job_location_name=$job_location_name,job_address=$job_address,job_longitude=$job_longitude,job_latitude=$job_latitude,job_description=$job_description,job_degree_name=$job_degree_name,job_year=$job_year,job_salary_min=$job_salary_min,job_salary_max=$job_salary_max,job_salary_total_month=$job_salary_total_month,job_first_publish_datetime=$job_first_publish_datetime,boss_name=$boss_name,boss_company_name=$boss_company_name,boss_position=$boss_position,update_datetime=$update_datetime,is_full_company_name=$is_full_company_name,skill_tag=$skill_tag,welfare_tag=$welfare_tag WHERE job_id = $job_id;
   `;
         (await getDb()).exec({
           sql: SQL_UPDATE_JOB,
@@ -667,6 +667,8 @@ async function _insertOrUpdateJob(param, now, { update = true } = {}) {
             $boss_position: convertEmptyStringToNull(param.bossPosition),
             $update_datetime: dayjs(now).format("YYYY-MM-DD HH:mm:ss"),
             $is_full_company_name: param.isFullCompanyName,
+            $skill_tag: param.skillTag,
+            $welfare_tag: param.welfareTag,
           },
         });
       } else {
@@ -676,7 +678,7 @@ async function _insertOrUpdateJob(param, now, { update = true } = {}) {
         let currentRowUpdateDatetime = dayjs(param.updateDatetime);
         if (currentRowUpdateDatetime.isAfter(previousRowUpdateDatetime)) {
           const SQL_UPDATE_JOB = `
-          UPDATE job SET job_platform=$job_platform,job_url=$job_url,job_name=$job_name,job_company_name=$job_company_name,job_location_name=$job_location_name,job_address=$job_address,job_longitude=$job_longitude,job_latitude=$job_latitude,job_description=$job_description,job_degree_name=$job_degree_name,job_year=$job_year,job_salary_min=$job_salary_min,job_salary_max=$job_salary_max,job_salary_total_month=$job_salary_total_month,job_first_publish_datetime=$job_first_publish_datetime,boss_name=$boss_name,boss_company_name=$boss_company_name,boss_position=$boss_position,update_datetime=$update_datetime,is_full_company_name=$is_full_company_name WHERE job_id = $job_id;
+          UPDATE job SET job_platform=$job_platform,job_url=$job_url,job_name=$job_name,job_company_name=$job_company_name,job_location_name=$job_location_name,job_address=$job_address,job_longitude=$job_longitude,job_latitude=$job_latitude,job_description=$job_description,job_degree_name=$job_degree_name,job_year=$job_year,job_salary_min=$job_salary_min,job_salary_max=$job_salary_max,job_salary_total_month=$job_salary_total_month,job_first_publish_datetime=$job_first_publish_datetime,boss_name=$boss_name,boss_company_name=$boss_company_name,boss_position=$boss_position,update_datetime=$update_datetime,is_full_company_name=$is_full_company_name,skill_tag=$skill_tag,welfare_tag=$welfare_tag WHERE job_id = $job_id;
         `;
           (await getDb()).exec({
             sql: SQL_UPDATE_JOB,
@@ -704,6 +706,8 @@ async function _insertOrUpdateJob(param, now, { update = true } = {}) {
               $boss_position: convertEmptyStringToNull(param.bossPosition),
               $update_datetime: currentRowUpdateDatetime.format("YYYY-MM-DD HH:mm:ss"),
               $is_full_company_name: param.isFullCompanyName,
+              $skill_tag: param.skillTag,
+              $welfare_tag: param.welfareTag,
             },
           });
         }
@@ -724,7 +728,7 @@ async function _insertOrUpdateJob(param, now, { update = true } = {}) {
     }
   } else {
     const SQL_INSERT_JOB = `
-    INSERT INTO job (job_id,job_platform,job_url,job_name,job_company_name,job_location_name,job_address,job_longitude,job_latitude,job_description,job_degree_name,job_year,job_salary_min,job_salary_max,job_salary_total_month,job_first_publish_datetime,boss_name,boss_company_name,boss_position,create_datetime,update_datetime,is_full_company_name) VALUES ($job_id,$job_platform,$job_url,$job_name,$job_company_name,$job_location_name,$job_address,$job_longitude,$job_latitude,$job_description,$job_degree_name,$job_year,$job_salary_min,$job_salary_max,$job_salary_total_month,$job_first_publish_datetime,$boss_name,$boss_company_name,$boss_position,$create_datetime,$update_datetime,$is_full_company_name)
+    INSERT INTO job (job_id,job_platform,job_url,job_name,job_company_name,job_location_name,job_address,job_longitude,job_latitude,job_description,job_degree_name,job_year,job_salary_min,job_salary_max,job_salary_total_month,job_first_publish_datetime,boss_name,boss_company_name,boss_position,create_datetime,update_datetime,is_full_company_name,skill_tag,welfare_tag) VALUES ($job_id,$job_platform,$job_url,$job_name,$job_company_name,$job_location_name,$job_address,$job_longitude,$job_latitude,$job_description,$job_degree_name,$job_year,$job_salary_min,$job_salary_max,$job_salary_total_month,$job_first_publish_datetime,$boss_name,$boss_company_name,$boss_position,$create_datetime,$update_datetime,$is_full_company_name,$skill_tag,$welfare_tag)
   `;
     (await getDb()).exec({
       sql: SQL_INSERT_JOB,
@@ -753,6 +757,8 @@ async function _insertOrUpdateJob(param, now, { update = true } = {}) {
         $create_datetime: dayjs(param.createDatetime ?? now).format("YYYY-MM-DD HH:mm:ss"),
         $update_datetime: dayjs(param.updateDatetime ?? now).format("YYYY-MM-DD HH:mm:ss"),
         $is_full_company_name: param.isFullCompanyName,
+        $skill_tag: param.skillTag,
+        $welfare_tag: param.welfareTag,
       },
     });
   }
@@ -779,7 +785,7 @@ function genSqlJobSearchQuery(param) {
   } else {
     joinSql = `LEFT JOIN (SELECT job_id AS _jobId,COUNT(job_id) AS browseDetailCount,MAX(job_visit_datetime) AS latestBrowseDetailDatetime FROM JOB_BROWSE_HISTORY WHERE job_visit_type = 'DETAIL' GROUP BY job_id) AS t2 ON t1.job_id = t2._jobId`;
   }
-  return `SELECT job_id AS jobId,job_platform AS jobPlatform,job_url AS jobUrl,job_name AS jobName,job_company_name AS jobCompanyName,job_location_name AS jobLocationName,job_address AS jobAddress,job_longitude AS jobLongitude,job_latitude AS jobLatitude,job_description AS jobDescription,job_degree_name AS jobDegreeName,job_year AS jobYear,job_salary_min AS jobSalaryMin,job_salary_max AS jobSalaryMax,job_salary_total_month AS jobSalaryTotalMonth,job_first_publish_datetime AS jobFirstPublishDatetime,boss_name AS bossName,boss_company_name AS bossCompanyName,boss_position AS bossPosition,create_datetime AS createDatetime,update_datetime AS updateDatetime,is_full_company_name AS isFullCompanyName,IFNULL(t2.browseDetailCount,0) AS browseDetailCount,t2.latestBrowseDetailDatetime AS latestBrowseDetailDatetime FROM job AS t1 ${joinSql}`;
+  return `SELECT job_id AS jobId,job_platform AS jobPlatform,job_url AS jobUrl,job_name AS jobName,job_company_name AS jobCompanyName,job_location_name AS jobLocationName,job_address AS jobAddress,job_longitude AS jobLongitude,job_latitude AS jobLatitude,job_description AS jobDescription,job_degree_name AS jobDegreeName,job_year AS jobYear,job_salary_min AS jobSalaryMin,job_salary_max AS jobSalaryMax,job_salary_total_month AS jobSalaryTotalMonth,job_first_publish_datetime AS jobFirstPublishDatetime,boss_name AS bossName,boss_company_name AS bossCompanyName,boss_position AS bossPosition,create_datetime AS createDatetime,update_datetime AS updateDatetime,is_full_company_name AS isFullCompanyName,skill_tag AS skillTag,welfare_tag AS welfareTag,IFNULL(t2.browseDetailCount,0) AS browseDetailCount,t2.latestBrowseDetailDatetime AS latestBrowseDetailDatetime FROM job AS t1 ${joinSql}`;
 }
 
 const SQL_GROUP_BY_COUNT_AVG_SALARY = `
@@ -871,5 +877,7 @@ export async function _fillSearchResultExtraInfo(items, queryRows) {
     item.companyTagDTOList = companyIdAndCompanyTagListMap.get(genIdFromText(item.jobCompanyName));
     item.jobTagDTOList = jobIdAndJobTagListMap.get(item.jobId);
     item.companyDTO = companyIdAndCompanyDTOListMap.get(genIdFromText(item.jobCompanyName));
+    item.skillTagList = item.skillTag?.split(",");
+    item.welfareTagList = item.welfareTag?.split(",");
   });
 }

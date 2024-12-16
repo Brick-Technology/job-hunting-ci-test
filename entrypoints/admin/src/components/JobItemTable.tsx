@@ -31,6 +31,8 @@ const JobItemTable: React.FC<JobItemTableProps> = (props) => {
     longitude,
     latitude,
     degree,
+    skillTagList,
+    welfareTagList,
   } = props.data;
   const { name: companyName, companyTagList, url: companyUrl } = company;
 
@@ -176,6 +178,38 @@ const JobItemTable: React.FC<JobItemTableProps> = (props) => {
       ),
     },
     {
+      key: "jobSkillTag",
+      label: "技能标签",
+      span: 3,
+      children: (
+        <>
+          {skillTagList
+            ? skillTagList.map((item, index) => (
+                <Tag bordered={false} key={index} color="processing">
+                  {item}
+                </Tag>
+              ))
+            : `无`}
+        </>
+      ),
+    },
+    {
+      key: "jobWelfareTag",
+      label: "福利标签",
+      span: 3,
+      children: (
+        <>
+          {welfareTagList
+            ? welfareTagList.map((item, index) => (
+                <Tag bordered={false} key={index} color="gold">
+                  {item}
+                </Tag>
+              ))
+            : `无`}
+        </>
+      ),
+    },
+    {
       key: "jobTag",
       label: "职位标签",
       span: 3,
@@ -183,7 +217,7 @@ const JobItemTable: React.FC<JobItemTableProps> = (props) => {
         <>
           {jobTagList
             ? jobTagList.map((item, index) => (
-                <Tag key={index} color="warning">
+                <Tag key={index} color="processing">
                   {item.tagName}
                 </Tag>
               ))
@@ -199,7 +233,7 @@ const JobItemTable: React.FC<JobItemTableProps> = (props) => {
         <>
           {companyTagList
             ? companyTagList.map((item, index) => (
-                <Tag key={index} color="processing">
+                <Tag key={index} color="warning">
                   {item.tagName}
                 </Tag>
               ))

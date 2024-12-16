@@ -1,19 +1,19 @@
 import { Flex, Tag, Typography } from "antd";
 const { Text } = Typography;
 
-import styles from "./JobItemCard.module.css";
-import Link from "antd/es/typography/Link";
 import { convertTimeOffsetToHumanReadable, isToday } from "@/common/utils";
+import Link from "antd/es/typography/Link";
+import styles from "./JobItemCard.module.css";
 
-import dayjs from "dayjs";
 import { Icon } from "@iconify/react";
-import { useJob } from "../hooks/job";
-import Paragraph from "antd/es/typography/Paragraph";
 import Card from "antd/es/card/Card";
+import Paragraph from "antd/es/typography/Paragraph";
+import dayjs from "dayjs";
+import { useJob } from "../hooks/job";
 
-import "./JobItemCard.css";
-import { JobData } from "../data/JobData";
 import { QuestionCircleOutlined } from "@ant-design/icons";
+import { JobData } from "../data/JobData";
+import "./JobItemCard.css";
 
 const { platformLogo, platformFormat } = useJob();
 
@@ -61,6 +61,8 @@ const JobItemCard: React.FC<JobItemCardProps> = (props) => {
     desc,
     browseTime,
     createDatetime,
+    skillTagList,
+    welfareTagList,
   } = props.data;
   const { name: companyName, companyTagList, url: companyUrl } = company;
   const { onLocate } = props;
@@ -70,7 +72,7 @@ const JobItemCard: React.FC<JobItemCardProps> = (props) => {
         title={browseTime ? `浏览时间:${convertTimeOffsetToHumanReadable(browseTime)}` : null}
         size="small"
         hoverable={props.onCardClick ? true : false}
-        className={`${styles.main} ${props.className?props.className:""}`}
+        className={`${styles.main} ${props.className ? props.className : ""}`}
         onClick={() => {
           props.onCardClick(props.data);
         }}
@@ -95,10 +97,10 @@ const JobItemCard: React.FC<JobItemCardProps> = (props) => {
             {salaryMin} - {salaryMax}
           </Text>
         </Flex>
-        <Flex className={styles.marginTop}>
+        <Flex className={styles.marginTop} wrap={true} gap={2}>
           {companyTagList &&
             companyTagList.map((item, index) => (
-              <Tag key={index} color="processing">
+              <Tag key={index} color="warning">
                 {item.tagName}
               </Tag>
             ))}
@@ -137,10 +139,26 @@ const JobItemCard: React.FC<JobItemCardProps> = (props) => {
             </>
           )}
         </Flex>
-        <Flex className={styles.marginTop}>
+        <Flex className={styles.marginTop} wrap={true} gap={2}>
+          {skillTagList &&
+            skillTagList.map((item, index) => (
+              <Tag bordered={false} key={index} color="processing">
+                {item}
+              </Tag>
+            ))}
+        </Flex>
+        <Flex className={styles.marginTop} wrap={true} gap={2}>
+          {welfareTagList &&
+            welfareTagList.map((item, index) => (
+              <Tag bordered={false} key={index} color="gold">
+                {item}
+              </Tag>
+            ))}
+        </Flex>
+        <Flex className={styles.marginTop} wrap={true} gap={2}>
           {jobTagList &&
             jobTagList.map((item, index) => (
-              <Tag key={index} color="warning">
+              <Tag key={index} color="processing">
                 {item.tagName}
               </Tag>
             ))}

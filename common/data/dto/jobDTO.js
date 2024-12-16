@@ -7,4 +7,6 @@ export class JobDTO extends Job{
     companyTagDTOList;
     jobTagDTOList;
     companyDTO;
+    skillTagList;
+    welfareTagList;
 }

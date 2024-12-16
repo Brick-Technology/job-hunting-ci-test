@@ -106,6 +106,8 @@ export function useJob() {
             createDatetime: item.createDatetime,
             browseCount: item.browseCount,
             browseDetailCount: item.browseDetailCount,
+            skillTagList: item.skillTagList,
+            welfareTagList: item.welfareTagList,
         };
     };
 
@@ -159,7 +161,7 @@ export function useJob() {
     const convertSortField = (key: any) => {
         return sortFieldMap[key];
     }
-    
+
     return { platformFormat, platformLogo, convertToJobDataList, convertToJobData, convertJobDataToGeojson, convertSortField }
 
 }

@@ -24,4 +24,6 @@ export type JobData = {
   createDatetime?: Date;
   browseCount:number;
   browseDetailCount:number;
+  skillTagList:string[],
+  welfareTagList:string[],
 };

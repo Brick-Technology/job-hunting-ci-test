@@ -73,6 +73,31 @@ export const JOB_FILE_HEADER = [
         "招聘者职位",
         "首次扫描日期",
         "记录更新日期",
+    ],
+    [
+        "职位自编号",
+        "发布平台",
+        "职位访问地址",
+        "职位",
+        "公司",
+        "公司是否为全称",
+        "地区",
+        "地址",
+        "经度",
+        "纬度",
+        "职位描述",
+        "学历",
+        "所需经验",
+        "技能",
+        "福利",
+        "最低薪资",
+        "最高薪资",
+        "首次发布时间",
+        "招聘人",
+        "招聘公司",
+        "招聘者职位",
+        "首次扫描日期",
+        "记录更新日期",
     ]
 ];
 
@@ -94,6 +119,8 @@ export const jobDataToExcelJSONArray = (list) => {
             职位描述: item.jobDescription,
             学历: item.jobDegreeName,
             所需经验: item.jobYear,
+            技能: item.skillTag,
+            福利: item.welfareTag,
             最低薪资: item.jobSalaryMin,
             最高薪资: item.jobSalaryMax,
             几薪: item.jobSalaryTotalMonth,
@@ -128,6 +155,8 @@ export const jobExcelDataToObjectArray = (data) => {
         item.jobDescription = dataItem['职位描述'];
         item.jobDegreeName = dataItem['学历'];
         item.jobYear = dataItem['所需经验'];
+        item.skillTag= dataItem['技能'];
+        item.welfareTag= dataItem['福利'];
         item.jobSalaryMin = dataItem['最低薪资'];
         item.jobSalaryMax = dataItem['最高薪资'];
         item.jobSalaryTotalMonth = dataItem['几薪'];
