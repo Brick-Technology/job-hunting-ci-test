@@ -96,7 +96,7 @@ export function getJobIds(list, platform) {
     if (PLATFORM_51JOB == platform) {
       jobId = item.jobId;
     } else if (PLATFORM_BOSS == platform) {
-      jobId = item.value.zpData.jobInfo.encryptId;
+      jobId = item.encryptJobId;
     } else if (PLATFORM_ZHILIAN == platform) {
       jobId = item.jobId;
     } else if (PLATFORM_LAGOU == platform) {
@@ -404,29 +404,20 @@ function handleBossData(list) {
   for (let i = 0; i < list.length; i++) {
     let job = new Job();
     let item = list[i];
-    let zpData = item.value.zpData;
-    const { brandName } = zpData.brandComInfo;
-    const { name, brandName: bossBranchName, title } = zpData.bossInfo;
+    const { encryptJobId, jobUrl, jobName,
+      brandName, cityName, areaDistrict, businessDistrict, address,
+      postDescription, jobDegree, jobExperience,
+      salaryDesc, bossName, bossTitle,
+    } = item;
     const {
-      encryptId,
-      jobName,
-      locationName,
-      address,
-      longitude,
-      latitude,
-      postDescription,
-      degreeName,
-      experienceName,
-      salaryDesc,
-      jobStatusDesc,
-      jobUrl,
-    } = zpData.jobInfo;
-    job.jobId = genId(encryptId, PLATFORM_BOSS);
+      latitude, longitude
+    } = item.gps || {};
+    job.jobId = genId(encryptJobId, PLATFORM_BOSS);
     job.jobPlatform = PLATFORM_BOSS;
     job.jobUrl = convertPureJobDetailUrl(jobUrl);
     job.jobName = jobName;
     job.jobCompanyName = brandName;
-    job.jobLocationName = locationName;
+    job.jobLocationName = `${cityName}·${areaDistrict}·${businessDistrict}`;
     job.jobAddress = address;
     job.jobLongitude = longitude;
     job.jobLatitude = latitude;
@@ -436,9 +427,9 @@ function handleBossData(list) {
       job.jobLatitude = wgs84[1];
     }
     job.jobDescription = postDescription;
-    job.jobDegreeName = degreeName;
+    job.jobDegreeName = jobDegree;
     //handle job year
-    let jobYearGroups = experienceName.match(JOB_YEAR_MATCH)?.groups;
+    let jobYearGroups = jobExperience.match(JOB_YEAR_MATCH)?.groups;
     if (jobYearGroups) {
       job.jobYear = jobYearGroups.min;
     } else {
@@ -462,15 +453,17 @@ function handleBossData(list) {
     } else {
       //skip
     }
+    //TODO 暂不能获取职位招聘状态，因为detail.json接口限流窗口过小
+    const jobStatusDesc = null;
     if (jobStatusDesc == JOB_STATUS_DESC_NEWEST.key) {
       //招聘状态为最新，则代表一周内发布的职位。记录入库的时间设置取今天零点。
       job.jobFirstPublishDatetime = dayjs(new Date()).startOf("day").toDate();
     } else {
       job.jobFirstPublishDatetime = null;
     }
-    job.bossName = name;
-    job.bossCompanyName = bossBranchName;
-    job.bossPosition = title;
+    job.bossName = bossName;
+    job.bossCompanyName = brandName;
+    job.bossPosition = bossTitle;
     job.isFullCompanyName = false;
     jobs.push(job);
   }

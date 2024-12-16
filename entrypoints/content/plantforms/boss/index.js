@@ -89,16 +89,16 @@ function getJobItemDetailUrlFunction(dom) {
 
 // 解析数据，插入时间标签
 export function handleData(list, getListItem, getJobItemDetailUrlFunction, orderStartIndex) {
-  const apiUrlList = [];
+  const cardApiUrlList = [];
   const urlList = [];
   list.forEach((item, index) => {
     const { brandName, securityId } = item;
     const dom = getListItem(index);
-    //apiUrl
-    let pureJobItemDetailApiUrl =
-      "https://www.zhipin.com/wapi/zpgeek/job/detail.json?securityId=" +
+    //cardApiUrl
+    let pureJobItemCardApiUrl =
+      "https://www.zhipin.com/wapi/zpgeek/job/card.json?securityId=" +
       securityId;
-    apiUrlList.push(pureJobItemDetailApiUrl);
+    cardApiUrlList.push(pureJobItemCardApiUrl);
     //jobUrl
     const jobItemDetailUrl = getJobItemDetailUrlFunction(dom);
     const url = new URL(jobItemDetailUrl);
@@ -111,38 +111,41 @@ export function handleData(list, getListItem, getJobItemDetailUrlFunction, order
     );
     dom.appendChild(loadingLastModifyTimeTag);
   });
-  const promiseList = apiUrlList.map(async (url, index) => {
+  const promiseList = cardApiUrlList.map(async (url, index) => {
     await randomDelay(DELAY_FETCH_TIME * index, DELAY_FETCH_TIME_RANDOM_OFFSET); // 避免频繁请求触发风控
     const response = await fetch(url);
     const result = await response.json();
-    return result;
+    return Object.assign(result.zpData.jobCard, list[index]);
   });
   Promise.allSettled(promiseList)
-    .then(async (jsonList) => {
+    .then(async (response) => {
+      const jsonList = response.map(item => item.value);
       let jobDTOList = [];
       jsonList.forEach((item, index) => {
-        item.value.zpData.jobInfo.jobUrl = urlList[index];
+        item.jobUrl = urlList[index];
       });
       await saveBrowseJob(jsonList, PLATFORM_BOSS);
       jobDTOList = await JobApi.getJobBrowseInfoByIds(
         getJobIds(jsonList, PLATFORM_BOSS)
       );
-      const lastModifyTimeList = [];
+      // const lastModifyTimeList = [];
       const jobStatusDescList = [];
       jsonList.forEach((item, index) => {
-        lastModifyTimeList.push(
-          dayjs(item.value?.zpData?.brandComInfo?.activeTime)
-        );
-        let jobStatus = convertJobStatusDesc(
-          item.value?.zpData?.jobInfo?.jobStatusDesc
-        );
-        jobStatusDescList.push(jobStatus);
-        //额外针对BOSS平台，为后面的排序做准备
-        jobDTOList[index].jobStatusDesc = jobStatus;
+        //TODO 字段接口被删除
+        // lastModifyTimeList.push(
+        //   dayjs(item.value?.zpData?.brandComInfo?.activeTime)
+        // );
+        //TODO json.detail接口限流窗口过小
+        // let jobStatus = convertJobStatusDesc(
+        //   item.value?.zpData?.jobInfo?.jobStatusDesc
+        // );
+        jobStatusDescList.push(null);
+        // 额外针对BOSS平台，为后面的排序做准备
+        // jobDTOList[index].jobStatusDesc = null;
         jobDTOList[
           index
-        ].jobCompanyApiUrl = `https://www.zhipin.com/gongsi/${item.value?.zpData?.brandComInfo?.encryptBrandId}.html`;
-        let hrActiveTimeDesc = item.value?.zpData?.bossInfo?.activeTimeDesc;
+        ].jobCompanyApiUrl = `https://www.zhipin.com/gongsi/${item.encryptBrandId}.html`;
+        let hrActiveTimeDesc = item.activeTimeDesc;
         //额外针对BOSS平台，为后面的排序做准备
         jobDTOList[index].hrActiveTimeDesc = hrActiveTimeDesc;
       });
