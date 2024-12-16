@@ -1,20 +1,20 @@
-import { postSuccessMessage, postErrorMessage } from "../util";
-import { infoLog, errorLog } from "../../../common/log";
-import { randomDelay } from "../../../common/utils";
+import dayjs from "dayjs";
 import {
     connect,
     ExtensionTransport,
 } from 'puppeteer-core/lib/esm/puppeteer/puppeteer-core-browser.js';
 import {
-    PLATFORM_BOSS,
+    AUTOMATE_ERROR_HUMAN_VALID,
+    AUTOMATE_ERROR_UNKNOW,
     PLATFORM_51JOB,
-    PLATFORM_ZHILIAN,
+    PLATFORM_BOSS,
     PLATFORM_LAGOU,
     PLATFORM_LIEPIN,
-    AUTOMATE_ERROR_UNKNOW,
-    AUTOMATE_ERROR_HUMAN_VALID,
+    PLATFORM_ZHILIAN,
 } from "../../../common";
-import dayjs from "dayjs";
+import { errorLog, infoLog } from "../../../common/log";
+import { randomDelay } from "../../../common/utils";
+import { postErrorMessage, postSuccessMessage } from "../util";
 const DATE_FORMAT = "YYYY-MM-DD HH:mm:ss.SSS";
 
 export const AutomateService = {
@@ -46,6 +46,27 @@ jobItemPageHandleFunction.set(PLATFORM_LAGOU, _lagouHandle);
 jobItemPageHandleFunction.set(PLATFORM_LIEPIN, _liepinHandle);
 
 async function _automateFetchJobItemData({ url, platform, delay, delayRandomRange, maxPage }) {
+    if (platform == PLATFORM_51JOB) {
+        infoLog(`[puppeteer] clear cookies platform = ${PLATFORM_51JOB} start`)
+        infoLog(`[puppeteer] clear cookies url = ${url}`)
+        let cookies = await chrome.cookies.getAll({
+            url
+        });
+        infoLog(`[puppeteer] cookies length = ${cookies.length}`)
+        cookies.forEach(async item => {
+            await chrome.cookies.remove({
+                name: item.name,
+                url,
+                storeId: item.storeId,
+            });
+        });
+        cookies = await chrome.cookies.getAll({
+            url
+        });
+        infoLog(`[puppeteer] clear cookies`)
+        infoLog(`[puppeteer] cookies length = ${cookies.length}`)
+        infoLog(`[puppeteer] clear cookies platform = ${PLATFORM_51JOB} end`)
+    }
     let windowValue = await chrome.windows.create({
         url,
         width: 800,
@@ -62,7 +83,7 @@ async function _automateFetchJobItemData({ url, platform, delay, delayRandomRang
         infoLog(`[puppeteer] get job item page handle function platform = ${platform}`)
         if (handler) {
             const startDatetime = new Date();
-            const result = await handler(tab, page, platform, delay, delayRandomRange, maxPage)
+            const result = await handler(tab, browser, page, platform, delay, delayRandomRange, maxPage)
             result.startDatetime = startDatetime;
             result.endDatetime = new Date();
             return result;
@@ -86,7 +107,7 @@ function _log(logList, message) {
     logList.push(`${dayjs(new Date()).format(DATE_FORMAT)} ${message}`);
 }
 
-async function _51jobHandle(tab, page, platform, delay, delayRandomRange, maxPage) {
+async function _51jobHandle(tab, browser, page, platform, delay, delayRandomRange, maxPage) {
     const logList = [];
     const screenshotList = [];
     let error = null;
@@ -130,7 +151,7 @@ async function _51jobHandle(tab, page, platform, delay, delayRandomRange, maxPag
     }
 }
 
-async function _bossHandle(tab, page, platform, delay, delayRandomRange, maxPage) {
+async function _bossHandle(tab, browser, page, platform, delay, delayRandomRange, maxPage) {
     const logList = [];
     const screenshotList = [];
     let error = null;
@@ -185,7 +206,7 @@ async function _bossHandle(tab, page, platform, delay, delayRandomRange, maxPage
     }
 }
 
-async function _liepinHandle(tab, page, platform, delay, delayRandomRange, maxPage) {
+async function _liepinHandle(tab, browser, page, platform, delay, delayRandomRange, maxPage) {
     const logList = [];
     const screenshotList = [];
     let error = null;
@@ -233,23 +254,23 @@ async function _liepinHandle(tab, page, platform, delay, delayRandomRange, maxPa
     }
 }
 
-async function _zhilianHandle(tab, page, platform, delay, delayRandomRange, maxPage) {
-    return _handle(tab, page, platform, delay, delayRandomRange, maxPage,
+async function _zhilianHandle(tab, browser, page, platform, delay, delayRandomRange, maxPage) {
+    return _handle(tab, browser, page, platform, delay, delayRandomRange, maxPage,
         {
             nextButtonSelector: ".btn ::-p-text(下一页)",
             lastPageButtonSelector: "a.btn.soupager__btn.soupager__btn--disable"
         });
 }
 
-async function _lagouHandle(tab, page, platform, delay, delayRandomRange, maxPage) {
-    return _handle(tab, page, platform, delay, delayRandomRange, maxPage,
+async function _lagouHandle(tab, browser, page, platform, delay, delayRandomRange, maxPage) {
+    return _handle(tab, browser, page, platform, delay, delayRandomRange, maxPage,
         {
             nextButtonSelector: ".lg-pagination-next",
             lastPageButtonSelector: "li.lg-pagination-next.lg-pagination-disabled"
         });
 }
 
-async function _handle(tab, page, platform, delay, delayRandomRange, maxPage, { nextButtonSelector, lastPageButtonSelector }) {
+async function _handle(tab, browser, page, platform, delay, delayRandomRange, maxPage, { nextButtonSelector, lastPageButtonSelector }) {
     const logList = [];
     const screenshotList = [];
     let error = null;

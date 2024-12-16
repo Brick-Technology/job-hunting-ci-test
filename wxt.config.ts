@@ -43,7 +43,8 @@ export default defineConfig({
       "unlimitedStorage",
       "declarativeNetRequestWithHostAccess",
       "declarativeNetRequestFeedback",
-      "debugger"
+      "debugger",
+      "cookies"
     ],
     "host_permissions": [
       "http://*/",
