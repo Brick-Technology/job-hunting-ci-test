@@ -19,6 +19,7 @@ export function useJobTag() {
             updateDatetime,
             tagIdArray,
             tagNameArray,
+            tagArray,
         } = item ?? {};
 
         return {
@@ -31,6 +32,7 @@ export function useJobTag() {
             updateDatetime,
             nameArray: tagNameArray,
             idArray: tagIdArray,
+            tagArray
         }
     }
 

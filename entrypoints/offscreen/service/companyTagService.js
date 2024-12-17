@@ -1,15 +1,15 @@
-import { Message } from "../../../common/api/message";
-import { postSuccessMessage, postErrorMessage } from "../util";
-import { getDb, getOne, getAll } from "../database";
-import { convertEmptyStringToNull, genUniqueId, genIdFromText } from "../../../common/utils";
 import dayjs from "dayjs";
+import { Message } from "../../../common/api/message";
+import { SearchCompanyTagBO } from "../../../common/data/bo/searchCompanyTagBO";
 import { CompanyTag } from "../../../common/data/domain/companyTag";
 import { Tag } from "../../../common/data/domain/tag";
-import { _addOrUpdateTag, _searchWithTagInfo } from "./tagService";
 import { CompanyTagDTO } from "../../../common/data/dto/companyTagDTO";
-import { SearchCompanyTagBO } from "../../../common/data/bo/searchCompanyTagBO";
 import { SearchCompanyTagDTO } from "../../../common/data/dto/searchCompanyTagDTO";
 import { StatisticCompanyTagDTO } from "../../../common/data/dto/statisticCompanyTagDTO";
+import { convertEmptyStringToNull, genIdFromText, genUniqueId } from "../../../common/utils";
+import { getAll, getDb, getOne } from "../database";
+import { postErrorMessage, postSuccessMessage } from "../util";
+import { _addNotExistsTags, _searchWithTagInfo } from "./tagService";
 
 export const CompanyTagService = {
     /**
@@ -366,14 +366,7 @@ export const CompanyTagService = {
  * @param {CompanyTagBO} param 
  */
 async function _addOrUpdateCompanyTag(param) {
-    for (let i = 0; i < param.tags.length; i++) {
-        let tagName = param.tags[i];
-        let id = genIdFromText(tagName);
-        let tag = new Tag();
-        tag.tagId = id;
-        tag.tagName = tagName;
-        await _addOrUpdateTag(tag);
-    }
+    await _addNotExistsTags(param.tags);
     let companyName = param.companyName;
     let companyId = genIdFromText(companyName);
     await _deleteCompanyTagByCompanyId(companyId);

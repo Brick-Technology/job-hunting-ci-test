@@ -1,9 +1,9 @@
-import { Message } from "../../../common/api/message";
-import { postSuccessMessage, postErrorMessage } from "../util";
-import { getDb, getOne, getAll } from "../database";
-import { convertEmptyStringToNull } from "../../../common/utils";
 import dayjs from "dayjs";
+import { Message } from "../../../common/api/message";
 import { Tag } from "../../../common/data/domain/tag";
+import { convertEmptyStringToNull, genIdFromText } from "../../../common/utils";
+import { batchGet, getAll, getDb, getOne } from "../database";
+import { postErrorMessage, postSuccessMessage } from "../util";
 
 export const TagService = {
     /**
@@ -17,7 +17,7 @@ export const TagService = {
         try {
             postSuccessMessage(
                 message,
-                _getTagById(param) 
+                _getTagById(param)
             );
         } catch (e) {
             postErrorMessage(message, "[worker] getTagById error : " + e.message);
@@ -63,8 +63,42 @@ export const TagService = {
  * 
  * @param {string} param id
  */
-export async function _getTagById(param){
+export async function _getTagById(param) {
     return getOne(SQL_SELECT_BY_ID, [param], new Tag());
+}
+
+/**
+ * 
+ * @param {string[]} ids 
+ * @returns 
+ */
+export async function _batchGetTagByIds(ids) {
+    return batchGet(new Tag(), "tag", "tag_id", ids)
+}
+
+/**
+ * 
+ * @param {string[]} tags 
+ */
+export async function _addNotExistsTags(tags) {
+    const tagIds = [];
+    for (let i = 0; i < tags.length; i++) {
+        let tagName = tags[i];
+        let id = genIdFromText(tagName);
+        tagIds.push(id);
+    }
+    const existsTags = await _batchGetTagByIds(tagIds);
+    const existsTagIds = existsTags.map(item => item.tagId);
+    for (let i = 0; i < tags.length; i++) {
+        let tagName = tags[i];
+        let id = genIdFromText(tagName);
+        if (!existsTagIds.includes(id)) {
+            let tag = new Tag();
+            tag.tagId = id;
+            tag.tagName = tagName;
+            await _addOrUpdateTag(tag);
+        }
+    }
 }
 
 /**
@@ -86,6 +120,7 @@ export async function _addOrUpdateTag(param) {
             bind: {
                 $tag_id: convertEmptyStringToNull(param.tagId),
                 $tag_name: convertEmptyStringToNull(param.tagName),
+                $is_public: param.isPublic,
                 $update_datetime: dayjs(now).format("YYYY-MM-DD HH:mm:ss"),
             },
         });
@@ -95,6 +130,7 @@ export async function _addOrUpdateTag(param) {
             bind: {
                 $tag_id: convertEmptyStringToNull(param.tagId),
                 $tag_name: convertEmptyStringToNull(param.tagName),
+                $is_public: param.isPublic,
                 $create_datetime: dayjs(now).format("YYYY-MM-DD HH:mm:ss"),
                 $update_datetime: dayjs(now).format("YYYY-MM-DD HH:mm:ss"),
             },
@@ -102,13 +138,13 @@ export async function _addOrUpdateTag(param) {
     }
 }
 
-const SQL_SELECT = `SELECT tag_id, tag_name, create_datetime, update_datetime FROM tag`;
+const SQL_SELECT = `SELECT tag_id, tag_name, create_datetime, update_datetime,is_public FROM tag`;
 const SQL_SELECT_BY_ID = `${SQL_SELECT} WHERE tag_id = ?`;
 const SQL_INSERT = `
-INSERT INTO tag (tag_id, tag_name, create_datetime, update_datetime) VALUES ($tag_id,$tag_name,$create_datetime,$update_datetime)
+INSERT INTO tag (tag_id, tag_name, create_datetime, update_datetime, is_public) VALUES ($tag_id,$tag_name,$create_datetime,$update_datetime,$is_public)
 `;
 const SQL_UPDATE = `
-UPDATE tag SET tag_name=$tag_name,update_datetime=$update_datetime WHERE tag_id = $tag_id;
+UPDATE tag SET tag_name=$tag_name,update_datetime=$update_datetime,is_public=$is_public WHERE tag_id = $tag_id;
 `;
 
 export async function _searchWithTagInfo({ param, cerateResultDTOFunction, createResultItemDTOFunction, genSqlSearchQueryFunction, genSearchWhereConditionSqlFunction, getAllDTOByIdsFunction, idColumn }) {
@@ -147,6 +183,7 @@ export async function _searchWithTagInfo({ param, cerateResultDTOFunction, creat
         }
         item.tagNameArray = [];
         item.tagIdArray = [];
+        item.tagArray = [];
         items.push(item);
     }
     let ids = [];
@@ -160,6 +197,7 @@ export async function _searchWithTagInfo({ param, cerateResultDTOFunction, creat
         tagDTOList.forEach(item => {
             itemIdObjectMap.get(item[idColumn]).tagNameArray.push(item.tagName);
             itemIdObjectMap.get(item[idColumn]).tagIdArray.push(item.tagId);
+            itemIdObjectMap.get(item[idColumn]).tagArray.push(item);
         });
     }
     let sqlCountSubTable = "";

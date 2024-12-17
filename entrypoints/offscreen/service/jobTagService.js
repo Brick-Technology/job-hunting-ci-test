@@ -1,17 +1,16 @@
 import { Message } from "../../../common/api/message";
-import { postSuccessMessage, postErrorMessage } from "../util";
-import { getDb, getAll, beginTransaction, commitTransaction, rollbackTransaction } from "../database";
-import { genUniqueId, genIdFromText } from "../../../common/utils";
-import { Tag } from "../../../common/data/domain/tag";
-import { _addOrUpdateTag, _searchWithTagInfo } from "./tagService";
-import { JobTagDTO } from "../../../common/data/dto/jobTagDTO";
-import { BaseService } from "./baseService";
-import { JobTag } from "../../../common/data/domain/jobTag";
 import { JobTagBO } from "../../../common/data/bo/jobTagBO";
-import { JobTagSearchDTO } from "../../../common/data/dto/jobTagSearchDTO";
 import { JobTagSearchBO } from "../../../common/data/bo/jobTagSearchBO";
+import { JobTag } from "../../../common/data/domain/jobTag";
+import { JobTagDTO } from "../../../common/data/dto/jobTagDTO";
+import { JobTagSearchDTO } from "../../../common/data/dto/jobTagSearchDTO";
 import { JobTagStatisticDTO } from "../../../common/data/dto/jobTagStatisticDTO";
+import { genIdFromText, genUniqueId } from "../../../common/utils";
+import { beginTransaction, commitTransaction, getAll, getDb, rollbackTransaction } from "../database";
+import { postErrorMessage, postSuccessMessage } from "../util";
+import { BaseService } from "./baseService";
 import { _getByIds as _jobGetByIds } from "./jobService";
+import { _addNotExistsTags, _searchWithTagInfo } from "./tagService";
 
 const JOB_ID_COLUMN = "job_id";
 
@@ -245,17 +244,10 @@ export const JobTagService = {
  * 
  * @param {JobTagBO} param 
  */
-async function _addOrUpdateJobTag(param) {
-    for (let i = 0; i < param.tags.length; i++) {
-        let tagName = param.tags[i];
-        let id = genIdFromText(tagName);
-        let tag = new Tag();
-        tag.tagId = id;
-        tag.tagName = tagName;
-        await _addOrUpdateTag(tag);
-    }
+export async function _addOrUpdateJobTag(param) {
+    await _addNotExistsTags(param.tags);
     let jobId = param.jobId;
-    await SERVICE_INSTANCE._deleteById(param.jobId, JOB_ID_COLUMN);
+    await SERVICE_INSTANCE._deleteById(param.jobId, JOB_ID_COLUMN, { otherCondition: `source_type=${param.sourceType} AND ${param.source ? "source = '" + param.source + "'" : "source IS NULL"}` });
     for (let i = 0; i < param.tags.length; i++) {
         let tagName = param.tags[i];
         let tagId = genIdFromText(tagName);
@@ -264,6 +256,8 @@ async function _addOrUpdateJobTag(param) {
         jobTag.jobId = jobId;
         jobTag.tagId = tagId;
         jobTag.seq = i;
+        jobTag.sourceType = param.sourceType;
+        jobTag.source = param.source;
         await SERVICE_INSTANCE._addOrUpdate(jobTag);
     }
 }
@@ -290,12 +284,12 @@ export async function _getAllJobTagDTOByJobIds(param) {
 }
 
 const SQL_SELECT_DTO_BY_JOB_ID = `
-SELECT t1.id, t1.job_id, t1.tag_id, t2.tag_name,t1.seq ,t1.create_datetime, t1.update_datetime FROM job_tag AS t1  LEFT JOIN tag AS t2 ON t1.tag_id = t2.tag_id where job_id = ? ORDER BY t1.seq ASC;
+SELECT t1.id, t1.job_id, t1.tag_id, t2.tag_name,t1.seq ,t1.create_datetime, t1.update_datetime,t1.source_type,t1.source,t2.is_public FROM job_tag AS t1  LEFT JOIN tag AS t2 ON t1.tag_id = t2.tag_id where job_id = ? ORDER BY t1.seq ASC;
 `;
 
 function genSqlSelectDTOByJobIds(ids) {
     let idsString = "'" + ids.join("','") + "'";
     return `
-    SELECT t1.id, t1.job_id, t1.tag_id, t2.tag_name,t1.seq ,t1.create_datetime, t1.update_datetime FROM job_tag AS t1  LEFT JOIN tag AS t2 ON t1.tag_id = t2.tag_id where job_id in (${idsString}) ORDER BY t1.seq ASC;
+    SELECT t1.id, t1.job_id, t1.tag_id, t2.tag_name,t1.seq ,t1.create_datetime, t1.update_datetime,t1.source_type,t1.source,t2.is_public FROM job_tag AS t1  LEFT JOIN tag AS t2 ON t1.tag_id = t2.tag_id where job_id in (${idsString}) ORDER BY t1.seq ASC;
     `;
 }

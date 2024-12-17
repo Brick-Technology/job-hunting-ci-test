@@ -8,7 +8,7 @@ export type JobData = {
   salaryMax: number;
   salaryTotalMonth: number;
   company: CompanyData;
-  jobTagList: { tagName: string }[];
+  jobTagList: { tagName: string,sourceType:string,isPublic:boolean }[];
   location: string,
   address: string;
   publishDatetime: Date;

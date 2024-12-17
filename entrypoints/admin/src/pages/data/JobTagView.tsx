@@ -1,7 +1,10 @@
+import { TAG_SOURCE_TYPE_CUSTOM, TAG_SOURCE_TYPE_PLATFORM } from "@/common";
 import { JobApi, TagApi } from "@/common/api";
 import { JobTagBO } from "@/common/data/bo/jobTagBO";
+import { JobTagDTO } from "@/common/data/dto/jobTagDTO";
 import { jobTagDataToExcelJSONArray } from "@/common/excel";
 import { dateToStr } from "@/common/utils";
+import { Icon } from "@iconify/react";
 import {
   Button,
   Col,
@@ -47,13 +50,13 @@ const JobTagView: React.FC = () => {
       title: '职位编号',
       dataIndex: 'jobId',
       render: (value: string) => <Text>{value}</Text>,
-      minWidth: 200,
+      minWidth: 100,
     },
     {
       title: '职位名称',
       dataIndex: 'name',
       render: (value: string) => <Text>{value}</Text>,
-      minWidth: 200,
+      minWidth: 100,
     },
     {
       title: '公司全称',
@@ -68,13 +71,27 @@ const JobTagView: React.FC = () => {
       minWidth: 100,
     },
     {
-      title: '标签',
-      dataIndex: 'nameArray',
-      render: (value: string[]) => {
+      title: '平台标签',
+      dataIndex: 'tagArray',
+      render: (value: JobTagDTO[]) => {
         const result = [];
-        value.map((item) => {
+        value.filter(item => item.sourceType == TAG_SOURCE_TYPE_PLATFORM).map((item) => {
           result.push(
-            <Tag key={item}>{item}</Tag>
+            <Tag key={item.id}>{item.tagName}</Tag>
+          );
+        })
+        return result;
+      },
+      minWidth: 100,
+    },
+    {
+      title: '自定义标签',
+      dataIndex: 'tagArray',
+      render: (value: JobTagDTO[]) => {
+        const result = [];
+        value.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM).map((item) => {
+          result.push(
+            <Tag key={item.id}>{item.isPublic ? <Icon icon="material-symbols:public" /> : <Icon icon="material-symbols:private-connectivity" />}{item.tagName}</Tag>
           );
         })
         return result;
@@ -85,13 +102,13 @@ const JobTagView: React.FC = () => {
       title: '标签数',
       dataIndex: 'nameArray',
       render: (value: string[]) => <Text>{value.length}</Text>,
-      minWidth: 50,
+      minWidth: 80,
     },
     {
       title: '更新时间',
       dataIndex: 'updateDatetime',
       render: (value: Date) => <Text title={dateToStr(value)}>{dateToStr(value, "YYYY-MM-DD")}</Text>,
-      minWidth: 80,
+      minWidth: 100,
       sorter: true,
     },
     {
@@ -105,7 +122,7 @@ const JobTagView: React.FC = () => {
             setEditJobTagData({
               id: record.jobId,
               name: record.name,
-              tags: record.nameArray,
+              tags: record.tagArray.filter(item => (item.sourceType == TAG_SOURCE_TYPE_CUSTOM && item.source == null)).map(item=>item.tagName),
             });
             setIsJobTagEditModalOpen(true);
           }}>编辑标签</Button>

@@ -31,6 +31,11 @@
 
 .address {
   width: 260px;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.desc {
   font-size: 12px;
 }
 
@@ -54,4 +59,9 @@
 .newBadgeIcon {
   width: 40px;
   height: 40px;
+}
+
+.tag {
+  display: flex;
+  align-items: center;
 }

@@ -1,10 +1,13 @@
+import { TAG_SOURCE_TYPE_CUSTOM } from "@/common";
 import { cleanHTMLTag, dateToStr } from "@/common/utils";
+import { Icon } from "@iconify/react";
 import { Popup } from "@vis.gl/react-maplibre";
 import { Flex, Tag, Typography } from "antd";
 import Link from "antd/es/typography/Link";
 import * as React from "react";
 import { JobData } from "../../data/JobData";
 import { useJob } from "../../hooks/job";
+import styles from "./JobPopup.module.css";
 const { Text } = Typography;
 
 const { platformFormat } = useJob();
@@ -75,11 +78,11 @@ const JobPopup: React.FC<JobPopupProps> = ({ data, onClick }) => {
             <Text ellipsis>{companyName}</Text>
           </Flex>
           <Flex style={{ marginTop: "5px" }} wrap={true} gap={2}>
-            {skillTagList != null ? (
+            {skillTagList != null && skillTagList.length > 0 ? (
               <>
                 <Text>技能标签：</Text>
                 {skillTagList.map((item, index) => (
-                  <Tag bordered={false} color="processing" key={`${index}`}>
+                  <Tag className={styles.tag} bordered={false} color="processing" key={`${index}`}>
                     {item}
                   </Tag>
                 ))}
@@ -87,48 +90,35 @@ const JobPopup: React.FC<JobPopupProps> = ({ data, onClick }) => {
             ) : null}
           </Flex>
           <Flex style={{ marginTop: "5px" }} wrap={true} gap={2}>
-            {welfareTagList != null ? (
+            {welfareTagList != null && welfareTagList.length > 0 ? (
               <>
                 <Text>福利标签：</Text>
                 {welfareTagList.map((item, index) => (
-                  <Tag bordered={false} color="gold" key={`${index}`}>
+                  <Tag className={styles.tag} bordered={false} color="gold" key={`${index}`}>
                     {item}
                   </Tag>
                 ))}
               </>
             ) : null}
           </Flex>
-
-          <Flex style={{ marginTop: "5px" }}>
-            {jobTagList != null ? (
+          <Flex style={{ marginTop: "5px" }} wrap={true} gap={2}>
+            {jobTagList != null && jobTagList.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM).length > 0 ? (
               <>
-                <Text>职位标签：</Text>
-                {jobTagList.map((item, index) => (
-                  <Tag color="#1677ff" key={`${index}`}>
-                    {item.tagName}
+                <Text>自定义职位标签：</Text>
+                {jobTagList.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM).map((item, index) => (
+                  <Tag className={styles.tag} color="#1677ff" key={`${index}`}>
+                    {item.isPublic ? <Icon icon="material-symbols:public" /> : <Icon icon="material-symbols:private-connectivity" />}{item.tagName}
                   </Tag>
                 ))}
               </>
             ) : null}
           </Flex>
-          <Flex style={{ marginTop: "5px" }}>
-            {jobTagList != null ? (
-              <>
-                <Text>职位标签：</Text>
-                {jobTagList.map((item, index) => (
-                  <Tag color="#1677ff" key={`${index}`}>
-                    {item.tagName}
-                  </Tag>
-                ))}
-              </>
-            ) : null}
-          </Flex>
-          <Flex wrap style={{ marginTop: "5px" }}>
-            {companyTagList != null ? (
+          <Flex style={{ marginTop: "5px" }} wrap={true} gap={2}>
+            {companyTagList != null && companyTagList.length > 0 ? (
               <>
                 <Text>公司标签：</Text>
                 {companyTagList.map((item, index) => (
-                  <Tag color="#faad14" key={`${index}`}>
+                  <Tag className={styles.tag} color="#faad14" key={`${index}`}>
                     {item.tagName}
                   </Tag>
                 ))}

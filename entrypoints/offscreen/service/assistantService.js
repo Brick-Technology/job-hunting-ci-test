@@ -1,18 +1,16 @@
-import { Message } from "../../../common/api/message";
-import { postSuccessMessage, postErrorMessage } from "../util";
-import { getDb } from "../database";
-import { SearchFaviousJobBO } from "../../../common/data/bo/searchFaviousJobBO";
-import { SearchJobDTO } from "../../../common/data/dto/searchJobDTO";
-import { JobFaviousSettingDTO } from "../../../common/data/dto/jobFaviousSettingDTO";
-import { AssistantStatisticDTO } from "../../../common/data/dto/assistantStatisticDTO";
-import { Config } from "../../../common/data/domain/config";
-import { _getAllCompanyTagDTOByCompanyIds } from "./companyTagService";
-import { _addOrUpdateConfig, _getConfigByKey } from "./configService";
 import dayjs from "dayjs";
-import { _getCompanyDTOByIds } from "./companyService";
-import { genNotLikeSql, genLikeSql, handleAndReturnWhereSql, genDatetimeConditionSql, genValueConditionSql } from "./sqlUtil";
-import { _fillSearchResultExtraInfo } from "./jobService";
+import { Message } from "../../../common/api/message";
+import { SearchFaviousJobBO } from "../../../common/data/bo/searchFaviousJobBO";
+import { Config } from "../../../common/data/domain/config";
+import { AssistantStatisticDTO } from "../../../common/data/dto/assistantStatisticDTO";
+import { JobFaviousSettingDTO } from "../../../common/data/dto/jobFaviousSettingDTO";
+import { SearchJobDTO } from "../../../common/data/dto/searchJobDTO";
 import { genIdFromText } from "../../../common/utils";
+import { getDb } from "../database";
+import { postErrorMessage, postSuccessMessage } from "../util";
+import { _addOrUpdateConfig, _getConfigByKey } from "./configService";
+import { _fillSearchResultExtraInfo } from "./jobService";
+import { genDatetimeConditionSql, genLikeSql, genNotLikeSql, genValueConditionSql, handleAndReturnWhereSql } from "./sqlUtil";
 
 const KEY_JOB_FAVIOUS_SETTING = "KEY_JOB_FAVIOUS_SETTING";
 
@@ -212,7 +210,7 @@ function genFilterSQL(sql, param, createDateStartDate, createDateEndDate) {
             if (index > 0) {
                 whereCondition += " AND ";
             }
-            whereCondition += " t1.jobTagIdArray LIKE '%" + item + "%' ";
+            whereCondition += " t1.jobTagIdArray LIKE '%" + genIdFromText(item) + "%' ";
         });
         whereCondition += " )";
     }
@@ -222,7 +220,7 @@ function genFilterSQL(sql, param, createDateStartDate, createDateEndDate) {
             if (index > 0) {
                 whereCondition += " AND ";
             }
-            whereCondition += " t1.jobTagIdArray NOT LIKE '%" + item + "%' ";
+            whereCondition += " t1.jobTagIdArray NOT LIKE '%" + genIdFromText(item) + "%' ";
         });
         whereCondition += " )";
         if (!(param.likeJobTagList && param.likeJobTagList.length > 0)) {

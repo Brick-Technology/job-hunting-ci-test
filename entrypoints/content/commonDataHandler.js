@@ -18,6 +18,7 @@ import { infoLog } from "../../common/log";
 import {
   convertDateStringToDateObject,
   convertPureJobDetailUrl,
+  isNotEmpty
 } from "../../common/utils";
 import {
   JOB_STATUS_DESC_NEWEST
@@ -325,8 +326,8 @@ function handleLagouData(list) {
     job.bossCompanyName = companyFullName;
     job.bossPosition = null;
     job.isFullCompanyName = true;
-    job.skillTag = positionLables.length > 0 ? positionLables.join(",") : "";
-    job.welfareTag = companyLabelList.length > 0 ? companyLabelList.join(",") : "";
+    job.skillTag = positionLables.length > 0 ? positionLables.join(",") : null;
+    job.welfareTag = companyLabelList.length > 0 ? companyLabelList.join(",") : null;
     jobs.push(job);
   }
   return jobs;
@@ -400,8 +401,8 @@ function handleZhilianData(list) {
     job.bossCompanyName = companyName;
     job.bossPosition = hrJob;
     job.isFullCompanyName = true;
-    job.skillTag = skillLabel.length > 0 ? skillLabel.map(item => item.value).join(",") : "";
-    job.welfareTag = welfareTagList.length > 0 ? welfareTagList.join(",") : "";
+    job.skillTag = skillLabel.length > 0 ? skillLabel.map(item => item.value).join(",") : null;
+    job.welfareTag = welfareTagList.length > 0 ? welfareTagList.join(",") : null;
     jobs.push(job);
   }
   return jobs;
@@ -473,8 +474,8 @@ function handleBossData(list) {
     job.bossCompanyName = brandName;
     job.bossPosition = bossTitle;
     job.isFullCompanyName = false;
-    job.skillTag = skills.length > 0 ? skills.join(",") : "";
-    job.welfareTag = welfareList.length > 0 ? welfareList.join(",") : "";
+    job.skillTag = skills.length > 0 ? skills.filter(item => isNotEmpty(item)).join(",") : null;
+    job.welfareTag = welfareList.length > 0 ? welfareList.filter(item => isNotEmpty(item)).join(",") : null;
     jobs.push(job);
   }
   return jobs;
@@ -542,8 +543,8 @@ function handle51JobData(list) {
     job.bossCompanyName = fullCompanyName;
     job.bossPosition = hrPosition;
     job.isFullCompanyName = true;
-    job.welfareTag = jobWelfareCodeDataList.length > 0 ? jobWelfareCodeDataList.map(item => item.chineseTitle).join(",") : "";
-    job.skillTag = jobTagsList.length > 0 ? jobTagsList.map(item => item.jobTagName).filter(item => !job.welfareTag.includes(item)).join(",") : "";
+    job.welfareTag = jobWelfareCodeDataList.length > 0 ? jobWelfareCodeDataList.map(item => item.chineseTitle).join(",") : null;
+    job.skillTag = jobTagsList.length > 0 ? jobTagsList.map(item => item.jobTagName).filter(item => !job.welfareTag.includes(item)).join(",") : null;
     jobs.push(job);
   }
   return jobs;

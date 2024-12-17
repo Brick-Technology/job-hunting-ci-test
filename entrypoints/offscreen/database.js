@@ -1,5 +1,10 @@
-import { infoLog, debugLog, errorLog, isDebug } from "../../common/log";
 import sqlite3InitModule from "@sqlite.org/sqlite-wasm";
+import dayjs from "dayjs";
+import JSZip from "jszip";
+import { debugLog, errorLog, infoLog, isDebug } from "../../common/log";
+import { convertEmptyStringToNull, toHump, toLine } from "../../common/utils";
+import { base64ToBytes, bytesToBase64 } from "../../common/utils/base64.js";
+import { getChangeLogList, initChangeLog } from "./changeLog";
 import { ChangeLogV1 } from "./changeLog/changeLogV1";
 import { ChangeLogV2 } from "./changeLog/changeLogV2";
 import { ChangeLogV3 } from './changeLog/changeLogV3';
@@ -8,12 +13,7 @@ import { ChangeLogV5 } from './changeLog/changeLogV5';
 import { ChangeLogV6 } from './changeLog/changeLogV6';
 import { ChangeLogV7 } from './changeLog/changeLogV7';
 import { ChangeLogV8 } from './changeLog/changeLogV8';
-import { initChangeLog, getChangeLogList } from "./changeLog";
-import { bytesToBase64, base64ToBytes } from "../../common/utils/base64.js";
-import JSZip from "jszip";
-import { postSuccessMessage, postErrorMessage } from "./util";
-import { toHump, toLine, convertEmptyStringToNull } from "../../common/utils";
-import dayjs from "dayjs";
+import { postErrorMessage, postSuccessMessage } from "./util";
 
 const JOB_DB_FILE_NAME = "job.sqlite3";
 const JOB_DB_PATH = "/" + JOB_DB_FILE_NAME;
@@ -208,8 +208,8 @@ export function genFullSelectByIdsSQL(obj, tableName, idColumnName, ids) {
   return `${genFullSelectSQL(obj, tableName)} WHERE ${idColumnName} in (${idsString})`;
 }
 
-export async function del(tableName, idColumn, id) {
-  const deleteSql = `DELETE FROM ${tableName} WHERE ${idColumn} = '${id}'`;
+export async function del(tableName, idColumn, id, { otherCondition } = { otherCondition: null }) {
+  const deleteSql = `DELETE FROM ${tableName} WHERE ${idColumn} = '${id}' ${otherCondition ? "AND " + otherCondition : ""}`;
   if (isDebug()) {
     debugLog(`[database] [del] deleteSql = ${deleteSql}`)
   }
@@ -218,9 +218,9 @@ export async function del(tableName, idColumn, id) {
   });
 }
 
-export async function batchDel(tableName, idColumn, ids) {
+export async function batchDel(tableName, idColumn, ids, { otherCondition } = { otherCondition: null }) {
   let idsString = "'" + ids.join("','") + "'";
-  const deleteSql = `DELETE FROM ${tableName} WHERE ${idColumn} in (${idsString})`;
+  const deleteSql = `DELETE FROM ${tableName} WHERE ${idColumn} in (${idsString}) ${otherCondition ? "AND " + otherCondition : ""}`;
   if (isDebug()) {
     debugLog(`[database] [batchDel] deleteSql = ${deleteSql}`)
   }

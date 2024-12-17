@@ -4,5 +4,6 @@ export class JobTagDTO extends JobTag{
     tagName;
     tagNameArray;
     tagIdArray;
+    tagArray;
     job;
 }

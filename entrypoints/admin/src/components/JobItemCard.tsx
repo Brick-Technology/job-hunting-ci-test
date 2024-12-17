@@ -11,6 +11,7 @@ import Paragraph from "antd/es/typography/Paragraph";
 import dayjs from "dayjs";
 import { useJob } from "../hooks/job";
 
+import { TAG_SOURCE_TYPE_CUSTOM } from "@/common";
 import { QuestionCircleOutlined } from "@ant-design/icons";
 import { JobData } from "../data/JobData";
 import "./JobItemCard.css";
@@ -100,7 +101,7 @@ const JobItemCard: React.FC<JobItemCardProps> = (props) => {
         <Flex className={styles.marginTop} wrap={true} gap={2}>
           {companyTagList &&
             companyTagList.map((item, index) => (
-              <Tag key={index} color="warning">
+              <Tag className={styles.tag} key={index} color="warning">
                 {item.tagName}
               </Tag>
             ))}
@@ -142,7 +143,7 @@ const JobItemCard: React.FC<JobItemCardProps> = (props) => {
         <Flex className={styles.marginTop} wrap={true} gap={2}>
           {skillTagList &&
             skillTagList.map((item, index) => (
-              <Tag bordered={false} key={index} color="processing">
+              <Tag className={styles.tag} bordered={false} key={index} color="processing">
                 {item}
               </Tag>
             ))}
@@ -150,16 +151,16 @@ const JobItemCard: React.FC<JobItemCardProps> = (props) => {
         <Flex className={styles.marginTop} wrap={true} gap={2}>
           {welfareTagList &&
             welfareTagList.map((item, index) => (
-              <Tag bordered={false} key={index} color="gold">
+              <Tag className={styles.tag} bordered={false} key={index} color="gold">
                 {item}
               </Tag>
             ))}
         </Flex>
         <Flex className={styles.marginTop} wrap={true} gap={2}>
           {jobTagList &&
-            jobTagList.map((item, index) => (
-              <Tag key={index} color="processing">
-                {item.tagName}
+            jobTagList.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM).map((item, index) => (
+              <Tag className={styles.tag} key={index} color="#1677ff">
+                {item.isPublic ? <Icon icon="material-symbols:public" /> : <Icon icon="material-symbols:private-connectivity" />}{item.tagName}
               </Tag>
             ))}
         </Flex>
@@ -171,7 +172,7 @@ const JobItemCard: React.FC<JobItemCardProps> = (props) => {
           className={`${styles.marginTop} ${styles.item}`}
         >
           <Text ellipsis className={styles.address}>
-            {address}
+          <Icon icon="entypo:address"/> {address}
           </Text>
           <Text style={{ color: "#1677ff" }}>
             <Icon icon="mdi:location" />
@@ -179,7 +180,7 @@ const JobItemCard: React.FC<JobItemCardProps> = (props) => {
           </Text>
         </Flex>
         <Flex className={`${styles.marginTop} ${styles.item}`}>
-          <Paragraph ellipsis={{ rows: 3, expandable: false }} title={cleanHTMLTag(desc)}>
+          <Paragraph className={styles.desc} ellipsis={{ rows: 3, expandable: false }} title={cleanHTMLTag(desc)}>
             {cleanHTMLTag(desc)}
           </Paragraph>
         </Flex>

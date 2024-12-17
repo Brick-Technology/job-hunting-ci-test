@@ -17,6 +17,7 @@ import {
   TAG_RUOBILIN_BLACK_LIST,
   TAG_IT_BLACK_LIST_2,
   TAG_CREDIT_BJ_BLACK_LIST,
+  TAG_SOURCE_TYPE_CUSTOM,
 } from "../../common";
 import {
   JOB_STATUS_DESC_NEWEST
@@ -679,7 +680,7 @@ export function renderFunctionPanel(
 function createJobTag(item) {
   const wrapper = document.createElement("div");
   wrapper.className = "__job_tag_wrapper";
-  let labelDiv = document.createElement("div");
+  const labelDiv = document.createElement("div");
   labelDiv.className = "__job_tag_label";
   labelDiv.textContent = "职位标签：";
   wrapper.appendChild(labelDiv);
@@ -687,7 +688,7 @@ function createJobTag(item) {
   jobTagDiv.className = "__job_tag";
   wrapper.appendChild(jobTagDiv);
   asyncRenderTag(jobTagDiv, "职位", async () => {
-    return JobApi.jobTagGetAllDTOByJobId(item.jobId)
+    return (await JobApi.jobTagGetAllDTOByJobId(item.jobId)).filter(item=>item.sourceType == TAG_SOURCE_TYPE_CUSTOM && item.source == null)
   }, async (tags) => {
     let param = new JobTagBO();
     param.jobId = item.jobId;

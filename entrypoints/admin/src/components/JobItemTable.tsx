@@ -1,6 +1,8 @@
+import { TAG_SOURCE_TYPE_CUSTOM } from "@/common";
 import { cleanHTMLTag, dateToStr } from "@/common/utils";
 import { QuestionCircleOutlined } from "@ant-design/icons";
-import { Descriptions, DescriptionsProps, Tag, Typography } from "antd";
+import { Icon } from "@iconify/react";
+import { Descriptions, DescriptionsProps, Flex, Tag, Typography } from "antd";
 import Link from "antd/es/typography/Link";
 import Markdown from "marked-react";
 import { CompanyData } from "../data/CompanyData";
@@ -124,7 +126,7 @@ const JobItemTable: React.FC<JobItemTableProps> = (props) => {
       ),
     },
     {
-      key: "salar",
+      key: "salary",
       label: "薪资",
       span: 1,
       children: (
@@ -183,13 +185,15 @@ const JobItemTable: React.FC<JobItemTableProps> = (props) => {
       span: 3,
       children: (
         <>
-          {skillTagList
-            ? skillTagList.map((item, index) => (
-              <Tag bordered={false} key={index} color="processing">
-                {item}
-              </Tag>
-            ))
-            : `无`}
+          <Flex wrap={true} gap={2}>
+            {skillTagList && skillTagList.length > 0
+              ? skillTagList.map((item, index) => (
+                <Tag className={styles.tag} bordered={false} key={index} color="processing">
+                  {item}
+                </Tag>
+              ))
+              : <Text>无</Text>}
+          </Flex>
         </>
       ),
     },
@@ -199,29 +203,33 @@ const JobItemTable: React.FC<JobItemTableProps> = (props) => {
       span: 3,
       children: (
         <>
-          {welfareTagList
-            ? welfareTagList.map((item, index) => (
-              <Tag bordered={false} key={index} color="gold">
-                {item}
-              </Tag>
-            ))
-            : `无`}
+          <Flex wrap={true} gap={2}>
+            {welfareTagList && welfareTagList.length > 0
+              ? welfareTagList.map((item, index) => (
+                <Tag className={styles.tag} bordered={false} key={index} color="gold">
+                  {item}
+                </Tag>
+              ))
+              : <Text>无</Text>}
+          </Flex>
         </>
       ),
     },
     {
       key: "jobTag",
-      label: "职位标签",
+      label: "自定义职位标签",
       span: 3,
       children: (
         <>
-          {jobTagList
-            ? jobTagList.map((item, index) => (
-              <Tag key={index} color="processing">
-                {item.tagName}
-              </Tag>
-            ))
-            : `无`}
+          <Flex wrap={true} gap={2}>
+            {jobTagList && jobTagList.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM).length > 0
+              ? jobTagList.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM).map((item, index) => (
+                <Tag className={styles.tag} key={index} color="#1677ff">
+                  {item.isPublic ? <Icon icon="material-symbols:public" /> : <Icon icon="material-symbols:private-connectivity" />}{item.tagName}
+                </Tag>
+              ))
+              : <Text>无</Text>}
+          </Flex>
         </>
       ),
     },
@@ -231,13 +239,15 @@ const JobItemTable: React.FC<JobItemTableProps> = (props) => {
       span: 3,
       children: (
         <>
-          {companyTagList
-            ? companyTagList.map((item, index) => (
-              <Tag key={index} color="warning">
-                {item.tagName}
-              </Tag>
-            ))
-            : `无`}
+          <Flex wrap={true} gap={2}>
+            {companyTagList && companyTagList.length > 0
+              ? companyTagList.map((item, index) => (
+                <Tag className={styles.tag} key={index} color="warning">
+                  {item.tagName}
+                </Tag>
+              ))
+              : <Text>无</Text>}
+          </Flex>
         </>
       ),
     },
@@ -247,9 +257,11 @@ const JobItemTable: React.FC<JobItemTableProps> = (props) => {
       label: "职位描述",
       children: (
         <>
-          <Markdown gfm={true} breaks={true} isInline={true}>
-            {cleanHTMLTag(desc)}
-          </Markdown>
+          <Text className={styles.desc}>
+            <Markdown gfm={true} breaks={true} isInline={true}>
+              {cleanHTMLTag(desc)}
+            </Markdown>
+          </Text>
         </>
       ),
     },

@@ -118,19 +118,19 @@ const JobView: React.FC = () => {
     {
       title: '编号',
       dataIndex: 'id',
-      render: (text: string) => <Text>{text}</Text>,
+      render: (text: string) => <Text copyable ellipsis title={text}>{text}</Text>,
       minWidth: 100,
     },
     {
       title: '名称',
       dataIndex: 'name',
-      render: (text: string) => <Text>{text}</Text>,
+      render: (text: string) => <Text copyable title={text}>{text}</Text>,
       minWidth: 200,
     },
     {
       title: '公司',
       dataIndex: 'company',
-      render: (value: CompanyData) => <Text>{value.name}</Text>,
+      render: (value: CompanyData) => <Text copyable title={value.name}>{value.name}</Text>,
       minWidth: 200,
     },
     {
@@ -150,21 +150,21 @@ const JobView: React.FC = () => {
       title: '最低薪资',
       dataIndex: 'salaryMin',
       render: (text: string) => <Text>{text}</Text>,
-      minWidth: 120,
+      minWidth: 100,
       sorter: true,
     },
     {
       title: '最高薪资',
       dataIndex: 'salaryMax',
       render: (text: string) => <Text>{text}</Text>,
-      minWidth: 120,
+      minWidth: 100,
       sorter: true,
     },
     {
       title: '几薪',
       dataIndex: 'salaryTotalMonth',
       render: (text: string) => <Text>{text}</Text>,
-      minWidth: 80,
+      minWidth: 60,
       sorter: true,
     },
     {
@@ -181,7 +181,7 @@ const JobView: React.FC = () => {
         }
         return result;
       },
-      minWidth: 100,
+      minWidth: 200,
     },
     {
       title: '公司标签',

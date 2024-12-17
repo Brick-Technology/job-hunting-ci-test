@@ -1,20 +1,22 @@
-import { Job } from "../../../common/data/domain/job";
-import { Message } from "../../../common/api/message";
 import dayjs from "dayjs";
+import { Message } from "../../../common/api/message";
+import { JobStatisticGrouByPublishDateBO, TYPE_ENUM_DAY, TYPE_ENUM_HOUR, TYPE_ENUM_MONTH, TYPE_ENUM_WEEK } from "../../../common/data/bo/jobStatisticGrouByPublishDateBO";
+import { JobTagBO } from "../../../common/data/bo/jobTagBO";
+import { SearchJobBO } from "../../../common/data/bo/searchJobBO";
+import { Job } from "../../../common/data/domain/job";
+import { ChartBasicDTO } from "../../../common/data/dto/chartBasicDTO";
 import { JobDTO } from "../../../common/data/dto/jobDTO";
-import { toHump, convertEmptyStringToNull, genIdFromText, isNotEmpty, dateToStr } from "../../../common/utils";
+import { SearchJobDTO } from "../../../common/data/dto/searchJobDTO";
 import { StatisticJobBrowseDTO } from "../../../common/data/dto/statisticJobBrowseDTO";
 import { StatisticJobSearchGroupByAvgSalaryDTO } from "../../../common/data/dto/statisticJobSearchGroupByAvgSalaryDTO";
-import { SearchJobBO } from "../../../common/data/bo/searchJobBO";
-import { SearchJobDTO } from "../../../common/data/dto/searchJobDTO";
-import { postSuccessMessage, postErrorMessage } from "../util";
+import { TAG_SOURCE_TYPE_PLATFORM } from "../../../common/index";
+import { convertEmptyStringToNull, dateToStr, genIdFromText, isNotEmpty, toHump } from "../../../common/utils";
 import { getDb, getOne } from "../database";
-import { _getAllCompanyTagDTOByCompanyIds } from "./companyTagService";
-import { _getCompanyDTOByIds } from "./companyService";
+import { postErrorMessage, postSuccessMessage } from "../util";
 import { BaseService } from "./baseService";
-import { _getAllJobTagDTOByJobIds } from "./jobTagService";
-import { ChartBasicDTO } from "../../../common/data/dto/chartBasicDTO";
-import { JobStatisticGrouByPublishDateBO, TYPE_ENUM_MONTH, TYPE_ENUM_WEEK, TYPE_ENUM_DAY, TYPE_ENUM_HOUR } from "../../../common/data/bo/jobStatisticGrouByPublishDateBO";
+import { _getCompanyDTOByIds } from "./companyService";
+import { _getAllCompanyTagDTOByCompanyIds } from "./companyTagService";
+import { _addOrUpdateJobTag, _getAllJobTagDTOByJobIds } from "./jobTagService";
 
 const JOB_VISIT_TYPE_SEARCH = "SEARCH";
 const JOB_VISIT_TYPE_DETAIL = "DETAIL";
@@ -54,7 +56,7 @@ export const JobService = {
       });
       postErrorMessage(
         message,
-        "[worker] addOrUpdateJobBrowse error : " + e.message
+        "[worker] batchAddOrUpdateJobBrowse error : " + e.message
       );
     }
   },
@@ -69,6 +71,7 @@ export const JobService = {
       const now = new Date();
       for (let i = 0; i < param.length; i++) {
         await _insertOrUpdateJob(param[i], now);
+        await _insertJobTag(param[i]);
       }
       postSuccessMessage(message, {});
     } catch (e) {
@@ -91,6 +94,7 @@ export const JobService = {
       });
       for (let i = 0; i < param.length; i++) {
         await _insertOrUpdateJob(param[i], now);
+        await _insertJobTag(param[i]);
       }
       (await getDb()).exec({
         sql: "COMMIT",
@@ -146,7 +150,7 @@ export const JobService = {
     } catch (e) {
       postErrorMessage(
         message,
-        "[worker] addOrUpdateJobBrowse error : " + e.message
+        "[worker] addJobBrowseDetailHistory error : " + e.message
       );
     }
   },
@@ -623,7 +627,28 @@ function genJobSearchWhereConditionSql(param) {
 
 async function insertOrUpdateJobAndBrowseHistory(param, now) {
   await _insertOrUpdateJob(param, now, { update: false });
+  await _insertJobTag(param);
   await addJobBrowseHistory(param.jobId, now, JOB_VISIT_TYPE_SEARCH);
+}
+
+/**
+ * 
+ * @param {Job} param 
+ */
+async function _insertJobTag(param) {
+  let entity = new JobTagBO();
+  entity.jobId = param.jobId;
+  entity.sourceType = TAG_SOURCE_TYPE_PLATFORM;
+  entity.source = param.jobPlatform;
+  const tags = [];
+  if (param.skillTag) {
+    tags.push(...param.skillTag.split(",").filter(item => isNotEmpty(item)))
+  }
+  if (param.welfareTag) {
+    tags.push(...param.welfareTag.split(",").filter(item => isNotEmpty(item)))
+  }
+  entity.tags = tags;
+  await _addOrUpdateJobTag(entity);
 }
 
 async function _insertOrUpdateJob(param, now, { update = true } = {}) {
@@ -667,8 +692,8 @@ async function _insertOrUpdateJob(param, now, { update = true } = {}) {
             $boss_position: convertEmptyStringToNull(param.bossPosition),
             $update_datetime: dayjs(now).format("YYYY-MM-DD HH:mm:ss"),
             $is_full_company_name: param.isFullCompanyName,
-            $skill_tag: param.skillTag,
-            $welfare_tag: param.welfareTag,
+            $skill_tag: convertEmptyStringToNull(param.skillTag),
+            $welfare_tag: convertEmptyStringToNull(param.welfareTag),
           },
         });
       } else {
@@ -706,8 +731,8 @@ async function _insertOrUpdateJob(param, now, { update = true } = {}) {
               $boss_position: convertEmptyStringToNull(param.bossPosition),
               $update_datetime: currentRowUpdateDatetime.format("YYYY-MM-DD HH:mm:ss"),
               $is_full_company_name: param.isFullCompanyName,
-              $skill_tag: param.skillTag,
-              $welfare_tag: param.welfareTag,
+              $skill_tag: convertEmptyStringToNull(param.skillTag),
+              $welfare_tag: convertEmptyStringToNull(param.welfareTag),
             },
           });
         }
@@ -757,8 +782,8 @@ async function _insertOrUpdateJob(param, now, { update = true } = {}) {
         $create_datetime: dayjs(param.createDatetime ?? now).format("YYYY-MM-DD HH:mm:ss"),
         $update_datetime: dayjs(param.updateDatetime ?? now).format("YYYY-MM-DD HH:mm:ss"),
         $is_full_company_name: param.isFullCompanyName,
-        $skill_tag: param.skillTag,
-        $welfare_tag: param.welfareTag,
+        $skill_tag: convertEmptyStringToNull(param.skillTag),
+        $welfare_tag: convertEmptyStringToNull(param.welfareTag),
       },
     });
   }
@@ -877,7 +902,7 @@ export async function _fillSearchResultExtraInfo(items, queryRows) {
     item.companyTagDTOList = companyIdAndCompanyTagListMap.get(genIdFromText(item.jobCompanyName));
     item.jobTagDTOList = jobIdAndJobTagListMap.get(item.jobId);
     item.companyDTO = companyIdAndCompanyDTOListMap.get(genIdFromText(item.jobCompanyName));
-    item.skillTagList = item.skillTag?.split(",");
-    item.welfareTagList = item.welfareTag?.split(",");
+    item.skillTagList = item.skillTag?.split(",") || [];
+    item.welfareTagList = item.welfareTag?.split(",") || [];
   });
 }

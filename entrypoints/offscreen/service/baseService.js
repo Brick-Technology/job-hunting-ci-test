@@ -1,7 +1,7 @@
 import { Message } from "../../../common/api/message";
-import { postSuccessMessage, postErrorMessage } from "../util";
-import { insert, update, one, del, search, searchCount, batchDel, batchGet } from "../database";
 import { genUniqueId } from "../../../common/utils";
+import { batchDel, batchGet, del, insert, one, search, searchCount, update } from "../database";
+import { postErrorMessage, postSuccessMessage } from "../util";
 
 export class BaseService {
     constructor(tableName, tableIdColumn, entityClassCreateFunction, searchDTOCreateFunction, whereConditionFunction) {
@@ -101,8 +101,8 @@ export class BaseService {
     * @param {string} id
     * @param {string} column 
     */
-    async _deleteById(id, column) {
-        return del(this.tableName, column ?? this.tableIdColumn, id);
+    async _deleteById(id, column, { otherCondition } = { otherCondition: null }) {
+        return del(this.tableName, column ?? this.tableIdColumn, id, { otherCondition });
     }
 
     /**
@@ -134,8 +134,8 @@ export class BaseService {
      * @param {string[]} ids
      * @param {string} column 
      */
-    async _deleteByIds(ids, column) {
-        return batchDel(this.tableName, column ?? this.tableIdColumn, ids);
+    async _deleteByIds(ids, column, { otherCondition } = { otherCondition: null }) {
+        return batchDel(this.tableName, column ?? this.tableIdColumn, ids, { otherCondition });
     }
 
     /**
