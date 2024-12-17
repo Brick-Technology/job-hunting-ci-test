@@ -8,6 +8,7 @@ import { Icon } from "@iconify/react";
 import {
   Button,
   Col,
+  Flex,
   Form,
   Modal,
   Select,
@@ -25,6 +26,7 @@ import { WhitelistData } from "../../data/WhitelistData";
 import { useJob } from "../../hooks/job";
 import { useJobTag } from "../../hooks/jobTag";
 import JobTagEdit from "./JobTagEdit";
+import styles from "./JobTagView.module.css";
 const { platformFormat } = useJob();
 
 const { Text } = Typography;
@@ -77,12 +79,12 @@ const JobTagView: React.FC = () => {
         const result = [];
         value.filter(item => item.sourceType == TAG_SOURCE_TYPE_PLATFORM).map((item) => {
           result.push(
-            <Tag key={item.id}>{item.tagName}</Tag>
+            <Tag className={styles.tag} key={item.id}>{item.tagName}</Tag>
           );
         })
-        return result;
+        return <Flex wrap gap={2}>{result}</Flex>;
       },
-      minWidth: 100,
+      minWidth: 200,
     },
     {
       title: '自定义标签',
@@ -91,12 +93,12 @@ const JobTagView: React.FC = () => {
         const result = [];
         value.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM).map((item) => {
           result.push(
-            <Tag key={item.id}>{item.isPublic ? <Icon icon="material-symbols:public" /> : <Icon icon="material-symbols:private-connectivity" />}{item.tagName}</Tag>
+            <Tag className={styles.tag} key={item.id}>{item.isPublic ? <Icon icon="material-symbols:public" /> : <Icon icon="material-symbols:private-connectivity" />}{item.tagName}</Tag>
           );
         })
-        return result;
+        return <Flex wrap gap={2}>{result}</Flex>;
       },
-      minWidth: 100,
+      minWidth: 200,
     },
     {
       title: '标签数',
@@ -122,7 +124,7 @@ const JobTagView: React.FC = () => {
             setEditJobTagData({
               id: record.jobId,
               name: record.name,
-              tags: record.tagArray.filter(item => (item.sourceType == TAG_SOURCE_TYPE_CUSTOM && item.source == null)).map(item=>item.tagName),
+              tags: record.tagArray.filter(item => (item.sourceType == TAG_SOURCE_TYPE_CUSTOM && item.source == null)).map(item => item.tagName),
             });
             setIsJobTagEditModalOpen(true);
           }}>编辑标签</Button>

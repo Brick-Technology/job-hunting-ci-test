@@ -7,6 +7,7 @@
 1. (ContentScript)记录职位技能标签，职位福利标签。
 2. 职位标签新增sourceType(来源类型)，source（来源）。
 3. 标签新增是否公开选项字段。
+4. (Sidepanel)新增标签管理页。
 
 ### 🐛 Fixed
 

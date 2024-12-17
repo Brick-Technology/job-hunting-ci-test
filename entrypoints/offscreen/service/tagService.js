@@ -1,11 +1,60 @@
 import dayjs from "dayjs";
 import { Message } from "../../../common/api/message";
+import { TagSearchBO } from "../../../common/data/bo/tagSearchBO";
 import { Tag } from "../../../common/data/domain/tag";
+import { TagSearchDTO } from "../../../common/data/dto/tagSearchDTO";
 import { convertEmptyStringToNull, genIdFromText } from "../../../common/utils";
 import { batchGet, getAll, getDb, getOne } from "../database";
 import { postErrorMessage, postSuccessMessage } from "../util";
+import { BaseService } from "./baseService";
+
+const SERVICE_INSTANCE = new BaseService("tag", "tag_id",
+    () => {
+        return new Tag();
+    },
+    () => {
+        return new TagSearchDTO();
+    },
+    (param) => {
+        let whereCondition = "";
+        if (param.tagName) {
+            whereCondition += " AND tag_name LIKE '%" + param.tagName + "%' ";
+        }
+        if (param.isPublic != null) {
+            whereCondition += ` AND is_public = ${param.isPublic}`;
+        }
+        return whereCondition;
+    }
+);
 
 export const TagService = {
+
+    /**
+     * 
+     * @param {Message} message 
+     * @param {TagSearchBO} param 
+     * 
+     * @returns TagSearchDTO
+     */
+    tagSearch: async function (message, param) {
+        SERVICE_INSTANCE.search(message, param);
+    },
+    /**
+     *
+     * @param {Message} message
+     * @param {string} param id
+     */
+    tagDeleteById: async function (message, param) {
+        SERVICE_INSTANCE.deleteById(message, param);
+    },
+    /**
+     *
+     * @param {Message} message
+     * @param {string[]} param ids
+     */
+    tagDeleteByIds: async function (message, param) {
+        SERVICE_INSTANCE.deleteByIds(message, param);
+    },
     /**
      *
      * @param {Message} message
@@ -107,28 +156,30 @@ export async function _addNotExistsTags(tags) {
  */
 export async function _addOrUpdateTag(param) {
     const now = new Date();
-    let rows = [];
-    (await getDb()).exec({
-        sql: SQL_SELECT_BY_ID,
-        rowMode: "object",
-        bind: [param.tagId],
-        resultRows: rows,
-    });
-    if (rows.length > 0) {
+    if (param.tagId) {
+        let rows = [];
         (await getDb()).exec({
-            sql: SQL_UPDATE,
-            bind: {
-                $tag_id: convertEmptyStringToNull(param.tagId),
-                $tag_name: convertEmptyStringToNull(param.tagName),
-                $is_public: param.isPublic,
-                $update_datetime: dayjs(now).format("YYYY-MM-DD HH:mm:ss"),
-            },
+            sql: SQL_SELECT_BY_ID,
+            rowMode: "object",
+            bind: [param.tagId],
+            resultRows: rows,
         });
+        if (rows.length > 0) {
+            (await getDb()).exec({
+                sql: SQL_UPDATE,
+                bind: {
+                    $tag_id: convertEmptyStringToNull(param.tagId),
+                    $tag_name: convertEmptyStringToNull(param.tagName),
+                    $is_public: param.isPublic,
+                    $update_datetime: dayjs(now).format("YYYY-MM-DD HH:mm:ss"),
+                },
+            });
+        }
     } else {
         (await getDb()).exec({
             sql: SQL_INSERT,
             bind: {
-                $tag_id: convertEmptyStringToNull(param.tagId),
+                $tag_id: genIdFromText(param.tagName),
                 $tag_name: convertEmptyStringToNull(param.tagName),
                 $is_public: param.isPublic,
                 $create_datetime: dayjs(now).format("YYYY-MM-DD HH:mm:ss"),
@@ -136,6 +187,7 @@ export async function _addOrUpdateTag(param) {
             },
         });
     }
+
 }
 
 const SQL_SELECT = `SELECT tag_id, tag_name, create_datetime, update_datetime,is_public FROM tag`;

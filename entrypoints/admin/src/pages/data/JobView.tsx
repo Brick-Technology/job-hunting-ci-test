@@ -1,11 +1,14 @@
+import { TAG_SOURCE_TYPE_CUSTOM } from "@/common";
 import { JobApi, TagApi } from "@/common/api";
 import { JobTagBO } from "@/common/data/bo/jobTagBO";
 import { jobDataToExcelJSONArray } from "@/common/excel";
 import { dateToStr } from "@/common/utils";
+import { Icon } from "@iconify/react";
 import {
   Button,
   Col,
   DatePicker,
+  Flex,
   Form,
   Input,
   Modal,
@@ -24,7 +27,7 @@ import { JobTagEditData } from "../../data/JobTagEditData";
 import { WhitelistData } from "../../data/WhitelistData";
 import { useJob } from "../../hooks/job";
 import JobTagEdit from "./JobTagEdit";
-
+import styles from "./JobView.module.css";
 const { RangePicker } = DatePicker;
 const { Text } = Typography;
 const { convertToJobDataList, platformFormat, convertSortField } = useJob();
@@ -170,16 +173,17 @@ const JobView: React.FC = () => {
     {
       title: '职位标签',
       dataIndex: 'jobTagList',
-      render: (value: { tagName: string }[]) => {
+      render: (value: { tagName: string, sourceType: string, isPublic: boolean, source?: string }[]) => {
         const result = [];
         if (value && value.length > 0) {
-          value.map((item) => {
+          value.map((item, index) => {
             result.push(
-              <Tag key={item.tagName}>{item.tagName}</Tag>
+              item.sourceType == TAG_SOURCE_TYPE_CUSTOM ? <Tag className={styles.tag} key={index}>{item.isPublic ? <Icon icon="material-symbols:public" /> : <Icon icon="material-symbols:private-connectivity" />}{item.tagName}</Tag> :
+                <Tag className={styles.tag} key={index} bordered={false} >{item.tagName}</Tag>
             );
           })
         }
-        return result;
+        return <Flex wrap gap={2}>{result}</Flex>;
       },
       minWidth: 200,
     },
@@ -195,7 +199,7 @@ const JobView: React.FC = () => {
             );
           })
         }
-        return result;
+        return <Flex wrap gap={2}>{result}</Flex>;
       },
       minWidth: 100,
     },
@@ -243,7 +247,7 @@ const JobView: React.FC = () => {
             setEditJobTagData({
               id: record.id,
               name: record.name,
-              tags: record.jobTagList?.map(item => item.tagName)
+              tags: record.jobTagList?.filter(item => (item.sourceType == TAG_SOURCE_TYPE_CUSTOM && item.source == null)).map(item => item.tagName)
             });
             setIsJobTagEditModalOpen(true);
           }}>编辑职位标签</Button>

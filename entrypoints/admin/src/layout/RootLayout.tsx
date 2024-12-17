@@ -96,6 +96,7 @@ const RootLayout: React.FC = () => {
               children: [
                 { key: "job", label: "职位" },
                 { key: "company", label: "公司" },
+                { key: "tag", label: "标签" },
                 { key: "companyTag", label: "公司标签" },
                 { key: "jobTag", label: "职位标签" },
               ],

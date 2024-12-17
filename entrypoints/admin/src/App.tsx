@@ -19,6 +19,7 @@ import TaskView from "./pages/dataSharePlan/TaskView";
 import DataSharePlanWelcomeView from "./pages/dataSharePlan/WelcomeView";
 import useAuthStore from "./store/AuthStore";
 import useDataSharePlanStore from "./store/DataSharePlanStore";
+import TagView from "./pages/data/TagView";
 
 
 const App: React.FC = () => {
@@ -52,6 +53,7 @@ const App: React.FC = () => {
           <Route path="bbs" element={<BbsView />} />
           <Route path="job" element={<JobView />} />
           <Route path="company" element={<CompanyView />} />
+          <Route path="tag" element={<TagView />} />
           <Route path="jobTag" element={<JobTagView />} />
           <Route path="companyTag" element={<CompanyTagView />} />
           <Route path="dataSharePlanWelcome" element={<DataSharePlanWelcomeView />} />

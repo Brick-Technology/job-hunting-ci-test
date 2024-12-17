@@ -1,49 +1,36 @@
-import { Job } from "../data/domain/job";
-import { JobDTO } from "../data/dto/jobDTO";
-import { invoke } from "./bridge";
-import { StatisticJobBrowseDTO } from "../data/dto/statisticJobBrowseDTO";
-import { SearchJobBO } from "../data/bo/searchJobBO";
-import { SearchJobDTO } from "../data/dto/searchJobDTO";
-import { StatisticJobSearchGroupByAvgSalaryDTO } from "../data/dto/statisticJobSearchGroupByAvgSalaryDTO";
-import { Company } from "../data/domain/company";
-import { CONTENT_SCRIPT } from "./bridgeCommon";
-import { CompanyTagBO } from "../data/bo/companyTagBO";
-import { CompanyTagDTO } from "../data/dto/companyTagDTO";
-import { SearchCompanyTagBO } from "../data/bo/searchCompanyTagBO";
-import { SearchCompanyTagDTO } from "../data/dto/searchCompanyTagDTO";
-import { StatisticCompanyTagDTO } from "../data/dto/statisticCompanyTagDTO";
-import { SearchCompanyBO } from "../data/bo/searchCompanyBO";
-import { SearchCompanyDTO } from "../data/dto/searchCompanyDTO";
-import { StatisticCompanyDTO } from "../data/dto/statisticCompanyDTO";
 import { CompanyBO } from "../data/bo/companyBO";
-import { OauthDTO } from "../data/dto/oauthDTO";
-import { AssistantStatisticDTO } from "../data/dto/assistantStatisticDTO";
-import { CompanyDTO } from "../data/dto/companyDTO";
+import { CompanyTagBO } from "../data/bo/companyTagBO";
+import { JobTagSearchBO } from "../data/bo/jobTagSearchBO";
+import { SearchCompanyBO } from "../data/bo/searchCompanyBO";
+import { SearchCompanyTagBO } from "../data/bo/searchCompanyTagBO";
+import { SearchDataSharePartnerBO } from "../data/bo/searchDataSharePartnerBO";
+import { SearchJobBO } from "../data/bo/searchJobBO";
+import { SearchMissionLogBO } from "../data/bo/searchMissionLogBO";
+import { SearchTaskBO } from "../data/bo/searchTaskBO";
+import { SearchTaskDataDownloadBO } from "../data/bo/searchTaskDataDownloadBO";
+import { SearchTaskDataMergeBO } from "../data/bo/searchTaskDataMergeBO";
+import { SearchTaskDataUploadBO } from "../data/bo/searchTaskDataUploadBO";
+import { TagSearchBO } from "../data/bo/tagSearchBO";
+import { Company } from "../data/domain/company";
+import { DataSharePartner } from "../data/domain/dataSharePartner";
+import { File } from "../data/domain/file";
+import { Job } from "../data/domain/job";
 import { Mission } from "../data/domain/mission";
 import { MissionLog } from "../data/domain/missionLog";
-import { SearchMissionLogBO } from "../data/bo/searchMissionLogBO";
-import { SearchMissionLogDTO } from "../data/dto/searchMissionLogDTO";
-import { SearchTaskBO } from "../data/bo/searchTaskBO";
-import { SearchTaskDTO } from "../data/dto/searchTaskDTO";
-import { SearchTaskDataUploadBO } from "../data/bo/searchTaskDataUploadBO";
-import { SearchTaskDataUploadDTO } from "../data/dto/searchTaskDataUploadDTO";
-import { TaskDataUpload } from "../data/domain/taskDataUpload";
-import { File } from "../data/domain/file";
-import { SearchTaskDataDownloadBO } from "../data/bo/searchTaskDataDownloadBO";
-import { SearchTaskDataDownloadDTO } from "../data/dto/searchTaskDataDownloadDTO";
-import { SearchTaskDataMergeBO } from "../data/bo/searchTaskDataMergeBO";
-import { SearchTaskDataMergeDTO } from "../data/dto/searchTaskDataMergeDTO";
+import { Tag } from "../data/domain/tag";
 import { TaskDataDownload } from "../data/domain/taskDataDownload";
 import { TaskDataMerge } from "../data/domain/taskDataMerge";
-import { DataSharePartner } from "../data/domain/dataSharePartner";
-import { SearchDataSharePartnerBO } from "../data/bo/searchDataSharePartnerBO";
+import { TaskDataUpload } from "../data/domain/taskDataUpload";
+import { OauthDTO } from "../data/dto/oauthDTO";
 import { SearchDataSharePartnerDTO } from "../data/dto/searchDataSharePartnerDTO";
-import { StatisticDataSharePartnerDTO } from "../data/dto/statisticDataSharePartnerDTO";
-import { StatisticTaskBO } from "../data/bo/statisticTaskBO";
-import { StatisticTaskDTO } from "../data/dto/statisticTaskDTO";
-import { JobTagSearchBO } from "../data/bo/jobTagSearchBO";
-import { JobTagSearchDTO } from "../data/dto/jobTagSearchDTO";
-import { TaskStatisticBO } from "../data/bo/taskStatisticBO";
+import { SearchMissionLogDTO } from "../data/dto/searchMissionLogDTO";
+import { SearchTaskDataDownloadDTO } from "../data/dto/searchTaskDataDownloadDTO";
+import { SearchTaskDataMergeDTO } from "../data/dto/searchTaskDataMergeDTO";
+import { SearchTaskDataUploadDTO } from "../data/dto/searchTaskDataUploadDTO";
+import { SearchTaskDTO } from "../data/dto/searchTaskDTO";
+import { StatisticJobBrowseDTO } from "../data/dto/statisticJobBrowseDTO";
+import { invoke } from "./bridge";
+import { CONTENT_SCRIPT } from "./bridgeCommon";
 
 
 export const JobApi = {
@@ -458,7 +445,48 @@ export const TagApi = {
   getAllTag: async function () {
     let result = await invoke(this.getAllTag.name, {});
     return result.data;
-  }
+  },
+
+  /**
+   * 
+   * @param {TagSearchBO} param 
+   * @returns TagSearchDTO
+   */
+  tagSearch: async function (param) {
+    let result = await invoke(this.tagSearch.name, param);
+    return result.data;
+  },
+
+  /**
+   * 
+   * @param {string} param id
+   * @returns 
+   */
+  tagDeleteById: async function (param) {
+    return await invoke(this.tagDeleteById.name, param);
+  },
+
+  /**
+  * 
+  * @param {string[]} param ids
+  * @returns 
+  */
+  tagDeleteByIds: async function (param) {
+    return await invoke(this.tagDeleteByIds.name, param);
+  },
+
+
+  /**
+   * 
+   * @param {Tag} param tag
+   * 
+   */
+  addOrUpdateTag: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
+    return await invoke(this.addOrUpdateTag.name, param, {
+      invokeEnv: invokeEnv,
+    });
+  },
+
 }
 
 export const AuthApi = {

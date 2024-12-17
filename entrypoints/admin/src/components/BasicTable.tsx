@@ -36,6 +36,8 @@ export type BasicTableProps = {
         convertSortField?: (key: any) => string,
         search: (searchParam) => Promise<any>,
         convertToDataList?: (data: any) => any,
+        orderByColumn?: string,
+        searchParam?: any,
     },
     rowKeyFunction?: (record) => string;
     expandedRowRender?: (record) => JSX.Element,
@@ -52,18 +54,18 @@ export type BasicTableProps = {
 const BasicTable = forwardRef(function Component(props: BasicTableProps, ref) {
     const { searchProps, expandedRowRender, exportProps, mode, onAdd, onDelete, rowKeyFunction, additionMenu } = props;
 
-    const { columns, searchFields, fillSearchParam, convertSortField, search, convertToDataList } = searchProps;
+    const { columns, searchFields, fillSearchParam, convertSortField, search, convertToDataList, orderByColumn = "updateDatetime", searchParam: defaultSearchParam = {} } = searchProps;
     const { dataToExcelJSONArray, title } = exportProps || {};
 
     const [dataSource, setDataSource] = useState<any>();
     const [originalData, setOriginalData] = useState();
     const [loading, setLoading] = useState(false);
-    const [searchParam, setSearchParam] = useState<any>({
+    const [searchParam, setSearchParam] = useState<any>(Object.assign({
         pageNum: 1,
         pageSize: UI_DEFAULT_PAGE_SIZE,
-        orderByColumn: "updateDatetime",
+        orderByColumn,
         orderBy: "DESC",
-    });
+    }, defaultSearchParam));
     const [tableParams, setTableParams] = useState<TableParams>({
         pagination: {
             current: 1,
@@ -182,7 +184,7 @@ const BasicTable = forwardRef(function Component(props: BasicTableProps, ref) {
     return <>
         <Flex vertical>
             <Space size="small" direction="vertical">
-                {mode?.length > 0 ? <Form form={form} name="advanced_search" style={{
+                {mode?.length > 0 ? <Form form={form} initialValues={defaultSearchParam} name="advanced_search" style={{
                     maxWidth: 'none',
                     background: token.colorFillAlter,
                     borderRadius: token.borderRadiusLG,
