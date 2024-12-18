@@ -3,6 +3,10 @@ import minMax from 'dayjs/plugin/minMax'; // ES 2015
 import JSZip from "jszip";
 import { read, utils, writeXLSX } from "xlsx";
 import {
+    DATA_TYPE_NAME_COMPANY,
+    DATA_TYPE_NAME_COMPANY_TAG,
+    DATA_TYPE_NAME_JOB,
+    DATA_TYPE_NAME_JOB_TAG,
     MAX_RECORD_COUNT,
     TASK_STATUS_ERROR,
     TASK_STATUS_FINISHED,
@@ -18,7 +22,9 @@ import {
     TASK_TYPE_JOB_DATA_DOWNLOAD,
     TASK_TYPE_JOB_DATA_MERGE,
     TASK_TYPE_JOB_DATA_UPLOAD,
-    TASK_TYPE_JOB_TAG_DATA_UPLOAD
+    TASK_TYPE_JOB_TAG_DATA_DOWNLOAD,
+    TASK_TYPE_JOB_TAG_DATA_MERGE,
+    TASK_TYPE_JOB_TAG_DATA_UPLOAD,
 } from "../../../common";
 import { CompanyApi, DataSharePartnerApi, DBApi, FileApi, JobApi, TaskApi, TaskDataDownloadApi, TaskDataMergeApi, TaskDataUploadApi } from "../../../common/api";
 import { BACKGROUND } from "../../../common/api/bridgeCommon";
@@ -44,16 +50,19 @@ import {
     companyTagDataToExcelJSONArray,
     companyTagExcelDataToObjectArray,
     JOB_FILE_HEADER,
+    JOB_TAG_FILE_HEADER,
     jobDataToExcelJSONArray,
     jobExcelDataToObjectArray,
     jobTagDataToExcelJSONArray,
+    jobTagExcelDataToObjectArray,
     validImportData
 } from "../../../common/excel";
 import { debugLog, errorLog, infoLog } from "../../../common/log";
-import { getMergeDataListForCompany, getMergeDataListForCompanyTag, getMergeDataListForJob } from "../../../common/service/dataSyncService";
+import { getMergeDataListForCompany, getMergeDataListForCompanyTag, getMergeDataListForJob, getMergeDataListForJobTag } from "../../../common/service/dataSyncService";
 import { dateToStr } from "../../../common/utils";
 import { bytesToBase64 } from "../../../common/utils/base64";
 import { getToken, setToken } from "./authService";
+import { getUser } from "./userService";
 
 dayjs.extend(minMax);
 export const TaskService = {
@@ -238,6 +247,7 @@ export async function calculateDownloadTask({ userName, repoName }) {
                     await addDataDownloadTask({ type: TASK_TYPE_JOB_DATA_DOWNLOAD, datetime: day, userName, repoName, })
                     await addDataDownloadTask({ type: TASK_TYPE_COMPANY_DATA_DOWNLOAD, datetime: day, userName, repoName, })
                     await addDataDownloadTask({ type: TASK_TYPE_COMPANY_TAG_DATA_DOWNLOAD, datetime: day, userName, repoName, })
+                    await addDataDownloadTask({ type: TASK_TYPE_JOB_TAG_DATA_DOWNLOAD, datetime: day, userName, repoName, })
                 }
                 await DBApi.dbCommitTransaction({}, { invokeEnv: BACKGROUND });
             } catch (e) {
@@ -254,10 +264,6 @@ export async function calculateDownloadTask({ userName, repoName }) {
 
 const TASK_HANDLE_MAP = new Map();
 
-const DATA_TYPE_NAME_JOB = "job";
-const DATA_TYPE_NAME_COMPANY = "company";
-const DATA_TYPE_NAME_COMPANY_TAG = "company_tag";
-const DATA_TYPE_NAME_JOB_TAG = "job_tag";
 
 // Upload
 TASK_HANDLE_MAP.set(TASK_TYPE_JOB_DATA_UPLOAD, async (dataId) => {
@@ -283,6 +289,11 @@ TASK_HANDLE_MAP.set(TASK_TYPE_COMPANY_DATA_DOWNLOAD, async (dataId) => {
 TASK_HANDLE_MAP.set(TASK_TYPE_COMPANY_TAG_DATA_DOWNLOAD, async (dataId) => {
     return downloadDataByDataId(dataId, DATA_TYPE_NAME_COMPANY_TAG, TASK_TYPE_COMPANY_TAG_DATA_MERGE);
 })
+TASK_HANDLE_MAP.set(TASK_TYPE_JOB_TAG_DATA_DOWNLOAD, async (dataId) => {
+    return downloadDataByDataId(dataId, DATA_TYPE_NAME_JOB_TAG, TASK_TYPE_JOB_TAG_DATA_MERGE);
+})
+
+// Merge
 TASK_HANDLE_MAP.set(TASK_TYPE_JOB_DATA_MERGE, async (dataId) => {
     return mergeDataByDataId(dataId, TASK_TYPE_JOB_DATA_MERGE, DATA_TYPE_NAME_JOB, JOB_FILE_HEADER, jobExcelDataToObjectArray, async (items, taskDataMerge) => {
         //处理数据冲突问题，根据创建时间来判断
@@ -294,8 +305,6 @@ TASK_HANDLE_MAP.set(TASK_TYPE_JOB_DATA_MERGE, async (dataId) => {
         return targetList.length;
     });
 })
-
-// Merge
 TASK_HANDLE_MAP.set(TASK_TYPE_COMPANY_DATA_MERGE, async (dataId) => {
     return mergeDataByDataId(dataId, TASK_TYPE_COMPANY_DATA_MERGE, DATA_TYPE_NAME_COMPANY, COMPANY_FILE_HEADER, companyExcelDataToObjectArray, async (items, taskDataMerge) => {
         //处理数据冲突问题，根据数据来源更新时间来判断
@@ -314,6 +323,26 @@ TASK_HANDLE_MAP.set(TASK_TYPE_COMPANY_TAG_DATA_MERGE, async (dataId) => {
         })
         await CompanyApi.batchAddOrUpdateCompanyTag(targetList, { invokeEnv: BACKGROUND });
         return targetList.length;
+    });
+})
+TASK_HANDLE_MAP.set(TASK_TYPE_JOB_TAG_DATA_MERGE, async (dataId) => {
+    return mergeDataByDataId(dataId, TASK_TYPE_JOB_TAG_DATA_MERGE, DATA_TYPE_NAME_JOB_TAG, JOB_TAG_FILE_HEADER, jobTagExcelDataToObjectArray, async (items, taskDataMerge) => {
+        let userDTO = await getUser();
+        if (userDTO) {
+            let username = userDTO.login;
+            //处理数据冲突问题，根据更新时间合并
+            let targetList = await getMergeDataListForJobTag(items, "jobId", async (ids) => {
+                let searchParam = new JobTagExportBO();
+                //如果数据是当前登录用户，则将source设置为空，作为本地用户
+                searchParam.source = taskDataMerge.username == username ? "" : taskDataMerge.username;
+                searchParam.jobIds = ids;
+                return await JobApi.jobTagExport(searchParam, { invokeEnv: BACKGROUND });
+            })
+            await JobApi.jobTagBatchAddOrUpdate(targetList, { invokeEnv: BACKGROUND });
+            return targetList.length;
+        } else {
+            throw `[Task Data Merge] login user not found`;
+        }
     });
 })
 

@@ -170,7 +170,16 @@ export const JobApi = {
       invokeEnv: invokeEnv,
     });
   },
-
+  /**
+     * 
+     * @param {JobTagBO[]} param
+     */
+  jobTagBatchAddOrUpdate: async function (param,
+    { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
+    return invoke(this.jobTagBatchAddOrUpdate.name, param, {
+      invokeEnv: invokeEnv,
+    });
+  },
   /**
    * 
    * @param {JobTagBO[]} param

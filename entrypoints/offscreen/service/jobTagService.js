@@ -150,6 +150,25 @@ export const JobTagService = {
      * @param {Message} message 
      * @param {JobTagBO[]} param 
      */
+    jobTagBatchAddOrUpdate: async function (message, param) {
+        try {
+            for (let i = 0; i < param.length; i++) {
+                await _addOrUpdateJobTag(param[i]);
+            }
+            postSuccessMessage(message, {});
+        } catch (e) {
+            await rollbackTransaction();
+            postErrorMessage(
+                message,
+                "[worker] jobTagBatchAddOrUpdate error : " + e.message
+            );
+        }
+    },
+    /**
+     * 
+     * @param {Message} message 
+     * @param {JobTagBO[]} param 
+     */
     jobTagBatchAddOrUpdateWithTransaction: async function (message, param) {
         try {
             await beginTransaction()
