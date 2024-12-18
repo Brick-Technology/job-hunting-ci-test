@@ -1,5 +1,5 @@
 import { CompanyApi, JobApi } from "@/common/api";
-import { JobTagSearchBO } from "@/common/data/bo/jobTagSearchBO";
+import { JobTagExportBO } from "@/common/data/bo/jobTagExportBO";
 import { SearchCompanyBO } from "@/common/data/bo/searchCompanyBO";
 import { SearchCompanyTagBO } from "@/common/data/bo/searchCompanyTagBO";
 import { SearchJobBO } from "@/common/data/bo/searchJobBO";
@@ -85,21 +85,20 @@ export function useData() {
     }
 
     const getJobTagDataToExcelJsonArray = async () => {
-        let searchParam = new JobTagSearchBO();
-        searchParam.pageNum = 1;
-        searchParam.pageSize = MAX_RECORD_COUNT;
-        searchParam.orderByColumn = "updateDatetime";
-        searchParam.orderBy = "DESC";
-        let data = await JobApi.jobTagSearch(searchParam);
-        let list = data.items;
+        let searchParam = new JobTagExportBO();
+        searchParam.source = "";
+        let list = await JobApi.jobTagExport(searchParam);
         let result = jobTagDataToExcelJSONArray(list);
         return result;
     }
 
     const saveJobTagData = async (data) => {
         let result = jobTagExcelDataToObjectArray(data);
-        let targetList = await getMergeDataListForJobTag(result, async (ids) => {
-            return await JobApi.jobTagGetAllDTOByJobIds(ids);
+        let targetList = await getMergeDataListForJobTag(result, "jobId", async (ids) => {
+            let searchParam = new JobTagExportBO();
+            searchParam.source = "";
+            searchParam.jobIds = ids;
+            return await JobApi.jobTagExport(searchParam);
         })
         await JobApi.jobTagBatchAddOrUpdateWithTransaction(targetList);
         return targetList;

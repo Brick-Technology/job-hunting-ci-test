@@ -1,8 +1,8 @@
-import { Job } from "./data/domain/job";
 import { CompanyBO } from "./data/bo/companyBO";
 import { CompanyTagBO } from "./data/bo/companyTagBO";
-import { genIdFromText, convertDateStringToDateObject } from "./utils"
 import { JobTagBO } from "./data/bo/jobTagBO";
+import { Job } from "./data/domain/job";
+import { convertDateStringToDateObject, genIdFromText } from "./utils";
 
 const HEADER_VERSION_PREFIX = "__VERSION_";
 
@@ -155,8 +155,8 @@ export const jobExcelDataToObjectArray = (data) => {
         item.jobDescription = dataItem['职位描述'];
         item.jobDegreeName = dataItem['学历'];
         item.jobYear = dataItem['所需经验'];
-        item.skillTag= dataItem['技能'];
-        item.welfareTag= dataItem['福利'];
+        item.skillTag = dataItem['技能'];
+        item.welfareTag = dataItem['福利'];
         item.jobSalaryMin = dataItem['最低薪资'];
         item.jobSalaryMax = dataItem['最高薪资'];
         item.jobSalaryTotalMonth = dataItem['几薪'];
@@ -323,30 +323,56 @@ export const companyTagExcelDataToObjectArray = (data) => {
     return companyTagBOList;
 }
 
-export const JOB_TAG_FILE_HEADER = [[
-    "职位编号",
-    "标签",
-]];
+export const JOB_TAG_FILE_HEADER = [
+    [
+        "职位编号",
+        "标签",
+    ],
+    [
+        "职位编号",
+        "标签",
+        "记录更新日期",
+    ],
+];
+
+export const jobTagDataToExcelJSONArrayForView = (list) => {
+    let result = [];
+    for (let i = 0; i < list.length; i++) {
+        let item = list[i];
+        let obj = {
+            职位编号: item.jobId,
+            标签: item.tagNameArray.join(","),
+            记录更新日期: item.updateDatetime,
+        }
+        fillDataVersion(obj, JOB_TAG_FILE_HEADER);
+        result.push(obj);
+    }
+    return result;
+}
 
 export const jobTagDataToExcelJSONArray = (list) => {
     let result = [];
     for (let i = 0; i < list.length; i++) {
         let item = list[i];
-        result.push({
+        let obj = {
             职位编号: item.jobId,
-            标签: item.tagNameArray.join(","),
-        });
+            标签: item.tagNameArray,
+            记录更新日期: item.updateDatetime,
+        }
+        fillDataVersion(obj, JOB_TAG_FILE_HEADER);
+        result.push(obj);
     }
     return result;
 }
 
-export const jobTagExcelDataToObjectArray = (data) => {
+export const jobTagExcelDataToObjectArray = (data, datetime) => {
     let result = [];
     for (let i = 0; i < data.length; i++) {
         let dataItem = data[i];
         let item = new JobTagBO();
         item.jobId = dataItem['职位编号'];
         item.tags = dataItem['标签'].split(",");
+        item.updateDatetime = convertDateStringToDateObject(dataItem['记录更新日期']) ?? convertDateStringToDateObject(datetime);
         result.push(item);
     }
     return result;

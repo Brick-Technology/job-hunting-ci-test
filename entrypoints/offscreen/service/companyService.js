@@ -271,7 +271,7 @@ export const CompanyService = {
      * @param {Message} message
      * @param {*} param
      */
-  companyStatisticGrouByStartDate: async function (message, param) {
+  companyStatisticGroupByStartDate: async function (message, param) {
     try {
       let sql = `SELECT 
           t2.level AS name,
@@ -306,7 +306,7 @@ export const CompanyService = {
     } catch (e) {
       postErrorMessage(
         message,
-        "[worker] companyStatisticGrouByStartDate error : " + e.message
+        "[worker] companyStatisticGroupByStartDate error : " + e.message
       );
     }
   },
@@ -316,7 +316,7 @@ export const CompanyService = {
    * @param {Message} message
    * @param {*} param
    */
-  companyStatisticGrouByInsurance: async function (message, param) {
+  companyStatisticGroupByInsurance: async function (message, param) {
     try {
       let sql = `SELECT 
           t2.level AS name,
@@ -355,7 +355,7 @@ export const CompanyService = {
     } catch (e) {
       postErrorMessage(
         message,
-        "[worker] companyStatisticGrouByInsurance error : " + e.message
+        "[worker] companyStatisticGroupByInsurance error : " + e.message
       );
     }
   },

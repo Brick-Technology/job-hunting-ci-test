@@ -1,5 +1,6 @@
 import { CompanyBO } from "../data/bo/companyBO";
 import { CompanyTagBO } from "../data/bo/companyTagBO";
+import { JobTagExportBO } from "../data/bo/jobTagExportBO";
 import { JobTagSearchBO } from "../data/bo/jobTagSearchBO";
 import { SearchCompanyBO } from "../data/bo/searchCompanyBO";
 import { SearchCompanyTagBO } from "../data/bo/searchCompanyTagBO";
@@ -243,8 +244,8 @@ export const JobApi = {
   * @param {*} param 
   * @returns []
   */
-  jobStatisticGrouByPublishDate: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.jobStatisticGrouByPublishDate
+  jobStatisticGroupByPublishDate: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
+    let result = await invoke(this.jobStatisticGroupByPublishDate
       .name, param, { invokeEnv: invokeEnv });
     return result.data;
   },
@@ -254,8 +255,19 @@ export const JobApi = {
   * @param {*} param 
   * @returns []
   */
-  jobStatisticGrouByPlatform: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.jobStatisticGrouByPlatform
+  jobStatisticGroupByPlatform: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
+    let result = await invoke(this.jobStatisticGroupByPlatform
+      .name, param, { invokeEnv: invokeEnv });
+    return result.data;
+  },
+
+  /**
+  * 
+  * @param {JobTagExportBO} param 
+  * @returns []
+  */
+  jobTagExport: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
+    let result = await invoke(this.jobTagExport
       .name, param, { invokeEnv: invokeEnv });
     return result.data;
   },
@@ -417,8 +429,8 @@ export const CompanyApi = {
   * @param {*} param 
   * @returns []
   */
-  companyStatisticGrouByStartDate: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.companyStatisticGrouByStartDate
+  companyStatisticGroupByStartDate: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
+    let result = await invoke(this.companyStatisticGroupByStartDate
       .name, param, { invokeEnv: invokeEnv });
     return result.data;
   },
@@ -428,8 +440,8 @@ export const CompanyApi = {
   * @param {*} param 
   * @returns []
   */
-  companyStatisticGrouByInsurance: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.companyStatisticGrouByInsurance
+  companyStatisticGroupByInsurance: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
+    let result = await invoke(this.companyStatisticGroupByInsurance
       .name, param, { invokeEnv: invokeEnv });
     return result.data;
   },

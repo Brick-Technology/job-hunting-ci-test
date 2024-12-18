@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import { Message } from "../../../common/api/message";
-import { JobStatisticGrouByPublishDateBO, TYPE_ENUM_DAY, TYPE_ENUM_HOUR, TYPE_ENUM_MONTH, TYPE_ENUM_WEEK } from "../../../common/data/bo/jobStatisticGrouByPublishDateBO";
+import { JobStatisticGroupByPublishDateBO, TYPE_ENUM_DAY, TYPE_ENUM_HOUR, TYPE_ENUM_MONTH, TYPE_ENUM_WEEK } from "../../../common/data/bo/jobStatisticGroupByPublishDateBO";
 import { JobTagBO } from "../../../common/data/bo/jobTagBO";
 import { SearchJobBO } from "../../../common/data/bo/searchJobBO";
 import { Job } from "../../../common/data/domain/job";
@@ -466,9 +466,9 @@ export const JobService = {
   /**
      *
      * @param {Message} message
-     * @param {JobStatisticGrouByPublishDateBO} param
+     * @param {JobStatisticGroupByPublishDateBO} param
      */
-  jobStatisticGrouByPublishDate: async function (message, param) {
+  jobStatisticGroupByPublishDate: async function (message, param) {
     try {
       let sql = `SELECT STRFTIME('${convertEnum(param.type)}', job_first_publish_datetime) AS name,COUNT(*) AS total FROM job WHERE job_first_publish_datetime NOT NULL GROUP BY name;`;
       let result = await jobStatistic({ sql });
@@ -476,7 +476,7 @@ export const JobService = {
     } catch (e) {
       postErrorMessage(
         message,
-        "[worker] jobStatisticGrouByPublishDate error : " + e.message
+        "[worker] jobStatisticGroupByPublishDate error : " + e.message
       );
     }
   },
@@ -486,7 +486,7 @@ export const JobService = {
    * @param {Message} message
    * @param {*} param
    */
-  jobStatisticGrouByPlatform: async function (message, param) {
+  jobStatisticGroupByPlatform: async function (message, param) {
     try {
       let sql = `SELECT job_platform AS name,COUNT(*) AS total FROM job GROUP BY name;`;
       let result = await jobStatistic({ sql });
@@ -494,7 +494,7 @@ export const JobService = {
     } catch (e) {
       postErrorMessage(
         message,
-        "[worker] jobStatisticGrouByPlatform error : " + e.message
+        "[worker] jobStatisticGroupByPlatform error : " + e.message
       );
     }
   },

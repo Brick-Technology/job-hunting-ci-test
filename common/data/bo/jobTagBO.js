@@ -4,4 +4,5 @@ export class JobTagBO {
     tags;
     sourceType = TAG_SOURCE_TYPE_CUSTOM;
     source = null;
+    updateDatetime;
 }

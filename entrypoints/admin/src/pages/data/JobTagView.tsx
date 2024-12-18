@@ -2,7 +2,7 @@ import { TAG_SOURCE_TYPE_CUSTOM, TAG_SOURCE_TYPE_PLATFORM } from "@/common";
 import { JobApi, TagApi } from "@/common/api";
 import { JobTagBO } from "@/common/data/bo/jobTagBO";
 import { JobTagDTO } from "@/common/data/dto/jobTagDTO";
-import { jobTagDataToExcelJSONArray } from "@/common/excel";
+import { jobTagDataToExcelJSONArrayForView } from "@/common/excel";
 import { dateToStr } from "@/common/utils";
 import { Icon } from "@iconify/react";
 import {
@@ -109,7 +109,7 @@ const JobTagView: React.FC = () => {
     {
       title: '更新时间',
       dataIndex: 'updateDatetime',
-      render: (value: Date) => <Text title={dateToStr(value)}>{dateToStr(value, "YYYY-MM-DD")}</Text>,
+      render: (value: Date) => <Text title={dateToStr(value)}>{dateToStr(value)}</Text>,
       minWidth: 100,
       sorter: true,
     },
@@ -203,7 +203,7 @@ const JobTagView: React.FC = () => {
       }}
       rowKeyFunction={(record) => { return record.jobId }}
       exportProps={{
-        dataToExcelJSONArray: jobTagDataToExcelJSONArray,
+        dataToExcelJSONArray: jobTagDataToExcelJSONArrayForView,
         title: "职位标签"
       }}
     ></BasicTable>

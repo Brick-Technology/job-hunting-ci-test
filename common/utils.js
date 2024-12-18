@@ -159,7 +159,7 @@ export function isNumeric(value) {
 
 const isEmpty = (str) => !str?.length;
 
-function isBlank(str) {
+export function isBlank(str) {
   return !str || /^\s*$/.test(str);
 }
 

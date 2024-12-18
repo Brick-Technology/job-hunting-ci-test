@@ -143,7 +143,6 @@ export async function _addNotExistsTags(tags) {
         let id = genIdFromText(tagName);
         if (!existsTagIds.includes(id)) {
             let tag = new Tag();
-            tag.tagId = id;
             tag.tagName = tagName;
             await _addOrUpdateTag(tag);
         }

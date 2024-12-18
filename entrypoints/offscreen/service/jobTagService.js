@@ -1,11 +1,12 @@
 import { Message } from "../../../common/api/message";
 import { JobTagBO } from "../../../common/data/bo/jobTagBO";
+import { JobTagExportBO } from "../../../common/data/bo/jobTagExportBO";
 import { JobTagSearchBO } from "../../../common/data/bo/jobTagSearchBO";
 import { JobTag } from "../../../common/data/domain/jobTag";
 import { JobTagDTO } from "../../../common/data/dto/jobTagDTO";
 import { JobTagSearchDTO } from "../../../common/data/dto/jobTagSearchDTO";
 import { JobTagStatisticDTO } from "../../../common/data/dto/jobTagStatisticDTO";
-import { genIdFromText, genUniqueId } from "../../../common/utils";
+import { genIdFromText, genUniqueId, isBlank } from "../../../common/utils";
 import { beginTransaction, commitTransaction, getAll, getDb, rollbackTransaction } from "../database";
 import { postErrorMessage, postSuccessMessage } from "../util";
 import { BaseService } from "./baseService";
@@ -66,7 +67,7 @@ export const JobTagService = {
                         whereCondition = " WHERE " + whereCondition;
                     }
                     return `
-                    SELECT t1.id AS id, t1.job_id AS jobId, t1.create_datetime AS createDatetime, t1.update_datetime AS updateDatetime FROM job_tag AS t1  LEFT JOIN tag AS t2 ON t1.tag_id = t2.tag_id ${whereCondition}  GROUP BY t1.job_id
+                    SELECT t1.id AS id, t1.job_id AS jobId, t1.create_datetime AS createDatetime, MAX(t1.update_datetime) AS updateDatetime FROM job_tag AS t1  LEFT JOIN tag AS t2 ON t1.tag_id = t2.tag_id ${whereCondition} GROUP BY t1.job_id
                     `;
                 },
                 genSearchWhereConditionSqlFunction: () => {
@@ -238,7 +239,68 @@ export const JobTagService = {
             );
         }
     },
+    /**
+     *
+     * @param {Message} message
+     * @param {JobTagExportBO} param
+     *
+     * @returns JobTagExportDTO[]
+     */
+    jobTagExport: async function (message, param) {
+        try {
+            postSuccessMessage(
+                message,
+                await _jobTagExport(param)
+            );
+        } catch (e) {
+            postErrorMessage(message, "[worker] jobTagExport error : " + e.message);
+        }
+    },
+
 };
+
+/**
+ * 
+ * @param {JobTagExportBO} param 
+ */
+async function _jobTagExport(param) {
+    let joinCondition = "";
+    if (param.startDatetimeForUpdate) {
+        joinCondition +=
+            " AND t1.update_datetime >= '" +
+            dayjs(param.startDatetimeForUpdate).format("YYYY-MM-DD HH:mm:ss") +
+            "'";
+    }
+    if (param.endDatetimeForUpdate) {
+        joinCondition +=
+            " AND t1.update_datetime < '" +
+            dayjs(param.endDatetimeForUpdate).format("YYYY-MM-DD HH:mm:ss") +
+            "'";
+    }
+    if (param.jobIds) {
+        let idsString = "'" + param.jobIds.join("','") + "'";
+        joinCondition +=
+            ` AND t1.job_id in (${idsString})`;
+    }
+    let whereCondition = "";
+    if (param.source != null) {
+        if (isBlank(param.source)) {
+            whereCondition +=
+                `AND t1.source IS NULL`
+        } else {
+            whereCondition +=
+                `AND t1.source = '${param.source}'`
+        }
+    }
+    let sqlQuery = `SELECT t1.job_id AS jobId,GROUP_CONCAT(t2.tag_name) AS tagNameArray,MAX(t1.update_datetime) AS updateDatetime FROM job_tag AS t1 LEFT JOIN tag AS t2 ON t1.tag_id = t2.tag_id ${joinCondition} WHERE t1.source_type = 0 ${whereCondition} AND t2.is_public = 1 GROUP BY t1.job_id ORDER BY t1.seq ASC;`;
+    let queryRows = [];
+    (await getDb()).exec({
+        sql: sqlQuery,
+        rowMode: "object",
+        resultRows: queryRows,
+    });
+    return queryRows;
+}
 
 /**
  * 

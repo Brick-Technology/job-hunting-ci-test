@@ -122,7 +122,7 @@ const TaskView: React.FC = () => {
                     </div>
                     <div>
                         <Icon icon="fluent-mdl2:date-time" />日期：{dateToStr(
-                            value.datetime, "YYYY-MM-DD")}
+                            value.datetime, "YYYY-MM-DD") ?? `N/A`}
                     </div>
                 </Col>
                     : null}
@@ -134,8 +134,8 @@ const TaskView: React.FC = () => {
                     </div>
                     <div>
                         <Icon icon="fluent-mdl2:date-time" />日期：{dateToStr(
-                            value.startDatetime, "YYYY-MM-DD")}-{dateToStr(
-                                value.endDatetime, "YYYY-MM-DD")}
+                            value.startDatetime, "YYYY-MM-DD") ?? `N/A`}-{dateToStr(
+                                value.endDatetime, "YYYY-MM-DD") ?? `N/A`}
                     </div>
                     <div>
                         <Icon icon="mdi:database-arrow-up" />数据量：{value.dataCount ?? 0
@@ -152,7 +152,7 @@ const TaskView: React.FC = () => {
                     <div>
                         <Icon icon="stash:data-date" />日期：{
                             dateToStr(
-                                value.datetime, "YYYY-MM-DD")}
+                                value.datetime, "YYYY-MM-DD") ?? `N/A`}
                     </div>
                     <div>
                         <Icon icon="mdi:database-plus" />数据量：{value.dataCount ?? 0}

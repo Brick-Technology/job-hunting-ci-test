@@ -1,43 +1,56 @@
-import { debugLog, errorLog, infoLog, isDebug } from "../../../common/log"
-import { SearchJobBO } from "../../../common/data/bo/searchJobBO";
+import dayjs from "dayjs";
+import minMax from 'dayjs/plugin/minMax'; // ES 2015
+import JSZip from "jszip";
+import { read, utils, writeXLSX } from "xlsx";
+import {
+    MAX_RECORD_COUNT,
+    TASK_STATUS_ERROR,
+    TASK_STATUS_FINISHED,
+    TASK_STATUS_FINISHED_BUT_ERROR,
+    TASK_STATUS_READY,
+    TASK_STATUS_RUNNING,
+    TASK_TYPE_COMPANY_DATA_DOWNLOAD,
+    TASK_TYPE_COMPANY_DATA_MERGE,
+    TASK_TYPE_COMPANY_DATA_UPLOAD,
+    TASK_TYPE_COMPANY_TAG_DATA_DOWNLOAD,
+    TASK_TYPE_COMPANY_TAG_DATA_MERGE,
+    TASK_TYPE_COMPANY_TAG_DATA_UPLOAD,
+    TASK_TYPE_JOB_DATA_DOWNLOAD,
+    TASK_TYPE_JOB_DATA_MERGE,
+    TASK_TYPE_JOB_DATA_UPLOAD
+} from "../../../common";
+import { CompanyApi, DataSharePartnerApi, DBApi, FileApi, JobApi, TaskApi, TaskDataDownloadApi, TaskDataMergeApi, TaskDataUploadApi } from "../../../common/api";
+import { BACKGROUND } from "../../../common/api/bridgeCommon";
+import { EXCEPTION, GithubApi } from "../../../common/api/github";
+import { TASK_DATA_DOWNLOAD_MAX_DAY } from "../../../common/config";
 import { SearchCompanyBO } from "../../../common/data/bo/searchCompanyBO";
 import { SearchCompanyTagBO } from "../../../common/data/bo/searchCompanyTagBO";
-import { JobApi, CompanyApi, TaskDataUploadApi, DBApi, TaskApi, TaskDataDownloadApi, FileApi, TaskDataMergeApi, DataSharePartnerApi } from "../../../common/api";
-import { BACKGROUND } from "../../../common/api/bridgeCommon";
-import {
-    MAX_RECORD_COUNT, TASK_STATUS_READY, TASK_TYPE_JOB_DATA_UPLOAD,
-    TASK_TYPE_COMPANY_DATA_UPLOAD, TASK_TYPE_COMPANY_TAG_DATA_UPLOAD,
-    TASK_STATUS_ERROR, TASK_STATUS_RUNNING, TASK_STATUS_FINISHED,
-    TASK_TYPE_JOB_DATA_DOWNLOAD, TASK_TYPE_COMPANY_DATA_DOWNLOAD, TASK_TYPE_COMPANY_TAG_DATA_DOWNLOAD,
-    TASK_TYPE_JOB_DATA_MERGE,
-    TASK_TYPE_COMPANY_DATA_MERGE,
-    TASK_TYPE_COMPANY_TAG_DATA_MERGE,
-    TASK_STATUS_FINISHED_BUT_ERROR
-} from "../../../common";
-import { utils, writeXLSX, read } from "xlsx";
-import {
-    jobDataToExcelJSONArray, companyDataToExcelJSONArray, companyTagDataToExcelJSONArray,
-    validImportData, JOB_FILE_HEADER, jobExcelDataToObjectArray,
-    COMPANY_FILE_HEADER, companyExcelDataToObjectArray,
-    COMPANY_TAG_FILE_HEADER, companyTagExcelDataToObjectArray
-} from "../../../common/excel";
-import { EXCEPTION, GithubApi } from "../../../common/api/github";
-import { getToken, setToken } from "./authService";
-import dayjs from "dayjs";
-import minMax from 'dayjs/plugin/minMax' // ES 2015
-import { Task } from "../../../common/data/domain/task";
-import { TaskDataUpload } from "../../../common/data/domain/taskDataUpload";
-import { TaskDataDownload } from "../../../common/data/domain/taskDataDownload";
+import { SearchDataSharePartnerBO } from "../../../common/data/bo/searchDataSharePartnerBO";
+import { SearchJobBO } from "../../../common/data/bo/searchJobBO";
 import { SearchTaskBO } from "../../../common/data/bo/searchTaskBO";
 import { SearchTaskDataDownloadBO } from "../../../common/data/bo/searchTaskDataDownloadBO";
-import { TASK_DATA_DOWNLOAD_MAX_DAY } from "../../../common/config";
-import { dateToStr } from "../../../common/utils";
 import { File } from "../../../common/data/domain/file";
+import { Task } from "../../../common/data/domain/task";
+import { TaskDataDownload } from "../../../common/data/domain/taskDataDownload";
 import { TaskDataMerge } from "../../../common/data/domain/taskDataMerge";
-import { getMergeDataListForCompany, getMergeDataListForJob, getMergeDataListForCompanyTag } from "../../../common/service/dataSyncService";
-import JSZip from "jszip";
-import { SearchDataSharePartnerBO } from "../../../common/data/bo/searchDataSharePartnerBO";
+import { TaskDataUpload } from "../../../common/data/domain/taskDataUpload";
+import {
+    COMPANY_FILE_HEADER,
+    COMPANY_TAG_FILE_HEADER,
+    companyDataToExcelJSONArray,
+    companyExcelDataToObjectArray,
+    companyTagDataToExcelJSONArray,
+    companyTagExcelDataToObjectArray,
+    JOB_FILE_HEADER,
+    jobDataToExcelJSONArray,
+    jobExcelDataToObjectArray,
+    validImportData
+} from "../../../common/excel";
+import { debugLog, errorLog, infoLog } from "../../../common/log";
+import { getMergeDataListForCompany, getMergeDataListForCompanyTag, getMergeDataListForJob } from "../../../common/service/dataSyncService";
+import { dateToStr } from "../../../common/utils";
 import { bytesToBase64 } from "../../../common/utils/base64";
+import { getToken, setToken } from "./authService";
 
 dayjs.extend(minMax);
 export const TaskService = {
@@ -257,7 +270,7 @@ TASK_HANDLE_MAP.set(TASK_TYPE_COMPANY_TAG_DATA_DOWNLOAD, async (dataId) => {
     return downloadDataByDataId(dataId, DATA_TYPE_NAME_COMPANY_TAG, TASK_TYPE_COMPANY_TAG_DATA_MERGE);
 })
 TASK_HANDLE_MAP.set(TASK_TYPE_JOB_DATA_MERGE, async (dataId) => {
-    return mergeDataByDataId(dataId, TASK_TYPE_JOB_DATA_MERGE, DATA_TYPE_NAME_JOB, JOB_FILE_HEADER, jobExcelDataToObjectArray, async (items) => {
+    return mergeDataByDataId(dataId, TASK_TYPE_JOB_DATA_MERGE, DATA_TYPE_NAME_JOB, JOB_FILE_HEADER, jobExcelDataToObjectArray, async (items, taskDataMerge) => {
         //处理数据冲突问题，根据创建时间来判断
         //处理公司名全称问题
         let targetList = await getMergeDataListForJob(items, "jobId", async (ids) => {
@@ -268,7 +281,7 @@ TASK_HANDLE_MAP.set(TASK_TYPE_JOB_DATA_MERGE, async (dataId) => {
     });
 })
 TASK_HANDLE_MAP.set(TASK_TYPE_COMPANY_DATA_MERGE, async (dataId) => {
-    return mergeDataByDataId(dataId, TASK_TYPE_COMPANY_DATA_MERGE, DATA_TYPE_NAME_COMPANY, COMPANY_FILE_HEADER, companyExcelDataToObjectArray, async (items) => {
+    return mergeDataByDataId(dataId, TASK_TYPE_COMPANY_DATA_MERGE, DATA_TYPE_NAME_COMPANY, COMPANY_FILE_HEADER, companyExcelDataToObjectArray, async (items, taskDataMerge) => {
         //处理数据冲突问题，根据数据来源更新时间来判断
         let targetList = await getMergeDataListForCompany(items, "companyId", async (ids) => {
             return CompanyApi.companyGetByIds(ids, { invokeEnv: BACKGROUND });
@@ -278,7 +291,7 @@ TASK_HANDLE_MAP.set(TASK_TYPE_COMPANY_DATA_MERGE, async (dataId) => {
     });
 })
 TASK_HANDLE_MAP.set(TASK_TYPE_COMPANY_TAG_DATA_MERGE, async (dataId) => {
-    return mergeDataByDataId(dataId, TASK_TYPE_COMPANY_TAG_DATA_MERGE, DATA_TYPE_NAME_COMPANY_TAG, COMPANY_TAG_FILE_HEADER, companyTagExcelDataToObjectArray, async (items) => {
+    return mergeDataByDataId(dataId, TASK_TYPE_COMPANY_TAG_DATA_MERGE, DATA_TYPE_NAME_COMPANY_TAG, COMPANY_TAG_FILE_HEADER, companyTagExcelDataToObjectArray, async (items, taskDataMerge) => {
         //处理数据冲突问题，合并标签
         let targetList = await getMergeDataListForCompanyTag(items, async (ids) => {
             return await CompanyApi.getAllCompanyTagDTOByCompanyIds(ids, { invokeEnv: BACKGROUND });
@@ -498,7 +511,7 @@ async function mergeDataByDataId(dataId, taskType, dataTypeName, fileHeader, exc
     const data = utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 2 });
     try {
         await DBApi.dbBeginTransaction({}, { invokeEnv: BACKGROUND });
-        let count = await dataInsertFunction(excelDataToObjectArrayFunction(data, taskDataMerge.datetime));
+        let count = await dataInsertFunction(excelDataToObjectArrayFunction(data, taskDataMerge.datetime), taskDataMerge);
         taskDataMerge.dataCount = count;
         await TaskDataMergeApi.taskDataMergeAddOrUpdate(taskDataMerge, { invokeEnv: BACKGROUND });
         await DBApi.dbCommitTransaction({}, { invokeEnv: BACKGROUND });

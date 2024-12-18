@@ -1,4 +1,4 @@
-export class JobStatisticGrouByPublishDateBO{
+export class JobStatisticGroupByPublishDateBO{
     /**
      * month,week,day,hour,
      */

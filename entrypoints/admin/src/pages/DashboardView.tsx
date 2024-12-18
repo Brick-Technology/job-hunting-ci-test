@@ -8,12 +8,12 @@ import {
 } from "@/common";
 import { CompanyApi, JobApi } from "@/common/api";
 import {
-  JobStatisticGrouByPublishDateBO,
+  JobStatisticGroupByPublishDateBO,
   TYPE_ENUM_DAY,
   TYPE_ENUM_HOUR,
   TYPE_ENUM_MONTH,
   TYPE_ENUM_WEEK,
-} from "@/common/data/bo/jobStatisticGrouByPublishDateBO";
+} from "@/common/data/bo/jobStatisticGroupByPublishDateBO";
 import {
   FallOutlined,
   RiseOutlined
@@ -342,8 +342,8 @@ const DashboardView: React.FC = () => {
         chartResult.push({
           title: "职位发布时间分析(按月)",
           data: convertToChartData({
-            queryResult: await JobApi.jobStatisticGrouByPublishDate(
-              new JobStatisticGrouByPublishDateBO(TYPE_ENUM_MONTH)
+            queryResult: await JobApi.jobStatisticGroupByPublishDate(
+              new JobStatisticGroupByPublishDateBO(TYPE_ENUM_MONTH)
             ),
             defaultNameArray: MONTH_NAME_ARRAY,
             convertNameFunction: convertMonthName,
@@ -352,8 +352,8 @@ const DashboardView: React.FC = () => {
         chartResult.push({
           title: "职位发布时间分析(按周)",
           data: convertToChartData({
-            queryResult: await JobApi.jobStatisticGrouByPublishDate(
-              new JobStatisticGrouByPublishDateBO(TYPE_ENUM_WEEK)
+            queryResult: await JobApi.jobStatisticGroupByPublishDate(
+              new JobStatisticGroupByPublishDateBO(TYPE_ENUM_WEEK)
             ),
             defaultNameArray: WEEK_NAME_ARRAY,
             convertNameFunction: convertWeekName,
@@ -362,8 +362,8 @@ const DashboardView: React.FC = () => {
         chartResult.push({
           title: "职位发布时间分析(按日)",
           data: convertToChartData({
-            queryResult: await JobApi.jobStatisticGrouByPublishDate(
-              new JobStatisticGrouByPublishDateBO(TYPE_ENUM_DAY)
+            queryResult: await JobApi.jobStatisticGroupByPublishDate(
+              new JobStatisticGroupByPublishDateBO(TYPE_ENUM_DAY)
             ),
             defaultNameArray: DAY_NAME_ARRAY,
           }),
@@ -371,8 +371,8 @@ const DashboardView: React.FC = () => {
         chartResult.push({
           title: "职位发布时间分析(按小时)",
           data: convertToChartData({
-            queryResult: await JobApi.jobStatisticGrouByPublishDate(
-              new JobStatisticGrouByPublishDateBO(TYPE_ENUM_HOUR)
+            queryResult: await JobApi.jobStatisticGroupByPublishDate(
+              new JobStatisticGroupByPublishDateBO(TYPE_ENUM_HOUR)
             ),
             defaultNameArray: HOUR_NAME_ARRAY,
           }),
@@ -380,7 +380,7 @@ const DashboardView: React.FC = () => {
         chartResult.push({
           title: "职位发布平台分析",
           data: convertToChartData({
-            queryResult: await JobApi.jobStatisticGrouByPlatform(),
+            queryResult: await JobApi.jobStatisticGroupByPlatform(),
             defaultNameArray: PLATFORM_NAME_ARRAY,
             convertNameFunction: platformFormat,
           }),
@@ -388,14 +388,14 @@ const DashboardView: React.FC = () => {
         chartResult.push({
           title: "公司成立年份分段分析",
           data: convertToChartData({
-            queryResult: await CompanyApi.companyStatisticGrouByStartDate(),
+            queryResult: await CompanyApi.companyStatisticGroupByStartDate(),
             defaultNameArray: COMPANY_START_DATE_NAME_ARRAY,
           }),
         });
         chartResult.push({
           title: "公司社保人数分段分析",
           data: convertToChartData({
-            queryResult: await CompanyApi.companyStatisticGrouByInsurance(),
+            queryResult: await CompanyApi.companyStatisticGroupByInsurance(),
             defaultNameArray: COMPANY_INSURANCE_NAME_ARRAY,
             convertNameFunction: convertCompanyInsuranceName,
           }),
