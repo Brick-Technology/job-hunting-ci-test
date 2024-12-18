@@ -544,7 +544,7 @@ function handle51JobData(list) {
     job.bossPosition = hrPosition;
     job.isFullCompanyName = true;
     job.welfareTag = jobWelfareCodeDataList.length > 0 ? jobWelfareCodeDataList.map(item => item.chineseTitle).join(",") : null;
-    job.skillTag = jobTagsList.length > 0 ? jobTagsList.map(item => item.jobTagName).filter(item => !job.welfareTag.includes(item)).join(",") : null;
+    job.skillTag = jobTagsList.length > 0 ? jobTagsList.map(item => item.jobTagName).filter(item => job.welfareTag ? (!job.welfareTag.includes(item)) : true).join(",") : null;
     jobs.push(job);
   }
   return jobs;
