@@ -10,13 +10,16 @@ import Card from "antd/es/card/Card";
 import Paragraph from "antd/es/typography/Paragraph";
 import dayjs from "dayjs";
 import { useJob } from "../hooks/job";
+import { useJobTag } from "../hooks/jobTag";
 
 import { TAG_SOURCE_TYPE_CUSTOM } from "@/common";
 import { QuestionCircleOutlined } from "@ant-design/icons";
 import { JobData } from "../data/JobData";
 import "./JobItemCard.css";
+import JobTag from "./JobTag";
 
 const { platformLogo, platformFormat } = useJob();
+const { convertToTagData } = useJobTag();
 
 const getTimeColorByOffsetTimeDay = (datetime) => {
   let offsetTimeDay = -1;
@@ -67,6 +70,22 @@ const JobItemCard: React.FC<JobItemCardProps> = (props) => {
   } = props.data;
   const { name: companyName, companyTagList, url: companyUrl } = company;
   const { onLocate } = props;
+
+
+  const genJobTag = (jobTagList) => {
+    if (jobTagList) {
+      const result = [];
+      convertToTagData(jobTagList.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM)).map((item) => {
+        result.push(
+          <JobTag item={item} color="#1677ff"></JobTag>
+        );
+      })
+      return result;
+    } else {
+      return null;
+    }
+  }
+
   return (
     <>
       <Card
@@ -157,12 +176,7 @@ const JobItemCard: React.FC<JobItemCardProps> = (props) => {
             ))}
         </Flex>
         <Flex className={styles.marginTop} wrap={true} gap={2}>
-          {jobTagList &&
-            jobTagList.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM).map((item, index) => (
-              <Tag className={styles.tag} key={index} color="#1677ff">
-                {item.isPublic ? <Icon icon="material-symbols:public" /> : <Icon icon="material-symbols:private-connectivity" />}{item.tagName}
-              </Tag>
-            ))}
+          {genJobTag(jobTagList)}
         </Flex>
         <Flex
           onClick={(e) => {
@@ -172,7 +186,7 @@ const JobItemCard: React.FC<JobItemCardProps> = (props) => {
           className={`${styles.marginTop} ${styles.item}`}
         >
           <Text ellipsis className={styles.address}>
-          <Icon icon="entypo:address"/> {address}
+            <Icon icon="entypo:address" /> {address}
           </Text>
           <Text style={{ color: "#1677ff" }}>
             <Icon icon="mdi:location" />

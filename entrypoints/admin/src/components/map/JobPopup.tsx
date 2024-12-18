@@ -1,13 +1,17 @@
 import { TAG_SOURCE_TYPE_CUSTOM } from "@/common";
 import { cleanHTMLTag, dateToStr } from "@/common/utils";
-import { Icon } from "@iconify/react";
 import { Popup } from "@vis.gl/react-maplibre";
 import { Flex, Tag, Typography } from "antd";
 import Link from "antd/es/typography/Link";
 import * as React from "react";
 import { JobData } from "../../data/JobData";
 import { useJob } from "../../hooks/job";
+import JobTag from "../JobTag";
 import styles from "./JobPopup.module.css";
+
+import { useJobTag } from "../../hooks/jobTag";
+const { convertToTagData } = useJobTag();
+
 const { Text } = Typography;
 
 const { platformFormat } = useJob();
@@ -34,6 +38,21 @@ const JobPopup: React.FC<JobPopupProps> = ({ data, onClick }) => {
     welfareTagList,
   } = data;
   const { name: companyName, companyTagList } = data.company ?? {};
+
+  const genJobTag = (jobTagList) => {
+    if (jobTagList) {
+      const result = [];
+      convertToTagData(jobTagList.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM)).map((item) => {
+        result.push(
+          <JobTag item={item} color="#1677ff"></JobTag>
+        );
+      })
+      return result;
+    } else {
+      return null;
+    }
+  }
+
   return (
     <>
       <Popup
@@ -105,11 +124,7 @@ const JobPopup: React.FC<JobPopupProps> = ({ data, onClick }) => {
             {jobTagList != null && jobTagList.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM).length > 0 ? (
               <>
                 <Text>自定义职位标签：</Text>
-                {jobTagList.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM).map((item, index) => (
-                  <Tag className={styles.tag} color="#1677ff" key={`${index}`}>
-                    {item.isPublic ? <Icon icon="material-symbols:public" /> : <Icon icon="material-symbols:private-connectivity" />}{item.tagName}
-                  </Tag>
-                ))}
+                {genJobTag(jobTagList)}
               </>
             ) : null}
           </Flex>

@@ -4,7 +4,6 @@ import { JobTagBO } from "@/common/data/bo/jobTagBO";
 import { JobTagDTO } from "@/common/data/dto/jobTagDTO";
 import { jobTagDataToExcelJSONArrayForView } from "@/common/excel";
 import { dateToStr } from "@/common/utils";
-import { Icon } from "@iconify/react";
 import {
   Button,
   Col,
@@ -20,6 +19,7 @@ import {
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import BasicTable from "../../components/BasicTable";
+import JobTag from "../../components/JobTag";
 import { JobTagData } from "../../data/JobTagData";
 import { JobTagEditData } from "../../data/JobTagEditData";
 import { WhitelistData } from "../../data/WhitelistData";
@@ -30,7 +30,7 @@ import styles from "./JobTagView.module.css";
 const { platformFormat } = useJob();
 
 const { Text } = Typography;
-const { convertToJobTagDataList, convertSortField } = useJobTag();
+const { convertToJobTagDataList, convertSortField, convertToTagData } = useJobTag();
 dayjs.extend(duration)
 
 const fillSearchParam = (searchParam, values) => {
@@ -91,9 +91,10 @@ const JobTagView: React.FC = () => {
       dataIndex: 'tagArray',
       render: (value: JobTagDTO[]) => {
         const result = [];
-        value.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM).map((item) => {
+        const tagData = convertToTagData(value.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM));
+        tagData.map((item) => {
           result.push(
-            <Tag className={styles.tag} key={item.id}>{item.isPublic ? <Icon icon="material-symbols:public" /> : <Icon icon="material-symbols:private-connectivity" />}{item.tagName}</Tag>
+            <JobTag item={item}></JobTag>
           );
         })
         return <Flex wrap gap={2}>{result}</Flex>;

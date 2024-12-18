@@ -1,7 +1,6 @@
 import { TAG_SOURCE_TYPE_CUSTOM } from "@/common";
 import { cleanHTMLTag, dateToStr } from "@/common/utils";
 import { QuestionCircleOutlined } from "@ant-design/icons";
-import { Icon } from "@iconify/react";
 import { Descriptions, DescriptionsProps, Flex, Tag, Typography } from "antd";
 import Link from "antd/es/typography/Link";
 import Markdown from "marked-react";
@@ -9,8 +8,12 @@ import { CompanyData } from "../data/CompanyData";
 import { JobData } from "../data/JobData";
 import { useJob } from "../hooks/job";
 import styles from "./JobItemTable.module.css";
+import JobTag from "./JobTag";
 const { platformFormat } = useJob();
 const { Text } = Typography;
+
+import { useJobTag } from "../hooks/jobTag";
+const { convertToTagData } = useJobTag();
 
 export type JobItemTableProps = {
   data: JobData;
@@ -37,6 +40,20 @@ const JobItemTable: React.FC<JobItemTableProps> = (props) => {
     welfareTagList,
   } = props.data;
   const { name: companyName, companyTagList, url: companyUrl } = company;
+
+  const genJobTag = (jobTagList) => {
+    if (jobTagList) {
+      const result = [];
+      convertToTagData(jobTagList.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM)).map((item) => {
+        result.push(
+          <JobTag item={item} color="#1677ff"></JobTag>
+        );
+      })
+      return result;
+    } else {
+      return null;
+    }
+  }
 
   const items: DescriptionsProps["items"] = [
     {
@@ -222,12 +239,7 @@ const JobItemTable: React.FC<JobItemTableProps> = (props) => {
       children: (
         <>
           <Flex wrap={true} gap={2}>
-            {jobTagList && jobTagList.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM).length > 0
-              ? jobTagList.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM).map((item, index) => (
-                <Tag className={styles.tag} key={index} color="#1677ff">
-                  {item.isPublic ? <Icon icon="material-symbols:public" /> : <Icon icon="material-symbols:private-connectivity" />}{item.tagName}
-                </Tag>
-              ))
+            {jobTagList ? genJobTag(jobTagList)
               : <Text>无</Text>}
           </Flex>
         </>
