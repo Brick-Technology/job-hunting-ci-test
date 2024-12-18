@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 import { Message } from "../../../common/api/message";
+import { JobTagBatchAddOrUpdateBO } from "../../../common/data/bo/jobTagBatchAddOrUpdateBO";
 import { JobTagBO } from "../../../common/data/bo/jobTagBO";
 import { JobTagExportBO } from "../../../common/data/bo/jobTagExportBO";
 import { JobTagSearchBO } from "../../../common/data/bo/jobTagSearchBO";
@@ -148,12 +149,12 @@ export const JobTagService = {
     /**
      * 
      * @param {Message} message 
-     * @param {JobTagBO[]} param 
+     * @param {JobTagBatchAddOrUpdateBO} param 
      */
     jobTagBatchAddOrUpdate: async function (message, param) {
         try {
-            for (let i = 0; i < param.length; i++) {
-                await _addOrUpdateJobTag(param[i]);
+            for (let i = 0; i < param.items.length; i++) {
+                await _addOrUpdateJobTag(param.items[i], param.overrideUpdateDatetime);
             }
             postSuccessMessage(message, {});
         } catch (e) {
@@ -167,13 +168,13 @@ export const JobTagService = {
     /**
      * 
      * @param {Message} message 
-     * @param {JobTagBO[]} param 
+     * @param {JobTagBatchAddOrUpdateBO} param 
      */
     jobTagBatchAddOrUpdateWithTransaction: async function (message, param) {
         try {
             await beginTransaction()
-            for (let i = 0; i < param.length; i++) {
-                await _addOrUpdateJobTag(param[i]);
+            for (let i = 0; i < param.items.length; i++) {
+                await _addOrUpdateJobTag(param.items[i], param.overrideUpdateDatetime);
             }
             await commitTransaction();
             postSuccessMessage(message, {});
@@ -326,7 +327,7 @@ async function _jobTagExport(param) {
  * 
  * @param {JobTagBO} param 
  */
-export async function _addOrUpdateJobTag(param) {
+export async function _addOrUpdateJobTag(param, overrideUpdateDatetime) {
     await _addNotExistsTags(param.tags);
     let jobId = param.jobId;
     await SERVICE_INSTANCE._deleteById(param.jobId, JOB_ID_COLUMN, { otherCondition: `source_type=${param.sourceType} AND ${param.source ? "source = '" + param.source + "'" : "source IS NULL"}` });
@@ -340,7 +341,8 @@ export async function _addOrUpdateJobTag(param) {
         jobTag.seq = i;
         jobTag.sourceType = param.sourceType;
         jobTag.source = param.source;
-        await SERVICE_INSTANCE._addOrUpdate(jobTag);
+        jobTag.updateDatetime = param.updateDatetime;
+        await SERVICE_INSTANCE._addOrUpdate(jobTag, { overrideUpdateDatetime });
     }
 }
 

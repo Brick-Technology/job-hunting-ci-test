@@ -338,7 +338,7 @@ TASK_HANDLE_MAP.set(TASK_TYPE_JOB_TAG_DATA_MERGE, async (dataId) => {
                 searchParam.jobIds = ids;
                 return await JobApi.jobTagExport(searchParam, { invokeEnv: BACKGROUND });
             })
-            await JobApi.jobTagBatchAddOrUpdate(targetList, { invokeEnv: BACKGROUND });
+            await JobApi.jobTagBatchAddOrUpdate({ items: targetList, overrideUpdateDatetime: true }, { invokeEnv: BACKGROUND });
             return targetList.length;
         } else {
             throw `[Task Data Merge] login user not found`;

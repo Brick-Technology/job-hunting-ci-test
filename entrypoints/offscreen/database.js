@@ -98,10 +98,10 @@ export function genFullInsertSQL(obj, tableName) {
   return `INSERT INTO ${tableName} (${column.join(",")}) VALUES (${columnParam.join(",")})`;
 }
 
-export async function insert(obj, tableName, param) {
+export async function insert(obj, tableName, param, { overrideUpdateDatetime = false } = {}) {
   const targetObj = Object.assign(obj, param)
   const insertSQL = genFullInsertSQL(targetObj, tableName);
-  const bindObject = genFullBindObject(targetObj);
+  const bindObject = genFullBindObject(targetObj, { overrideUpdateDatetime });
   if (isDebug()) {
     debugLog(`[database] [insert] insertSQL = ${insertSQL}`)
     debugLog(`[database] [insert] bindObject = ${JSON.stringify(bindObject)}`)
@@ -112,10 +112,10 @@ export async function insert(obj, tableName, param) {
   });
 }
 
-export async function update(obj, tableName, idColumn, param) {
+export async function update(obj, tableName, idColumn, param, { overrideUpdateDatetime = false } = {}) {
   const targetObj = Object.assign(obj, param)
   const updateSQL = genFullUpdateSQL(targetObj, tableName, idColumn);
-  const bindObject = genFullBindObject(targetObj);
+  const bindObject = genFullBindObject(targetObj, { overrideUpdateDatetime });
   delete bindObject.$create_datetime;
   if (isDebug()) {
     debugLog(`[database] [update] updateSQL = ${updateSQL}`)
@@ -139,13 +139,13 @@ export function genFullUpdateSQL(obj, tableName, idColumn) {
   return `UPDATE ${tableName} SET ${column.join(",")} WHERE ${idColumn} = $${idColumn}`;
 }
 
-export function genFullBindObject(obj) {
+export function genFullBindObject(obj, { overrideUpdateDatetime = false } = {}) {
   let now = new Date();
   const result = {};
   let keys = Object.keys(obj);
   for (let n = 0; n < keys.length; n++) {
     let key = keys[n];
-    if (key == "createDatetime" || key == "updateDatetime") {
+    if (key == "createDatetime" || (!overrideUpdateDatetime && key == "updateDatetime")) {
       result[`$${toLine(key)}`] = dayjs(now).format("YYYY-MM-DD HH:mm:ss");
     } else {
       result[`$${toLine(key)}`] = convertEmptyStringToNull(obj[`${key}`])

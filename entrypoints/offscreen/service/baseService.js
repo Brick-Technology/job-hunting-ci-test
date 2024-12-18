@@ -142,7 +142,7 @@ export class BaseService {
      * 
      * @param {*} param 
      */
-    async _addOrUpdate(param) {
+    async _addOrUpdate(param, { overrideUpdateDatetime = false } = {}) {
         let needUpdate = false;
         if (param[this.tableIdColumn]) {
             needUpdate = (await one(this.entityClassCreateFunction(), this.tableName, this.tableIdColumn, param[this.tableIdColumn]) ? true : false);
@@ -150,10 +150,10 @@ export class BaseService {
             needUpdate = false;
         }
         if (needUpdate) {
-            await update(this.entityClassCreateFunction(), this.tableName, this.tableIdColumn, param);
+            await update(this.entityClassCreateFunction(), this.tableName, this.tableIdColumn, param, { overrideUpdateDatetime });
         } else {
             param[this.tableIdColumn] = genUniqueId();
-            await insert(this.entityClassCreateFunction(), this.tableName, param);
+            await insert(this.entityClassCreateFunction(), this.tableName, param, { overrideUpdateDatetime });
         }
         return param;
     }

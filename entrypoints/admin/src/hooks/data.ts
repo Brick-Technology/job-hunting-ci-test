@@ -100,7 +100,7 @@ export function useData() {
             searchParam.jobIds = ids;
             return await JobApi.jobTagExport(searchParam);
         })
-        await JobApi.jobTagBatchAddOrUpdateWithTransaction(targetList);
+        await JobApi.jobTagBatchAddOrUpdateWithTransaction({ items: targetList, overrideUpdateDatetime:true});
         return targetList;
     }
 
