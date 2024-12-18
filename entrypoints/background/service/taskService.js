@@ -17,12 +17,14 @@ import {
     TASK_TYPE_COMPANY_TAG_DATA_UPLOAD,
     TASK_TYPE_JOB_DATA_DOWNLOAD,
     TASK_TYPE_JOB_DATA_MERGE,
-    TASK_TYPE_JOB_DATA_UPLOAD
+    TASK_TYPE_JOB_DATA_UPLOAD,
+    TASK_TYPE_JOB_TAG_DATA_UPLOAD
 } from "../../../common";
 import { CompanyApi, DataSharePartnerApi, DBApi, FileApi, JobApi, TaskApi, TaskDataDownloadApi, TaskDataMergeApi, TaskDataUploadApi } from "../../../common/api";
 import { BACKGROUND } from "../../../common/api/bridgeCommon";
 import { EXCEPTION, GithubApi } from "../../../common/api/github";
 import { TASK_DATA_DOWNLOAD_MAX_DAY } from "../../../common/config";
+import { JobTagExportBO } from "../../../common/data/bo/jobTagExportBO";
 import { SearchCompanyBO } from "../../../common/data/bo/searchCompanyBO";
 import { SearchCompanyTagBO } from "../../../common/data/bo/searchCompanyTagBO";
 import { SearchDataSharePartnerBO } from "../../../common/data/bo/searchDataSharePartnerBO";
@@ -44,6 +46,7 @@ import {
     JOB_FILE_HEADER,
     jobDataToExcelJSONArray,
     jobExcelDataToObjectArray,
+    jobTagDataToExcelJSONArray,
     validImportData
 } from "../../../common/excel";
 import { debugLog, errorLog, infoLog } from "../../../common/log";
@@ -153,6 +156,10 @@ export async function calculateUploadTask({ userName, repoName }) {
                     type: TASK_TYPE_COMPANY_TAG_DATA_UPLOAD, startDatetime: null, endDatetime: null, userName, repoName,
                     total: (await getCompanyTagData({ startDatetime: null, endDatetime: null })).total
                 });
+                await addDataUploadTask({
+                    type: TASK_TYPE_JOB_TAG_DATA_UPLOAD, startDatetime: dataSyncStartDatetime, endDatetime: today, userName, repoName,
+                    total: (await getJobTagData({ startDatetime: dataSyncStartDatetime, endDatetime: today })).total
+                });
                 await DBApi.dbCommitTransaction({}, { invokeEnv: BACKGROUND });
             } catch (e) {
                 await DBApi.dbRollbackTransaction({}, { invokeEnv: BACKGROUND });
@@ -250,7 +257,9 @@ const TASK_HANDLE_MAP = new Map();
 const DATA_TYPE_NAME_JOB = "job";
 const DATA_TYPE_NAME_COMPANY = "company";
 const DATA_TYPE_NAME_COMPANY_TAG = "company_tag";
+const DATA_TYPE_NAME_JOB_TAG = "job_tag";
 
+// Upload
 TASK_HANDLE_MAP.set(TASK_TYPE_JOB_DATA_UPLOAD, async (dataId) => {
     return uploadDataByDataId(dataId, DATA_TYPE_NAME_JOB, getJobData, jobDataToExcelJSONArray);
 })
@@ -260,6 +269,11 @@ TASK_HANDLE_MAP.set(TASK_TYPE_COMPANY_DATA_UPLOAD, async (dataId) => {
 TASK_HANDLE_MAP.set(TASK_TYPE_COMPANY_TAG_DATA_UPLOAD, async (dataId) => {
     return uploadDataByDataId(dataId, DATA_TYPE_NAME_COMPANY_TAG, getCompanyTagData, companyTagDataToExcelJSONArray);
 })
+TASK_HANDLE_MAP.set(TASK_TYPE_JOB_TAG_DATA_UPLOAD, async (dataId) => {
+    return uploadDataByDataId(dataId, DATA_TYPE_NAME_JOB_TAG, getJobTagData, jobTagDataToExcelJSONArray);
+})
+
+// Download
 TASK_HANDLE_MAP.set(TASK_TYPE_JOB_DATA_DOWNLOAD, async (dataId) => {
     return downloadDataByDataId(dataId, DATA_TYPE_NAME_JOB, TASK_TYPE_JOB_DATA_MERGE);
 })
@@ -280,6 +294,8 @@ TASK_HANDLE_MAP.set(TASK_TYPE_JOB_DATA_MERGE, async (dataId) => {
         return targetList.length;
     });
 })
+
+// Merge
 TASK_HANDLE_MAP.set(TASK_TYPE_COMPANY_DATA_MERGE, async (dataId) => {
     return mergeDataByDataId(dataId, TASK_TYPE_COMPANY_DATA_MERGE, DATA_TYPE_NAME_COMPANY, COMPANY_FILE_HEADER, companyExcelDataToObjectArray, async (items, taskDataMerge) => {
         //处理数据冲突问题，根据数据来源更新时间来判断
@@ -433,6 +449,20 @@ async function getCompanyTagData({ startDatetime, endDatetime }) {
     return CompanyApi.searchCompanyTag(searchParam, {
         invokeEnv: BACKGROUND,
     });
+}
+
+async function getJobTagData({ startDatetime, endDatetime }) {
+    let searchParam = new JobTagExportBO();
+    searchParam.source = "";
+    searchParam.startDatetimeForUpdate = startDatetime;
+    searchParam.endDatetimeForUpdate = endDatetime;
+    const items = await JobApi.jobTagExport(searchParam, {
+        invokeEnv: BACKGROUND,
+    })
+    return {
+        total: items.length,
+        items
+    };
 }
 
 async function uploadData({ userName, repoName, dirPath, dataTypeName, dataList, jsonObjectToExcelJsonArrayFunction }) {

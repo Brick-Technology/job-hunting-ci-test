@@ -1,25 +1,25 @@
+import dayjs from "dayjs";
+import {
+    isDownloadType,
+    isMergeType,
+    isUploadType
+} from "../../../common";
 import { Message } from "../../../common/api/message";
 import { SearchTaskBO } from "../../../common/data/bo/searchTaskBO";
-import { SearchTaskDTO } from "../../../common/data/dto/searchTaskDTO";
-import { Task } from "../../../common/data/domain/task";
-import { BaseService } from "./baseService";
-import dayjs from "dayjs";
-import { TaskDTO } from "../../../common/data/dto/taskDTO";
-import {
-    TASK_TYPE_COMPANY_DATA_DOWNLOAD, TASK_TYPE_COMPANY_TAG_DATA_DOWNLOAD, TASK_TYPE_JOB_DATA_DOWNLOAD,
-    TASK_TYPE_JOB_DATA_UPLOAD, TASK_TYPE_COMPANY_DATA_UPLOAD, TASK_TYPE_COMPANY_TAG_DATA_UPLOAD,
-    TASK_TYPE_JOB_DATA_MERGE, TASK_TYPE_COMPANY_DATA_MERGE, TASK_TYPE_COMPANY_TAG_DATA_MERGE
-} from "../../../common";
-import { SERVICE_INSTANCE as taskDataDownloadService } from "./taskDataDownloadService";
-import { SERVICE_INSTANCE as taskDataUploadService } from "./taskDataUploadService";
-import { SERVICE_INSTANCE as taskDataMergeService } from "./taskDataMergeService";
 import { StatisticTaskBO } from "../../../common/data/bo/statisticTaskBO";
-import { StatisticTaskDTO } from "../../../common/data/dto/statisticTaskDTO";
-import { postSuccessMessage, postErrorMessage } from "../util";
-import { getDb } from "../database";
-import { dateToStr } from "../../../common/utils";
 import { TaskStatisticBO } from "../../../common/data/bo/taskStatisticBO";
+import { Task } from "../../../common/data/domain/task";
 import { ChartStackedDTO } from "../../../common/data/dto/chartStackedDTO";
+import { SearchTaskDTO } from "../../../common/data/dto/searchTaskDTO";
+import { StatisticTaskDTO } from "../../../common/data/dto/statisticTaskDTO";
+import { TaskDTO } from "../../../common/data/dto/taskDTO";
+import { dateToStr } from "../../../common/utils";
+import { getDb } from "../database";
+import { postErrorMessage, postSuccessMessage } from "../util";
+import { BaseService } from "./baseService";
+import { SERVICE_INSTANCE as taskDataDownloadService } from "./taskDataDownloadService";
+import { SERVICE_INSTANCE as taskDataMergeService } from "./taskDataMergeService";
+import { SERVICE_INSTANCE as taskDataUploadService } from "./taskDataUploadService";
 
 const SERVICE_INSTANCE = new BaseService("task", "id",
     () => {
@@ -104,18 +104,6 @@ async function getDetailObjectList(typeAndObjectListMap) {
         }
     }
     return result;
-}
-
-function isDownloadType(type) {
-    return type == TASK_TYPE_JOB_DATA_DOWNLOAD || type == TASK_TYPE_COMPANY_DATA_DOWNLOAD || type == TASK_TYPE_COMPANY_TAG_DATA_DOWNLOAD;
-}
-
-function isUploadType(type) {
-    return type == TASK_TYPE_JOB_DATA_UPLOAD || type == TASK_TYPE_COMPANY_DATA_UPLOAD || type == TASK_TYPE_COMPANY_TAG_DATA_UPLOAD;
-}
-
-function isMergeType(type) {
-    return type == TASK_TYPE_JOB_DATA_MERGE || type == TASK_TYPE_COMPANY_DATA_MERGE || type == TASK_TYPE_COMPANY_TAG_DATA_MERGE;
 }
 
 export const TaskService = {

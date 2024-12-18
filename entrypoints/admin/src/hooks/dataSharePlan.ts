@@ -1,5 +1,3 @@
-import { genRangeDate } from "@/common/utils";
-import { SeriesData, StackBarData } from "../data/chart/StackBarData";
 import {
     TASK_STATUS_CANCEL,
     TASK_STATUS_ERROR,
@@ -14,8 +12,16 @@ import {
     TASK_TYPE_COMPANY_TAG_DATA_UPLOAD,
     TASK_TYPE_JOB_DATA_DOWNLOAD,
     TASK_TYPE_JOB_DATA_MERGE,
-    TASK_TYPE_JOB_DATA_UPLOAD
+    TASK_TYPE_JOB_DATA_UPLOAD,
+    TASK_TYPE_JOB_TAG_DATA_DOWNLOAD,
+    TASK_TYPE_JOB_TAG_DATA_MERGE,
+    TASK_TYPE_JOB_TAG_DATA_UPLOAD,
+    isDownloadType,
+    isMergeType,
+    isUploadType
 } from "@/common";
+import { genRangeDate } from "@/common/utils";
+import { SeriesData, StackBarData } from "../data/chart/StackBarData";
 
 export function useDataSharePlan() {
 
@@ -41,6 +47,7 @@ export function useDataSharePlan() {
         "JOB_DATA_UPLOAD": "职位数据",
         "COMPANY_DATA_UPLOAD": "公司数据",
         "COMPANY_TAG_DATA_UPLOAD": "公司标签数据",
+        "JOB_TAG_DATA_UPLOAD": "职位标签数据",
     }
 
     const convertStatusName = (name) => {
@@ -97,12 +104,15 @@ export function useDataSharePlan() {
         { value: "职位数据上传", code: TASK_TYPE_JOB_DATA_UPLOAD },
         { value: "公司数据上传", code: TASK_TYPE_COMPANY_DATA_UPLOAD },
         { value: "公司标签数据上传", code: TASK_TYPE_COMPANY_TAG_DATA_UPLOAD },
+        { value: "职位标签数据上传", code: TASK_TYPE_JOB_TAG_DATA_UPLOAD },
         { value: "职位数据下载", code: TASK_TYPE_JOB_DATA_DOWNLOAD },
         { value: "公司数据下载", code: TASK_TYPE_COMPANY_DATA_DOWNLOAD },
         { value: "公司标签数据下载", code: TASK_TYPE_COMPANY_TAG_DATA_DOWNLOAD },
+        { value: "职位标签数据下载", code: TASK_TYPE_JOB_TAG_DATA_DOWNLOAD },
         { value: "职位数据合并", code: TASK_TYPE_JOB_DATA_MERGE },
         { value: "公司数据合并", code: TASK_TYPE_COMPANY_DATA_MERGE },
         { value: "公司标签数据合并", code: TASK_TYPE_COMPANY_TAG_DATA_MERGE },
+        { value: "职位标签数据合并", code: TASK_TYPE_JOB_TAG_DATA_MERGE },
     ];
 
     const taskCodeNameMap = new Map();
@@ -173,18 +183,6 @@ export function useDataSharePlan() {
                 return "";
         }
     }
-
-    const isDownloadType = (value: string) => {
-        return value == TASK_TYPE_JOB_DATA_DOWNLOAD || value == TASK_TYPE_COMPANY_DATA_DOWNLOAD || value == TASK_TYPE_COMPANY_TAG_DATA_DOWNLOAD;
-    }
-
-    const isUploadType = (value: string) => {
-        return value == TASK_TYPE_JOB_DATA_UPLOAD || value == TASK_TYPE_COMPANY_DATA_UPLOAD || value == TASK_TYPE_COMPANY_TAG_DATA_UPLOAD;
-    }
-
-    const isMergeType = (value: string) => {
-        return value == TASK_TYPE_JOB_DATA_MERGE || value == TASK_TYPE_COMPANY_DATA_MERGE || value == TASK_TYPE_COMPANY_TAG_DATA_MERGE;
-    };
 
     return {
         convertToChartData, convertUploadName, convertStatusName,
