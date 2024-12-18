@@ -338,6 +338,12 @@ TASK_HANDLE_MAP.set(TASK_TYPE_JOB_TAG_DATA_MERGE, async (dataId) => {
                 searchParam.jobIds = ids;
                 return await JobApi.jobTagExport(searchParam, { invokeEnv: BACKGROUND });
             })
+            if (targetList.length > 0) {
+                //如果补充source信息
+                targetList.forEach(item => {
+                    item.source = taskDataMerge.username == username ? null : taskDataMerge.username;
+                });
+            }
             await JobApi.jobTagBatchAddOrUpdate({ items: targetList, overrideUpdateDatetime: true }, { invokeEnv: BACKGROUND });
             return targetList.length;
         } else {
