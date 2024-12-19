@@ -35,6 +35,8 @@ const { convertToJobDataList, platformFormat, convertSortField } = useJob();
 dayjs.extend(duration)
 const { convertToTagData } = useJobTag();
 
+import styles from "./JobView.module.css";
+
 const searchFields =
 {
   common: [
@@ -153,7 +155,7 @@ const JobView: React.FC = () => {
         const tagData = convertToTagData(value ? value.filter(item => item.sourceType == TAG_SOURCE_TYPE_PLATFORM) : []);
         tagData.map((item) => {
           result.push(
-            <JobTag item={item}></JobTag>
+            <Tag className={styles.tag} key={item.id}>{item.tagName}</Tag>
           );
         })
         return <Flex wrap gap={2}>{result}</Flex>;
