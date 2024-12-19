@@ -42,7 +42,7 @@ const JobPopup: React.FC<JobPopupProps> = ({ data, onClick }) => {
   const genJobTag = (jobTagList) => {
     if (jobTagList) {
       const result = [];
-      convertToTagData(jobTagList.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM)).map((item) => {
+      convertToTagData(jobTagList?.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM)).map((item) => {
         result.push(
           <JobTag item={item} color="#1677ff"></JobTag>
         );
@@ -121,18 +121,18 @@ const JobPopup: React.FC<JobPopupProps> = ({ data, onClick }) => {
             ) : null}
           </Flex>
           <Flex style={{ marginTop: "5px" }} wrap={true} gap={2}>
-            {jobTagList != null && jobTagList.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM && item.source == null).length > 0 ? (
+            {jobTagList != null && jobTagList?.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM && item.source == null).length > 0 ? (
               <>
                 <Text>职位标签(我)：</Text>
-                {genJobTag(jobTagList.filter(item => item.source == null))}
+                {genJobTag(jobTagList?.filter(item => item.source == null))}
               </>
             ) : null}
           </Flex>
           <Flex style={{ marginTop: "5px" }} wrap={true} gap={2}>
-            {jobTagList != null && jobTagList.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM && item.source != null).length > 0 ? (
+            {jobTagList != null && jobTagList?.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM && item.source != null).length > 0 ? (
               <>
                 <Text>职位标签(伙伴)：</Text>
-                {genJobTag(jobTagList.filter(item => item.source != null))}
+                {genJobTag(jobTagList?.filter(item => item.source != null))}
               </>
             ) : null}
           </Flex>

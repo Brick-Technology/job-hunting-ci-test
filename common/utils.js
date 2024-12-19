@@ -256,5 +256,5 @@ export function isToday(value) {
 }
 
 export function cleanHTMLTag(value) {
-  return value.replaceAll("<br>", "").replaceAll("<br />", "").replaceAll("<p>", "").replaceAll("</p>", "").replaceAll("&nbsp;", "");
+  return value?.replaceAll("<br>", "").replaceAll("<br />", "").replaceAll("<p>", "").replaceAll("</p>", "").replaceAll("&nbsp;", "");
 }

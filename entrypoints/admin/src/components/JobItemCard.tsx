@@ -75,7 +75,7 @@ const JobItemCard: React.FC<JobItemCardProps> = (props) => {
   const genJobTag = (jobTagList) => {
     if (jobTagList) {
       const result = [];
-      convertToTagData(jobTagList.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM)).map((item) => {
+      convertToTagData(jobTagList?.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM)).map((item) => {
         result.push(
           <JobTag item={item} color="#1677ff"></JobTag>
         );

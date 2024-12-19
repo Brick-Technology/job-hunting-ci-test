@@ -44,7 +44,7 @@ const JobItemTable: React.FC<JobItemTableProps> = (props) => {
   const genJobTag = (jobTagList) => {
     if (jobTagList) {
       const result = [];
-      convertToTagData(jobTagList.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM)).map((item) => {
+      convertToTagData(jobTagList?.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM)).map((item) => {
         result.push(
           <JobTag item={item} color="#1677ff"></JobTag>
         );
@@ -239,7 +239,7 @@ const JobItemTable: React.FC<JobItemTableProps> = (props) => {
       children: (
         <>
           <Flex wrap={true} gap={2}>
-            {genJobTag(jobTagList.filter(item => item.source == null))}
+            {genJobTag(jobTagList?.filter(item => item.source == null))}
           </Flex>
         </>
       ),
@@ -251,7 +251,7 @@ const JobItemTable: React.FC<JobItemTableProps> = (props) => {
       children: (
         <>
           <Flex wrap={true} gap={2}>
-            {genJobTag(jobTagList.filter(item => item.source != null))}
+            {genJobTag(jobTagList?.filter(item => item.source != null))}
           </Flex>
         </>
       ),
