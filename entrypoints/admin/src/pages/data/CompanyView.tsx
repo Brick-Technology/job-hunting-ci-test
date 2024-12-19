@@ -75,7 +75,7 @@ const CompanyView: React.FC = () => {
     {
       title: '编号',
       dataIndex: 'id',
-      render: (text: string) => <Text>{text}</Text>,
+      render: (text: string) => <Text copyable ellipsis title={text}>{text}</Text>,
       minWidth: 100,
     },
     {

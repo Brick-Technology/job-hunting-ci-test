@@ -41,14 +41,14 @@ const TagView: React.FC = () => {
     {
       title: '编号',
       dataIndex: 'tagId',
-      render: (value: string) => <Text copyable>{value}</Text>,
+      render: (value: string) => <Text copyable ellipsis title={value}>{value}</Text>,
       minWidth: 100,
     },
     {
       title: '名称',
       dataIndex: 'tagName',
       render: (value: string) => <Text>{value}</Text>,
-      minWidth: 200,
+      minWidth: 300,
     },
     {
       title: '标签私密性',
