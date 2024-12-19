@@ -73,7 +73,7 @@ const JobTagView: React.FC = () => {
       minWidth: 100,
     },
     {
-      title: '平台标签',
+      title: '标签(平台)',
       dataIndex: 'tagArray',
       render: (value: JobTagDTO[]) => {
         const result = [];
