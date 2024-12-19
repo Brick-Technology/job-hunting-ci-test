@@ -221,6 +221,10 @@ export function genIdFromText(value) {
   return sha256(value) + "";
 }
 
+export function genSha256(value) {
+  return sha256(value) + "";
+}
+
 export function genUniqueId() {
   return uuidv4();
 }

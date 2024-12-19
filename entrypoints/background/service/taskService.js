@@ -500,7 +500,7 @@ async function getJobTagData({ startDatetime, endDatetime }) {
     };
 }
 
-async function uploadData({ userName, repoName, dirPath, dataTypeName, dataList, jsonObjectToExcelJsonArrayFunction }) {
+async function uploadData({ userName, repoName, dirPath, dataTypeName, dataList, jsonObjectToExcelJsonArrayFunction } = {}) {
     if (dataList.length > 0) {
         infoLog(`[Task Data Upload ${dataTypeName}] data length = ${dataList.length}`);
         let result = jsonObjectToExcelJsonArrayFunction(dataList);
@@ -508,7 +508,7 @@ async function uploadData({ userName, repoName, dirPath, dataTypeName, dataList,
         let zipData = await zipFileToBase64(dataTypeName, excelData);
         let filePath = `${dirPath}/${dataTypeName}.zip`;
         try {
-            await GithubApi.createFileContent(userName, repoName, filePath, zipData, "upload job data", { getTokenFunction: getToken, setTokenFunction: setToken, });
+            await GithubApi.createFileContent(userName, repoName, filePath, zipData, `upload ${dataTypeName} file,local datetime=${dayjs().format()}`, { getTokenFunction: getToken, setTokenFunction: setToken, });
             infoLog(`[Task Data Upload ${dataTypeName}] create file ${filePath} success`);
         } catch (e) {
             if (e == EXCEPTION.CREATION_FAILED) {
@@ -698,7 +698,7 @@ async function uploadDataByDataId(dataId, dataTypeName, getDataFunction, jsonObj
         userName, repoName, dirPath,
         dataTypeName,
         dataList: (await getDataFunction({ startDatetime, endDatetime })).items,
-        jsonObjectToExcelJsonArrayFunction
+        jsonObjectToExcelJsonArrayFunction,
     });
 }
 
