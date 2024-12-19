@@ -49,7 +49,7 @@ const JobItemTable: React.FC<JobItemTableProps> = (props) => {
           <JobTag item={item} color="#1677ff"></JobTag>
         );
       })
-      return result;
+      return result.length > 0 ? result : <Text>无</Text>;
     } else {
       return null;
     }
@@ -239,8 +239,7 @@ const JobItemTable: React.FC<JobItemTableProps> = (props) => {
       children: (
         <>
           <Flex wrap={true} gap={2}>
-            {jobTagList ? genJobTag(jobTagList)
-              : <Text>无</Text>}
+            {genJobTag(jobTagList)}
           </Flex>
         </>
       ),
