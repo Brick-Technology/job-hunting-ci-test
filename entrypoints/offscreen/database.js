@@ -147,6 +147,8 @@ export function genFullBindObject(obj, { overrideUpdateDatetime = false } = {}) 
     let key = keys[n];
     if (key == "createDatetime" || (!overrideUpdateDatetime && key == "updateDatetime")) {
       result[`$${toLine(key)}`] = dayjs(now).format("YYYY-MM-DD HH:mm:ss");
+    } else if (overrideUpdateDatetime && key == "updateDatetime") {
+      result[`$${toLine(key)}`] = dayjs(obj[`${key}`]).format("YYYY-MM-DD HH:mm:ss");
     } else {
       result[`$${toLine(key)}`] = convertEmptyStringToNull(obj[`${key}`])
     }

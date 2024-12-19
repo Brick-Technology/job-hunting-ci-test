@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## WIP
+
+### 🐛 Fixed
+
+1. (Sidepanel)修复职位标签更新时间的格式。
+
 ## 2.1.0(2024-12-19)
 
 ### ⭐ Added
