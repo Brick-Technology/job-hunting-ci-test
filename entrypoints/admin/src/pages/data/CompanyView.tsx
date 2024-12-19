@@ -36,7 +36,7 @@ const searchFields =
       name={`name`}
       label={`公司名`}
     >
-      <Input placeholder="请输入公司名" />
+      <Input allowClear placeholder="请输入公司名" />
     </Form.Item>
   </Col>,
   <Col span={8} key="startDate">
@@ -44,7 +44,7 @@ const searchFields =
       name={`startDate`}
       label={`成立时间`}
     >
-      <RangePicker />
+      <RangePicker allowClear />
     </Form.Item>
   </Col>,],
 }

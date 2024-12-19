@@ -1,9 +1,9 @@
-import { TAG_SOURCE_TYPE_CUSTOM } from "@/common";
+import { TAG_SOURCE_TYPE_CUSTOM, TAG_SOURCE_TYPE_PLATFORM } from "@/common";
 import { JobApi, TagApi } from "@/common/api";
 import { JobTagBO } from "@/common/data/bo/jobTagBO";
+import { JobTagDTO } from "@/common/data/dto/jobTagDTO";
 import { jobDataToExcelJSONArray } from "@/common/excel";
 import { dateToStr } from "@/common/utils";
-import { Icon } from "@iconify/react";
 import {
   Button,
   Col,
@@ -21,17 +21,19 @@ import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import BasicTable from "../../components/BasicTable";
 import JobItemTable from "../../components/JobItemTable";
+import JobTag from "../../components/JobTag";
 import { CompanyData } from "../../data/CompanyData";
 import { JobData } from "../../data/JobData";
 import { JobTagEditData } from "../../data/JobTagEditData";
 import { WhitelistData } from "../../data/WhitelistData";
 import { useJob } from "../../hooks/job";
+import { useJobTag } from "../../hooks/jobTag";
 import JobTagEdit from "./JobTagEdit";
-import styles from "./JobView.module.css";
 const { RangePicker } = DatePicker;
 const { Text } = Typography;
 const { convertToJobDataList, platformFormat, convertSortField } = useJob();
 dayjs.extend(duration)
+const { convertToTagData } = useJobTag();
 
 const searchFields =
 {
@@ -41,7 +43,7 @@ const searchFields =
         name={`name`}
         label={`名称`}
       >
-        <Input placeholder="请输入名称" />
+        <Input allowClear placeholder="请输入名称" />
       </Form.Item>
     </Col>,
     <Col span={8} key="companyName">
@@ -49,7 +51,7 @@ const searchFields =
         name={`companyName`}
         label={`公司名`}
       >
-        <Input placeholder="请输入公司名" />
+        <Input allowClear placeholder="请输入公司名" />
       </Form.Item>
     </Col>,
     <Col span={8} key="location">
@@ -57,7 +59,7 @@ const searchFields =
         name={`location`}
         label={`地区`}
       >
-        <Input placeholder="请输入地区" />
+        <Input allowClear placeholder="请输入地区" />
       </Form.Item>
     </Col>,
   ],
@@ -66,7 +68,7 @@ const searchFields =
       name={`address`}
       label={`地址`}
     >
-      <Input placeholder="请输入地址" />
+      <Input allowClear placeholder="请输入地址" />
     </Form.Item>
   </Col>,
   <Col span={8} key="createDatetime">
@@ -74,7 +76,7 @@ const searchFields =
       name={`createDatetime`}
       label={`首次扫描时间`}
     >
-      <RangePicker />
+      <RangePicker allowClear />
     </Form.Item>
   </Col>,
   <Col span={8} key="publishDatetime">
@@ -82,7 +84,7 @@ const searchFields =
       name={`publishDatetime`}
       label={`发布时间`}
     >
-      <RangePicker />
+      <RangePicker allowClear />
     </Form.Item>
   </Col>,]
 }
@@ -140,8 +142,54 @@ const JobView: React.FC = () => {
       title: '发布时间',
       dataIndex: 'publishDatetime',
       render: (value: Date) => <Text title={dateToStr(value)}>{dateToStr(value, "YYYY-MM-DD")}</Text>,
-      minWidth: 120,
+      minWidth: 100,
       sorter: true,
+    },
+    {
+      title: '职位标签(平台)',
+      dataIndex: 'jobTagList',
+      render: (value: JobTagDTO[]) => {
+        const result = [];
+        const tagData = convertToTagData(value ? value.filter(item => item.sourceType == TAG_SOURCE_TYPE_PLATFORM) : []);
+        tagData.map((item) => {
+          result.push(
+            <JobTag item={item}></JobTag>
+          );
+        })
+        return <Flex wrap gap={2}>{result}</Flex>;
+      },
+      minWidth: 200,
+    },
+    {
+      title: '职位标签',
+      dataIndex: 'jobTagList',
+      render: (value: JobTagDTO[]) => {
+        const result = [];
+        const tagData = convertToTagData(value ? value.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM) : []);
+        tagData.map((item) => {
+          result.push(
+            <JobTag item={item}></JobTag>
+          );
+        })
+        return <Flex wrap gap={2}>{result}</Flex>;
+      },
+      minWidth: 200,
+    },
+    {
+      title: '公司标签',
+      dataIndex: 'company',
+      render: (value: CompanyData) => {
+        const result = [];
+        if (value && value.companyTagList && value.companyTagList.length > 0) {
+          value.companyTagList.map((item) => {
+            result.push(
+              <Tag key={item.tagName}>{item.tagName}</Tag>
+            );
+          })
+        }
+        return <Flex wrap gap={2}>{result}</Flex>;
+      },
+      minWidth: 300,
     },
     {
       title: '地区',
@@ -170,39 +218,7 @@ const JobView: React.FC = () => {
       minWidth: 60,
       sorter: true,
     },
-    {
-      title: '职位标签',
-      dataIndex: 'jobTagList',
-      render: (value: { tagName: string, sourceType: string, isPublic: boolean, source?: string }[]) => {
-        const result = [];
-        if (value && value.length > 0) {
-          value.map((item, index) => {
-            result.push(
-              item.sourceType == TAG_SOURCE_TYPE_CUSTOM ? <Tag className={styles.tag} key={index}>{item.isPublic ? <Icon icon="material-symbols:public" /> : <Icon icon="material-symbols:private-connectivity" />}{item.tagName}</Tag> :
-                <Tag className={styles.tag} key={index} bordered={false} >{item.tagName}</Tag>
-            );
-          })
-        }
-        return <Flex wrap gap={2}>{result}</Flex>;
-      },
-      minWidth: 200,
-    },
-    {
-      title: '公司标签',
-      dataIndex: 'company',
-      render: (value: CompanyData) => {
-        const result = [];
-        if (value && value.companyTagList && value.companyTagList.length > 0) {
-          value.companyTagList.map((item) => {
-            result.push(
-              <Tag key={item.tagName}>{item.tagName}</Tag>
-            );
-          })
-        }
-        return <Flex wrap gap={2}>{result}</Flex>;
-      },
-      minWidth: 100,
-    },
+
     {
       title: '学历',
       dataIndex: 'degree',

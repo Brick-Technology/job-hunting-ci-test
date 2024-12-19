@@ -1,54 +1,58 @@
 import dayjs from "dayjs";
-import { isOutsource } from "../../common/data/outsource";
-import { isTraining } from "../../common/data/training";
-import {
-  convertTimeToHumanReadable,
-  convertTimeOffsetToHumanReadable,
-  autoFillHttp,
-  getDomain,
-  genIdFromText,
-  genUniqueId,
-} from "../../common/utils";
 import {
   PLATFORM_BOSS,
   PLATFORM_JOBSDB,
   PLATFORM_LIEPIN,
-  TAG_IT_BLACK_LIST,
-  TAG_RUOBILIN_BLACK_LIST,
-  TAG_IT_BLACK_LIST_2,
   TAG_CREDIT_BJ_BLACK_LIST,
+  TAG_IT_BLACK_LIST,
+  TAG_IT_BLACK_LIST_2,
+  TAG_RUOBILIN_BLACK_LIST,
   TAG_SOURCE_TYPE_CUSTOM,
 } from "../../common";
+import { httpFetchGetText, httpFetchJson } from "../../common/api/common";
+import { isOutsource } from "../../common/data/outsource";
+import { isTraining } from "../../common/data/training";
+import {
+  autoFillHttp,
+  convertTimeOffsetToHumanReadable,
+  convertTimeToHumanReadable,
+  genIdFromText,
+  genUniqueId,
+  getDomain,
+} from "../../common/utils";
 import {
   JOB_STATUS_DESC_NEWEST
 } from "./common";
 import {
-  genSha256,
+  addAbortFunctionHandler,
+  addCompanyTagNotExists,
   companyNameConvert,
+  deleteAbortFunctionHandler,
+  genSha256,
   getCompanyFromCompanyInfo,
   getCompanyInfoByAiqicha,
   stopAndCleanAbortFunctionHandler,
-  addAbortFunctionHandler,
-  deleteAbortFunctionHandler,
-  addCompanyTagNotExists,
 } from "./commonDataHandler";
-import { httpFetchGetText, httpFetchJson } from "../../common/api/common";
 
-import { logoResource } from "./assets/logo";
 import $ from "jquery";
-import { CompanyApi, TagApi, AuthApi, UserApi, JobApi } from "../../common/api";
+import { AuthApi, CompanyApi, JobApi, TagApi, UserApi } from "../../common/api";
 import { GithubApi } from "../../common/api/github";
+import { COMMENT_PAGE_SIZE, COMPANY_DATA_EXPRIE_DAY } from "../../common/config";
 import { Company } from "../../common/data/domain/company";
 import { errorLog, infoLog } from "../../common/log";
-import { COMMENT_PAGE_SIZE, COMPANY_DATA_EXPRIE_DAY } from "../../common/config";
+import { logoResource } from "./assets/logo";
 
 const ACTIVE_TIME_MATCH = /(?<num>[0-9\.]*)/;
 
-import Tagify from '@yaireo/tagify';
 import DragSort from '@yaireo/dragsort';
+import Tagify from '@yaireo/tagify';
 import { CompanyTagBO } from "../../common/data/bo/companyTagBO";
 
 import { JobTagBO } from "../../common/data/bo/jobTagBO";
+
+import { useJobTag } from "@/common/hooks/jobTag";
+import "iconify-icon";
+const { convertToTagData } = useJobTag();
 
 export function renderTimeTag(
   divElement,
@@ -672,23 +676,53 @@ export function renderFunctionPanel(
         jobCardItemDom: targetDom
       })
     );
-    functionPanelDiv.appendChild(createJobTag(item));
+    functionPanelDiv.appendChild(createAllJobTag(item));
+    functionPanelDiv.appendChild(createMyJobTag(item));
     functionPanelDiv.appendChild(createCommentWrapper(item));
   });
 }
 
-function createJobTag(item) {
+function createAllJobTag(item) {
   const wrapper = document.createElement("div");
   wrapper.className = "__job_tag_wrapper";
   const labelDiv = document.createElement("div");
   labelDiv.className = "__job_tag_label";
-  labelDiv.textContent = "职位标签：";
+  labelDiv.textContent = "职位标签(伙伴)：";
+  wrapper.appendChild(labelDiv);
+  const jobTagDiv = document.createElement("div");
+  jobTagDiv.className = "__job_tag_all";
+  wrapper.appendChild(jobTagDiv);
+  asyncRenderAllTag(jobTagDiv, item);
+  return wrapper;
+}
+
+async function asyncRenderAllTag(div, item) {
+  const jobTagDTO = (await JobApi.jobTagGetAllDTOByJobId(item.jobId)).filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM && item.source != null);
+  convertToTagData(jobTagDTO).forEach(item => {
+    div.appendChild(createTag(item))
+  });
+}
+
+function createTag(item) {
+  return $(`<div style="display:flex;align-items: center;background-color:${getRandomColor()};border-radius: 3px;padding: 3px;margin-right: 5px;" 
+    title=${item.sourceList.filter(item => item.source != null).map(item => item.source).join(",")}
+    >
+    ${item.isPublic ? '<iconify-icon icon="material-symbols:public"></iconify-icon>' : '<iconify-icon icon="material-symbols:private-connectivity"></iconify-icon>'}(${item.sourceList.length}${item.self ? "*" : ""})${item.tagName}
+    </div>`)[0];
+}
+
+function createMyJobTag(item) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "__job_tag_wrapper";
+  const labelDiv = document.createElement("div");
+  labelDiv.className = "__job_tag_label";
+  labelDiv.textContent = "职位标签(我)：";
   wrapper.appendChild(labelDiv);
   const jobTagDiv = document.createElement("div");
   jobTagDiv.className = "__job_tag";
   wrapper.appendChild(jobTagDiv);
   asyncRenderTag(jobTagDiv, "职位", async () => {
-    return (await JobApi.jobTagGetAllDTOByJobId(item.jobId)).filter(item=>item.sourceType == TAG_SOURCE_TYPE_CUSTOM && item.source == null)
+    return (await JobApi.jobTagGetAllDTOByJobId(item.jobId)).filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM && item.source == null)
   }, async (tags) => {
     let param = new JobTagBO();
     param.jobId = item.jobId;

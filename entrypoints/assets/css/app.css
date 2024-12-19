@@ -30,6 +30,13 @@
   }
 }
 
+.__job_tag_all{
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
 .__tag_operation_button {
   background-color: mediumblue;
   color: white;

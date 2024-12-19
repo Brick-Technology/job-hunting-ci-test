@@ -87,11 +87,26 @@ const JobTagView: React.FC = () => {
       minWidth: 200,
     },
     {
-      title: '自定义标签',
+      title: '标签(我)',
       dataIndex: 'tagArray',
       render: (value: JobTagDTO[]) => {
         const result = [];
-        const tagData = convertToTagData(value.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM));
+        const tagData = convertToTagData(value.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM && item.source == null));
+        tagData.map((item) => {
+          result.push(
+            <JobTag item={item}></JobTag>
+          );
+        })
+        return <Flex wrap gap={2}>{result}</Flex>;
+      },
+      minWidth: 200,
+    },
+    {
+      title: '标签(伙伴)',
+      dataIndex: 'tagArray',
+      render: (value: JobTagDTO[]) => {
+        const result = [];
+        const tagData = convertToTagData(value.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM && item.source != null));
         tagData.map((item) => {
           result.push(
             <JobTag item={item}></JobTag>

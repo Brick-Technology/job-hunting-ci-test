@@ -16,6 +16,7 @@
 ### 🔨 Dependency
 
 1. Update puppeteer-core ^23.10.4
+2. Add iconify-icon ^2.2.0
 
 ## 2.0.2(2024-12-16)
 

@@ -234,12 +234,24 @@ const JobItemTable: React.FC<JobItemTableProps> = (props) => {
     },
     {
       key: "jobTag",
-      label: "自定义职位标签",
+      label: "职位标签(我)",
       span: 3,
       children: (
         <>
           <Flex wrap={true} gap={2}>
-            {genJobTag(jobTagList)}
+            {genJobTag(jobTagList.filter(item => item.source == null))}
+          </Flex>
+        </>
+      ),
+    },
+    {
+      key: "jobTag",
+      label: "职位标签(伙伴)",
+      span: 3,
+      children: (
+        <>
+          <Flex wrap={true} gap={2}>
+            {genJobTag(jobTagList.filter(item => item.source != null))}
           </Flex>
         </>
       ),
