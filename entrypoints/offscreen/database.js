@@ -489,6 +489,31 @@ export const Database = {
       );
     }
   },
+  dbClose: async function (message, param) {
+    try {
+      (await getDb()).close();
+      postSuccessMessage(message, {});
+    } catch (e) {
+      postErrorMessage(
+        message,
+        "[worker] dbClose error : " + e.message
+      );
+    }
+  },
+  dbDelete: async function (message, param) {
+    try {
+      (await getDb()).close();
+      const root = await navigator.storage.getDirectory();
+      const fileHandle = await root.getFileHandle(JOB_DB_FILE_NAME);
+      await fileHandle.remove();
+      postSuccessMessage(message, {});
+    } catch (e) {
+      postErrorMessage(
+        message,
+        "[worker] dbDelete error : " + e.message
+      );
+    }
+  },
 };
 
 /**

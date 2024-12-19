@@ -1,4 +1,4 @@
-import { invoke, init } from "./bridge";
+import { init, invoke } from "./bridge";
 import { CONTENT_SCRIPT } from "./bridgeCommon";
 
 export async function initBridge() {
@@ -21,6 +21,11 @@ export async function dbExport() {
  */
 export async function dbImport(param) {
   let result = await invoke("dbImport", param);
+  return result.data;
+}
+
+export async function dbDelete() {
+  let result = await invoke("dbDelete", {});
   return result.data;
 }
 

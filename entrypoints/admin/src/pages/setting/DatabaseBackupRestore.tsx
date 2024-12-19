@@ -1,7 +1,7 @@
-import { dbExport, dbImport } from "@/common/api/common";
+import { dbDelete, dbExport, dbImport } from "@/common/api/common";
 import { base64ToBytes, bytesToBase64 } from "@/common/utils/base64.js";
 import { Icon } from "@iconify/react";
-import { Button, Flex, Input, Modal, Popconfirm, Spin, Typography, message } from "antd";
+import { Button, Flex, Input, Modal, Popconfirm, Spin, Switch, Typography, message } from "antd";
 import dayjs from "dayjs";
 const { Text } = Typography;
 
@@ -11,8 +11,10 @@ export type DatabaseBackupRestoreProps = {
 
 const DatabaseBackupRestore: React.FC<DatabaseBackupRestoreProps> = ({ }) => {
     const title = "数据库";
+    const [isDangerDatabaseMenuOpen, setIsDangerDatabaseMenuOpen] = useState(false);
     const [exportLoading, setExportLoading] = useState(false);
     const [importLoading, setImportLoading] = useState(false);
+    const [deleteLoading, setDeleteLoading] = useState(false);
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
     const [files, setFiles] = useState([]);
     const [messageApi, contextHolder] = message.useMessage();
@@ -105,11 +107,40 @@ const DatabaseBackupRestore: React.FC<DatabaseBackupRestoreProps> = ({ }) => {
         }
     };
 
+    const onDelete = async () => {
+        setDeleteLoading(true);
+        await dbDelete();
+        messageApi.success(`删除数据库成功`)
+        confirm({
+            title: '点击确定按钮重启程序',
+            maskClosable: false,
+            okText: '确定',
+            cancelButtonProps: { style: { visibility: "hidden" } },
+            onOk() {
+                reloadExtension();
+            },
+        });
+        setDeleteLoading(false);
+    }
+
+    const getSwitchStyle = () => {
+        if (isDangerDatabaseMenuOpen) {
+            return { backgroundColor: "red" };
+        } else {
+            return null
+        }
+    }
+
     return <>
         {contextHolder}
         <Spin spinning={loading} fullscreen />
         <Flex vertical gap={5}>
-            <Text>{title}</Text>
+            <Flex align="center" gap={5}>
+                <Text>{title}</Text>
+                <Switch style={getSwitchStyle()} checkedChildren="危险操作开启" unCheckedChildren="危险操作关闭" size="small" checked={isDangerDatabaseMenuOpen} onChange={(checked) => {
+                    setIsDangerDatabaseMenuOpen(checked);
+                }}></Switch>
+            </Flex>
             <Flex gap={5}>
                 <Popconfirm
                     title="导出数据库"
@@ -124,6 +155,16 @@ const DatabaseBackupRestore: React.FC<DatabaseBackupRestoreProps> = ({ }) => {
                     setImportLoading(false);
                     setIsImportModalOpen(true);
                 }}><Icon icon="mdi:file-document-box-plus" />{title}恢复</Button>
+                {isDangerDatabaseMenuOpen ? <Popconfirm
+                    title="删除"
+                    description="确认删除数据库？"
+                    onConfirm={onDelete}
+                    okText="是"
+                    cancelText="否"
+                >
+                    <Button style={{ backgroundColor: "red", color: "white" }} loading={deleteLoading}><Icon icon="mdi:document" />{title}删除</Button>
+                </Popconfirm> : null}
+
             </Flex>
         </Flex>
         <Modal
