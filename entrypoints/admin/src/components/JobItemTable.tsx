@@ -44,28 +44,28 @@ const JobItemTable: React.FC<JobItemTableProps> = (props) => {
   const genJobTag = (jobTagList) => {
     if (jobTagList) {
       const result = [];
-      convertToTagData(jobTagList?.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM)).map((item,index) => {
+      convertToTagData(jobTagList?.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM)).map((item, index) => {
         result.push(
           <CustomTag item={item} color="#1677ff" key={index}></CustomTag>
         );
       })
       return result.length > 0 ? result : <Text>无</Text>;
     } else {
-      return null;
+      return <Text>无</Text>;
     }
   }
 
   const genCompanyTag = (companyTagList) => {
     if (companyTagList) {
       const result = [];
-      convertToTagData(companyTagList).map((item,index) => {
+      convertToTagData(companyTagList).map((item, index) => {
         result.push(
           <CustomTag key={index} item={item} color="#faad14"></CustomTag>
         );
       })
       return result.length > 0 ? result : <Text>无</Text>;
     } else {
-      return null;
+      return <Text>无</Text>;
     }
   }
 
@@ -248,24 +248,12 @@ const JobItemTable: React.FC<JobItemTableProps> = (props) => {
     },
     {
       key: "jobTag",
-      label: "职位标签(我)",
+      label: "职位标签",
       span: 3,
       children: (
         <>
           <Flex wrap={true} gap={2}>
-            {genJobTag(jobTagList?.filter(item => item.source == null))}
-          </Flex>
-        </>
-      ),
-    },
-    {
-      key: "jobTag",
-      label: "职位标签(伙伴)",
-      span: 3,
-      children: (
-        <>
-          <Flex wrap={true} gap={2}>
-            {genJobTag(jobTagList?.filter(item => item.source != null))}
+            {genJobTag(jobTagList)}
           </Flex>
         </>
       ),
