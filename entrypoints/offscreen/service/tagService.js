@@ -130,16 +130,18 @@ export async function _batchGetTagByIds(ids) {
  * @param {string[]} tags 
  */
 export async function _addNotExistsTags(tags) {
+    //对tags进行去重处理
+    const uniqueTags = Array.from(new Set(tags));
     const tagIds = [];
-    for (let i = 0; i < tags.length; i++) {
-        let tagName = tags[i];
+    for (let i = 0; i < uniqueTags.length; i++) {
+        let tagName = uniqueTags[i];
         let id = genIdFromText(tagName);
         tagIds.push(id);
     }
     const existsTags = await _batchGetTagByIds(tagIds);
     const existsTagIds = existsTags.map(item => item.tagId);
-    for (let i = 0; i < tags.length; i++) {
-        let tagName = tags[i];
+    for (let i = 0; i < uniqueTags.length; i++) {
+        let tagName = uniqueTags[i];
         let id = genIdFromText(tagName);
         if (!existsTagIds.includes(id)) {
             let tag = new Tag();
