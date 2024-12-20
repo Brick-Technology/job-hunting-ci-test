@@ -1,27 +1,23 @@
-import { infoLog, debugLog, errorLog, isDebug } from "../../common/log";
+import { ConfigApi, JobApi } from "../../common/api";
+import { getAndRemovePromiseHook } from "../../common/api/bridge";
 import {
   BACKGROUND,
   CONTENT_SCRIPT,
   OFFSCREEN,
 } from "../../common/api/bridgeCommon";
-import { convertPureJobDetailUrl, paramsToObject, parseToLineObjectToToHumpObject, randomDelay } from "../../common/utils";
-import { JobApi } from "../../common/api";
 import { httpFetchGetText, httpFetchJson } from "../../common/api/common";
-import { getAndRemovePromiseHook } from "../../common/api/bridge";
-import { AuthService, getOauth2LoginMessageMap, setToken, getToken } from "./service/authService";
-import { postSuccessMessage, postErrorMessage } from "./util";
-import { OauthDTO } from "../../common/data/dto/oauthDTO";
-import { GITHUB_APP_CLIENT_ID, GITHUB_APP_CLIENT_SECRET, GITHUB_URL_GET_ACCESS_TOKEN, GITHUB_URL_GET_USER, GITHUB_APP_INSTALL_CALLBACK_URL } from "../../common/config";
-import { UserService } from "./service/userService";
-import { UserDTO } from "../../common/data/dto/userDTO";
-import { setUser, getUser } from "./service/userService";
-import { SystemService } from "./service/systemService";
-import { AutomateService } from "./service/automateService";
-import { calculateUploadTask, calculateDownloadTask, runTask, calculateDataSharePartnerList } from "./service/taskService";
-import { DEFAULT_DATA_REPO, TASK_LOOP_DELAY } from "../../common/config";
-import { ConfigApi } from "../../common/api";
+import { CONFIG_KEY_DATA_SHARE_PLAN, DEFAULT_DATA_REPO, GITHUB_APP_CLIENT_ID, GITHUB_APP_CLIENT_SECRET, GITHUB_APP_INSTALL_CALLBACK_URL, GITHUB_URL_GET_ACCESS_TOKEN, GITHUB_URL_GET_USER, TASK_LOOP_DELAY } from "../../common/config";
 import { DataSharePlanConfigDTO } from "../../common/data/dto/dataSharePlanConfigDTO";
-import { CONFIG_KEY_DATA_SHARE_PLAN } from "../../common/config";
+import { OauthDTO } from "../../common/data/dto/oauthDTO";
+import { UserDTO } from "../../common/data/dto/userDTO";
+import { debugLog, errorLog, infoLog } from "../../common/log";
+import { convertPureJobDetailUrl, paramsToObject, parseToLineObjectToToHumpObject, randomDelay } from "../../common/utils";
+import { AuthService, getOauth2LoginMessageMap, getToken, setToken } from "./service/authService";
+import { AutomateService } from "./service/automateService";
+import { SystemService } from "./service/systemService";
+import { calculateDataSharePartnerList, calculateDownloadTask, calculateUploadTask, runTask } from "./service/taskService";
+import { getUser, setUser, UserService } from "./service/userService";
+import { postErrorMessage, postSuccessMessage } from "./util";
 
 export default defineBackground(() => {
   debugLog("background ready");

@@ -1,16 +1,22 @@
-import {
-  GITHUB_URL_GET_USER, GITHUB_URL_GET_ACCESS_TOKEN, GITHUB_APP_CLIENT_ID,
-  GITHUB_APP_CLIENT_SECRET, URL_GRAPHQL, GITHUB_APP_REPO, URL_POST_ISSUES,
-  URL_TRAFFIC_CLONE, URL_TRAFFIC_POPULAR_PATHS, URL_TRAFFIC_POPULAR_REFERRERS, URL_TRAFFIC_VIEWS,
-  APP_URL_LATEST_VERSION, GITHUB_URL_API
-} from "../../config";
-import { AuthApi, DeveloperApi } from "../index"
-import { UserDTO } from "../../data/dto/userDTO";
-import { OauthDTO } from "../../data/dto/oauthDTO";
-import { infoLog, errorLog } from "../../log";
-import { httpFetchJson } from "../../api/common";
+import { EVENT_RESPONSE_INFO } from "../../../common";
+import Emitter from "../../../common/emitter";
 import { parseToLineObjectToToHumpObject } from "../../../common/utils";
-
+import {
+  APP_URL_LATEST_VERSION,
+  GITHUB_APP_CLIENT_ID,
+  GITHUB_APP_CLIENT_SECRET,
+  GITHUB_APP_REPO,
+  GITHUB_URL_API,
+  GITHUB_URL_GET_ACCESS_TOKEN,
+  GITHUB_URL_GET_USER,
+  URL_GRAPHQL,
+  URL_POST_ISSUES,
+  URL_TRAFFIC_CLONE, URL_TRAFFIC_POPULAR_PATHS, URL_TRAFFIC_POPULAR_REFERRERS, URL_TRAFFIC_VIEWS
+} from "../../config";
+import { OauthDTO } from "../../data/dto/oauthDTO";
+import { UserDTO } from "../../data/dto/userDTO";
+import { infoLog } from "../../log";
+import { AuthApi, DeveloperApi } from "../index";
 export const EXCEPTION = {
   NO_LOGIN: "NO_LOGIN",
   NOT_FOUND: "NOT_FOUND",
@@ -389,6 +395,16 @@ async function fetchJsonReturnResponse(url, data, { method, token, skipLogin, ge
     option.body = JSON.stringify(data);
   }
   let response = await fetch(url, option);
+  let responseHeader = {};
+  response.headers.forEach((value, key, parent) => {
+    responseHeader[key] = value;
+  })
+  if (location.protocol == "chrome-extension:") {
+    const eventKey = `${EVENT_RESPONSE_INFO}${responseHeader.server}`;
+    Emitter.emit(eventKey, responseHeader);
+  } else {
+    //other page
+  }
   return response;
 }
 

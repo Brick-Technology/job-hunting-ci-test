@@ -1,3 +1,6 @@
+import { API_SERVER_GITHUB, EVENT_RESPONSE_INFO } from "@/common";
+import Emitter from "@/common/emitter";
+import dayjs from "dayjs";
 import React from "react";
 import { HashRouter, Route, Routes } from "react-router";
 import { useShallow } from 'zustand/shallow';
@@ -13,15 +16,14 @@ import CompanyTagView from "./pages/data/CompanyTagView";
 import CompanyView from "./pages/data/CompanyView";
 import JobTagView from "./pages/data/JobTagView";
 import JobView from "./pages/data/JobView";
+import TagView from "./pages/data/TagView";
 import PartnerView from "./pages/dataSharePlan/PartnerView";
 import DataSharePlanStatisticView from "./pages/dataSharePlan/StatisticView";
 import TaskView from "./pages/dataSharePlan/TaskView";
 import DataSharePlanWelcomeView from "./pages/dataSharePlan/WelcomeView";
+import useApiStore from "./store/ApiStore";
 import useAuthStore from "./store/AuthStore";
 import useDataSharePlanStore from "./store/DataSharePlanStore";
-import TagView from "./pages/data/TagView";
-
-
 const App: React.FC = () => {
 
   const [init, setInit] = useState(false);
@@ -32,6 +34,9 @@ const App: React.FC = () => {
   const [dataSharePlanStoreInit] = useDataSharePlanStore(useShallow(((state) => [
     state.init,
   ])));
+  const [updateApiInfo] = useApiStore(useShallow(((state) => [
+    state.update,
+  ])));
 
   useEffect(() => {
     const initStore = async () => {
@@ -41,6 +46,20 @@ const App: React.FC = () => {
       document.getElementById("loading")?.remove()
     }
     initStore();
+  }, [])
+
+  useEffect(() => {
+    const initListener = async () => {
+      Emitter.on(`${EVENT_RESPONSE_INFO}${API_SERVER_GITHUB}`, (value) => {
+        updateApiInfo(value['x-ratelimit-resource'], {
+          rateLimitLimit: value['x-ratelimit-limit'],
+          rateLimitRemaining: value['x-ratelimit-remaining'],
+          rateLimitReset: dayjs.unix(value['x-ratelimit-reset']).toDate(),
+          rateLimitUsed: value['x-ratelimit-used'],
+        });
+      });
+    };
+    initListener();
   }, [])
   return (
     init ? <HashRouter>

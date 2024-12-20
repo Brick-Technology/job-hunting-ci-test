@@ -2,6 +2,10 @@
 
 ## WIP
 
+### ⭐ Added
+
+1. (Sidepanel)添加GitHub API计量展示(Core,Graphql)。
+
 ### 🐛 Fixed
 
 1. (Sidepanel)修复主页图表默认显示tooltip的问题。

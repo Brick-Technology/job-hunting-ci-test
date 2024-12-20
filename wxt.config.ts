@@ -7,7 +7,7 @@ import { defineConfig } from 'wxt';
 // See https://wxt.dev/api/config.html
 export default defineConfig({
   extensionApi: 'chrome',
-  modules: ['@wxt-dev/unocss','@wxt-dev/module-react'],
+  modules: ['@wxt-dev/unocss', '@wxt-dev/module-react'],
   unocss: {
     configOrPath: {
       // mode: 'shadow-dom',
@@ -44,7 +44,8 @@ export default defineConfig({
       "declarativeNetRequestWithHostAccess",
       "declarativeNetRequestFeedback",
       "debugger",
-      "cookies"
+      "cookies",
+      "storage"
     ],
     "host_permissions": [
       "http://*/",

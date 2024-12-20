@@ -1,18 +1,18 @@
 import { ShareAltOutlined, UserOutlined } from '@ant-design/icons';
-import { Avatar, Flex, message, Modal, Popconfirm, Tag, Tooltip, Typography } from 'antd';
+import { Avatar, Flex, message, Modal, Popconfirm, Progress, Tag, Tooltip, Typography } from 'antd';
 import React from 'react';
 import styles from "./HeaderRight.module.css";
 const { Text } = Typography;
 
+import { convertToAbbreviation, dateToStr } from "@/common/utils";
 import { Icon } from '@iconify/react';
 import Link from 'antd/es/typography/Link';
 import Markdown from 'marked-react';
 import { useShallow } from 'zustand/shallow';
+import useApiStore from "../store/ApiStore";
 import useAuthStore from "../store/AuthStore";
 import useDataSharePlanStore from '../store/DataSharePlanStore';
 import useSystemStore from '../store/SystemStore';
-import { convertToAbbreviation } from "@/common/utils";
-
 const HeaderRight: React.FC = () => {
 
     const [auth, login, logout, username, avatar] = useAuthStore(useShallow(((state) => [
@@ -25,6 +25,11 @@ const HeaderRight: React.FC = () => {
 
     const [enable] = useDataSharePlanStore(useShallow(((state) => [
         state.enable,
+    ])));
+
+    const [core, graphql] = useApiStore(useShallow(((state) => [
+        state.core,
+        state.graphql,
     ])));
 
     const [versionObject,
@@ -66,6 +71,22 @@ const HeaderRight: React.FC = () => {
         query();
     }, [])
 
+    const genApiProgress = () => {
+        let result = [];
+        [{ title: "Core", value: core }, { title: "Graphql", value: graphql }].map(obj => {
+            const item = obj.value;
+            const title = obj.title;
+            result.push(
+                <Flex align="center" key={obj.title}>
+                    <Progress size={[170, 20]} percent={item.rateLimitRemaining / item.rateLimitLimit * 100} showInfo={true} percentPosition={{ align: 'center', type: 'inner' }} format={(percent) => {
+                        return <Text title={`将于${dateToStr(item.rateLimitReset) ?? "N/A"}重置`} className={styles.progressText}><Icon icon="mdi:github" />{title} API:{item.rateLimitRemaining}/{item.rateLimitLimit}</Text>
+                    }} />
+                </Flex>
+            );
+        })
+        return result;
+    }
+
     return (
         <Flex gap="small" align="center" className={styles.root}>
             {contextHolder}
@@ -74,6 +95,9 @@ const HeaderRight: React.FC = () => {
                     {newVersion ? <Tag style={{ cursor: "pointer" }} onClick={() => {
                         setIsLatestChangelogContentModalOpen(true);
                     }} color="yellow"><Flex align="center"><Icon icon="mdi:arrow-up-bold-box"></Icon>发现新版本</Flex></Tag> : null}
+                    {auth ?
+                        genApiProgress()
+                        : null}
                 </Flex>
                 <Flex justify="end">
                     {

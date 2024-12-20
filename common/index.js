@@ -80,3 +80,8 @@ export const MAX_RECORD_COUNT = 10000000;
 
 export const TAG_SOURCE_TYPE_CUSTOM = 0;
 export const TAG_SOURCE_TYPE_PLATFORM = 1;
+
+//EVENT
+export const EVENT_RESPONSE_INFO = "EVENT_RESPONSE_INFO";
+//EVENT KEY
+export const API_SERVER_GITHUB = "github.com";

@@ -8,3 +8,10 @@
     align-items:center;
     color:green;
 }
+.progressText{
+    display:flex;
+    align-items:center;
+    font-size:12px;
+    word-break: normal;
+    color:white;
+}

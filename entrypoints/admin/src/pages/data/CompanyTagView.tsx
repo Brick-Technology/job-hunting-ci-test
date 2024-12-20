@@ -141,9 +141,9 @@ const CompanyTagView: React.FC = () => {
       render: (value: CompanyTagDTO[]) => {
         const result = [];
         const tagData = convertToTagData(value.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM && item.source != null));
-        tagData.map((item) => {
+        tagData.map((item,index) => {
           result.push(
-            <CustomTag item={item}></CustomTag>
+            <CustomTag item={item} key={index}></CustomTag>
           );
         })
         return <Flex wrap gap={2}>{result}</Flex>;
