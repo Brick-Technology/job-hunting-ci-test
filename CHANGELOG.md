@@ -10,9 +10,15 @@
 
 1. (Sidepanel)修复主页图表默认显示tooltip的问题。
 
+### 🔗 Build
+
+1. 新增iconify图标离线打包。
+
 ### 🔨 Dependency
 
 1. Update @ant-design/charts ^2.2.5
+2. Add @iconify/json ^2.2.286
+3. Add unplugin-icons ^0.22.0
 
 ## 2.2.0(2024-12-20)
 

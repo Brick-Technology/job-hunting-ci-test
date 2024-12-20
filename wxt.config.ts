@@ -1,6 +1,7 @@
 import react from "@vitejs/plugin-react-swc";
 import { copyFileSync } from "fs";
 import { resolve } from "path";
+import Icons from 'unplugin-icons/vite';
 import wasm from "vite-plugin-wasm";
 import { defineConfig } from 'wxt';
 
@@ -82,7 +83,7 @@ export default defineConfig({
         }
       },
       plugins: () => {
-        [react(), wasm()]
+        [react(), wasm(), Icons(),]
       },
       worker: {
         plugins: () => [wasm()]
