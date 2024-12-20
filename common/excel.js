@@ -294,8 +294,28 @@ export const COMPANY_TAG_FILE_HEADER = [
     [
         "公司",
         "标签",
+    ],
+    [
+        "公司",
+        "标签",
+        "记录更新日期",
     ]
 ];
+
+export const companyTagDataToExcelJSONArrayForView = (list) => {
+    let result = [];
+    for (let i = 0; i < list.length; i++) {
+        let item = list[i];
+        let obj = {
+            公司: item.companyName,
+            标签: item.tagNameArray.join(","),
+            记录更新日期: item.updateDatetime,
+        }
+        fillDataVersion(obj, JOB_TAG_FILE_HEADER);
+        result.push(obj);
+    }
+    return result;
+}
 
 export const companyTagDataToExcelJSONArray = (list) => {
     let result = [];
@@ -303,7 +323,8 @@ export const companyTagDataToExcelJSONArray = (list) => {
         let item = list[i];
         let obj = {
             公司: item.companyName,
-            标签: item.tagNameArray.join(","),
+            标签: item.tagNameArray,
+            记录更新日期: item.updateDatetime,
         };
         fillDataVersion(obj, COMPANY_TAG_FILE_HEADER);
         result.push(obj);
@@ -311,13 +332,14 @@ export const companyTagDataToExcelJSONArray = (list) => {
     return result;
 }
 
-export const companyTagExcelDataToObjectArray = (data) => {
+export const companyTagExcelDataToObjectArray = (data, datetime) => {
     let companyTagBOList = [];
     for (let i = 0; i < data.length; i++) {
         let dataItem = data[i];
         let item = new CompanyTagBO();
         item.companyName = dataItem['公司'];
         item.tags = dataItem['标签'].split(",");
+        item.updateDatetime = convertDateStringToDateObject(dataItem['记录更新日期']) ?? convertDateStringToDateObject(datetime);
         companyTagBOList.push(item);
     }
     return companyTagBOList;

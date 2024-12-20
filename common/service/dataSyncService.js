@@ -101,7 +101,7 @@ export async function getMergeDataListForCompanyTag(items, getByIdsCallback) {
     return targetList;
 }
 
-export async function getMergeDataListForJobTag(items,idColumn, getByIdsCallback) {
+export async function getMergeDataListForTag(items,idColumn, getByIdsCallback) {
     return await getMergeDataList(items, idColumn, getByIdsCallback, (existsRecord, newRecord) => {
         if (dayjs(newRecord.updateDatetime).isAfter(dayjs(existsRecord.updateDatetime))) {
             return newRecord;

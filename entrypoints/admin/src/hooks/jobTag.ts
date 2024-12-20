@@ -1,7 +1,4 @@
-import { useJobTag as _useJobTag } from "@/common/hooks/jobTag";
 import { JobTagData } from "../data/JobTagData";
-
-const { convertToTagData } = _useJobTag();
 export function useJobTag() {
 
     const convertToJobTagDataList = (items: any[]): JobTagData[] => {
@@ -46,5 +43,5 @@ export function useJobTag() {
         return sortFieldMap[key];
     }
 
-    return { convertToJobTagDataList, convertToJobTagData, convertSortField, convertToTagData }
+    return { convertToJobTagDataList, convertToJobTagData, convertSortField }
 }

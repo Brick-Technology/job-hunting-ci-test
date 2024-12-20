@@ -1,10 +1,13 @@
+import { TAG_SOURCE_TYPE_CUSTOM, TAG_SOURCE_TYPE_PLATFORM } from "@/common";
 import { CompanyApi, TagApi } from "@/common/api";
 import { CompanyTagBO } from "@/common/data/bo/companyTagBO";
-import { companyTagDataToExcelJSONArray } from "@/common/excel";
+import { CompanyTagDTO } from "@/common/data/dto/companyTagDTO";
+import { companyTagDataToExcelJSONArrayForView } from "@/common/excel";
 import { dateToStr } from "@/common/utils";
 import {
   Button,
   Col,
+  Flex,
   Form,
   Input,
   Modal,
@@ -17,11 +20,16 @@ import {
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import BasicTable from "../../components/BasicTable";
+import CustomTag from "../../components/CustomTag";
 import { CompanyTagData } from "../../data/CompanyTagData";
 import { CompanyTagEditData } from "../../data/CompanyTagEditData";
 import { WhitelistData } from "../../data/WhitelistData";
 import { useCompanyTag } from "../../hooks/companyTag";
 import CompanyTagEdit from "./CompanyTagEdit";
+import styles from "./CompanyTagView.module.css";
+
+import { useTag } from "../../hooks/tag";
+const { convertToTagData } = useTag();
 
 const { Text } = Typography;
 const { convertToCompanyTagDataList, convertSortField } = useCompanyTag();
@@ -95,22 +103,52 @@ const CompanyTagView: React.FC = () => {
     {
       title: '公司全称',
       dataIndex: 'companyName',
-      render: (value: string) => <Text>{value}</Text>,
+      render: (value: string) => <Text copyable>{value}</Text>,
       minWidth: 200,
     },
     {
-      title: '标签',
-      dataIndex: 'nameArray',
-      render: (value: string[]) => {
+      title: '标签(平台)',
+      dataIndex: 'tagArray',
+      render: (value: CompanyTagDTO[]) => {
         const result = [];
-        value.map((item) => {
+        value.filter(item => item.sourceType == TAG_SOURCE_TYPE_PLATFORM).map((item,index) => {
           result.push(
-            <Tag key={item}>{item}</Tag>
+            <Tag className={styles.tag} key={index}>{item.tagName}</Tag>
           );
         })
-        return result;
+        return <Flex wrap gap={2}>{result}</Flex>;
       },
-      minWidth: 300,
+      minWidth: 200,
+    },
+    {
+      title: '标签(我)',
+      dataIndex: 'tagArray',
+      render: (value: CompanyTagDTO[]) => {
+        const result = [];
+        const tagData = convertToTagData(value.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM && item.source == null));
+        tagData.map((item,index) => {
+          result.push(
+            <CustomTag item={item} key={index}></CustomTag>
+          );
+        })
+        return <Flex wrap gap={2}>{result}</Flex>;
+      },
+      minWidth: 200,
+    },
+    {
+      title: '标签(伙伴)',
+      dataIndex: 'tagArray',
+      render: (value: CompanyTagDTO[]) => {
+        const result = [];
+        const tagData = convertToTagData(value.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM && item.source != null));
+        tagData.map((item) => {
+          result.push(
+            <CustomTag item={item}></CustomTag>
+          );
+        })
+        return <Flex wrap gap={2}>{result}</Flex>;
+      },
+      minWidth: 200,
     },
     {
       title: '标签数',
@@ -121,7 +159,7 @@ const CompanyTagView: React.FC = () => {
     {
       title: '更新时间',
       dataIndex: 'updateDatetime',
-      render: (value: Date) => <Text title={dateToStr(value)}>{dateToStr(value, "YYYY-MM-DD")}</Text>,
+      render: (value: Date) => <Text title={dateToStr(value)}>{dateToStr(value)}</Text>,
       minWidth: 80,
       sorter: true,
     },
@@ -135,7 +173,7 @@ const CompanyTagView: React.FC = () => {
             setMode("update");
             setEditCompanyTagData({
               name: record.companyName,
-              tags: record.nameArray,
+              tags: record.tagArray.filter(item => (item.sourceType == TAG_SOURCE_TYPE_CUSTOM && item.source == null)).map(item => item.tagName),
             });
             setIsCompanyTagEditModalOpen(true);
           }}>编辑标签</Button>
@@ -167,13 +205,13 @@ const CompanyTagView: React.FC = () => {
         fillSearchParam,
         convertSortField,
         search: async (searchParam) => {
-          return CompanyApi.searchCompanyTag(searchParam);
+          return await CompanyApi.searchCompanyTag(searchParam);
         },
         convertToDataList: convertToCompanyTagDataList,
       }}
       rowKeyFunction={(record) => { return record.companyId }}
       exportProps={{
-        dataToExcelJSONArray: companyTagDataToExcelJSONArray,
+        dataToExcelJSONArray: companyTagDataToExcelJSONArrayForView,
         title: "公司标签"
       }}
     ></BasicTable>

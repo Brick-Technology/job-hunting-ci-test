@@ -1,15 +1,33 @@
 import dayjs from "dayjs";
 import { Message } from "../../../common/api/message";
+import { CompanyTagBO } from "../../../common/data/bo/companyTagBO";
+import { CompanyTagBatchAddOrUpdateBO } from "../../../common/data/bo/companyTagBatchAddOrUpdateBO";
+import { CompanyTagExportBO } from "../../../common/data/bo/companyTagExportBO";
 import { SearchCompanyTagBO } from "../../../common/data/bo/searchCompanyTagBO";
 import { CompanyTag } from "../../../common/data/domain/companyTag";
-import { Tag } from "../../../common/data/domain/tag";
 import { CompanyTagDTO } from "../../../common/data/dto/companyTagDTO";
 import { SearchCompanyTagDTO } from "../../../common/data/dto/searchCompanyTagDTO";
 import { StatisticCompanyTagDTO } from "../../../common/data/dto/statisticCompanyTagDTO";
-import { convertEmptyStringToNull, genIdFromText, genUniqueId } from "../../../common/utils";
+import { genIdFromText, genUniqueId, isBlank } from "../../../common/utils";
 import { getAll, getDb, getOne } from "../database";
 import { postErrorMessage, postSuccessMessage } from "../util";
+import { BaseService } from "./baseService";
 import { _addNotExistsTags, _searchWithTagInfo } from "./tagService";
+
+const COMPANY_ID_COLUMN = "company_id";
+
+const SERVICE_INSTANCE = new BaseService("company_tag", "company_tag_id",
+    () => {
+        return new CompanyTag();
+    },
+    () => {
+        return new SearchCompanyTagDTO();
+    },
+    (param) => {
+        let whereCondition = "";
+        return whereCondition;
+    }
+);
 
 export const CompanyTagService = {
     /**
@@ -112,12 +130,12 @@ export const CompanyTagService = {
     /**
      * 
      * @param {Message} message 
-     * @param {CompanyTagBO[]} param 
+     * @param {CompanyTagBatchAddOrUpdateBO} param 
      */
     batchAddOrUpdateCompanyTag: async function (message, param) {
         try {
-            for (let i = 0; i < param.length; i++) {
-                await _addOrUpdateCompanyTag(param[i]);
+            for (let i = 0; i < param.items.length; i++) {
+                await _addOrUpdateCompanyTag(param.items[i], param.overrideUpdateDatetime);
             }
             postSuccessMessage(message, {});
         } catch (e) {
@@ -130,15 +148,15 @@ export const CompanyTagService = {
     /**
      * 
      * @param {Message} message 
-     * @param {CompanyTagBO[]} param 
+     * @param {CompanyTagBatchAddOrUpdateBO} param 
      */
     batchAddOrUpdateCompanyTagWithTransaction: async function (message, param) {
         try {
             (await getDb()).exec({
                 sql: "BEGIN TRANSACTION",
             });
-            for (let i = 0; i < param.length; i++) {
-                await _addOrUpdateCompanyTag(param[i]);
+            for (let i = 0; i < param.items.length; i++) {
+                await _addOrUpdateCompanyTag(param.items[i], param.overrideUpdateDatetime);
             }
             (await getDb()).exec({
                 sql: "COMMIT",
@@ -223,7 +241,7 @@ export const CompanyTagService = {
                         whereCondition = " WHERE " + whereCondition;
                     }
                     return `
-                    SELECT t1.company_tag_id AS companyTagId, t1.company_id AS companyId, t1.company_name AS companyName,t1.create_datetime AS createDatetime, t1.update_datetime AS updateDatetime FROM company_tag AS t1  LEFT JOIN tag AS t2 ON t1.tag_id = t2.tag_id ${whereCondition}  GROUP BY t1.company_id
+                    SELECT t1.company_tag_id AS companyTagId, t1.company_id AS companyId, t1.company_name AS companyName,t1.create_datetime AS createDatetime, MAX(t1.update_datetime) AS updateDatetime FROM company_tag AS t1  LEFT JOIN tag AS t2 ON t1.tag_id = t2.tag_id ${whereCondition}  GROUP BY t1.company_id
                     `
                 },
                 genSearchWhereConditionSqlFunction: () => {
@@ -359,17 +377,80 @@ export const CompanyTagService = {
             );
         }
     },
+    /**
+     *
+     * @param {Message} message
+     * @param {CompanyTagExportBO} param
+     *
+     * @returns CompanyTagExportDTO[]
+     */
+    companyTagExport: async function (message, param) {
+        try {
+            postSuccessMessage(
+                message,
+                await _companyTagExport(param)
+            );
+        } catch (e) {
+            postErrorMessage(message, "[worker] companyTagExport error : " + e.message);
+        }
+    },
 };
+
+/**
+ * 
+ * @param {CompanyTagExportBO} param 
+ */
+async function _companyTagExport(param) {
+    let joinCondition = "";
+    if (param.startDatetimeForUpdate) {
+        joinCondition +=
+            " AND t1.update_datetime >= '" +
+            dayjs(param.startDatetimeForUpdate).format("YYYY-MM-DD HH:mm:ss") +
+            "'";
+    }
+    if (param.endDatetimeForUpdate) {
+        joinCondition +=
+            " AND t1.update_datetime < '" +
+            dayjs(param.endDatetimeForUpdate).format("YYYY-MM-DD HH:mm:ss") +
+            "'";
+    }
+    if (param.companyIds) {
+        let idsString = "'" + param.companyIds.join("','") + "'";
+        joinCondition +=
+            ` AND t1.company_id in (${idsString})`;
+    }
+    let whereCondition = "";
+    if (param.source != null) {
+        if (isBlank(param.source)) {
+            whereCondition +=
+                `AND t1.source IS NULL`
+        } else {
+            whereCondition +=
+                `AND t1.source = '${param.source}'`
+        }
+    }
+    if (param.isPublic != null) {
+        whereCondition += ` AND t2.is_public = ${param.isPublic}`
+    }
+    let sqlQuery = `SELECT t1.company_id AS companyId,t1.company_name AS companyName,GROUP_CONCAT(t2.tag_name) AS tagNameArray,MAX(t1.update_datetime) AS updateDatetime FROM company_tag AS t1 LEFT JOIN tag AS t2 ON t1.tag_id = t2.tag_id ${joinCondition} WHERE t1.source_type = 0 ${whereCondition} GROUP BY t1.company_id ORDER BY t1.seq ASC;`;
+    let queryRows = [];
+    (await getDb()).exec({
+        sql: sqlQuery,
+        rowMode: "object",
+        resultRows: queryRows,
+    });
+    return queryRows;
+}
 
 /**
  * 
  * @param {CompanyTagBO} param 
  */
-async function _addOrUpdateCompanyTag(param) {
+async function _addOrUpdateCompanyTag(param, overrideUpdateDatetime) {
     await _addNotExistsTags(param.tags);
     let companyName = param.companyName;
     let companyId = genIdFromText(companyName);
-    await _deleteCompanyTagByCompanyId(companyId);
+    await SERVICE_INSTANCE._deleteById(companyId, COMPANY_ID_COLUMN, { otherCondition: `source_type=${param.sourceType} AND ${param.source ? "source = '" + param.source + "'" : "source IS NULL"}` });
     for (let i = 0; i < param.tags.length; i++) {
         let tagName = param.tags[i];
         let tagId = genIdFromText(tagName);
@@ -379,7 +460,10 @@ async function _addOrUpdateCompanyTag(param) {
         companyTag.companyName = companyName;
         companyTag.tagId = tagId;
         companyTag.seq = i;
-        await _addCompanyTag(companyTag);
+        companyTag.sourceType = param.sourceType;
+        companyTag.source = param.source;
+        companyTag.updateDatetime = param.updateDatetime;
+        await SERVICE_INSTANCE._addOrUpdate(companyTag, { overrideUpdateDatetime });
     }
 }
 
@@ -388,7 +472,7 @@ async function _addOrUpdateCompanyTag(param) {
  * @param {string} param id
  */
 export async function _getCompanyTagById(param) {
-    return getOne(SQL_SELECT_BY_ID, [param], new Tag());
+    return getOne(SQL_SELECT_BY_ID, [param], new CompanyTag());
 }
 
 /**
@@ -414,26 +498,6 @@ export async function _getAllCompanyTagDTOByCompanyIds(param) {
 
 /**
  * 
- * @param {CompanyTag} param 
- */
-export async function _addCompanyTag(param) {
-    const now = new Date();
-    (await getDb()).exec({
-        sql: SQL_INSERT,
-        bind: {
-            $company_tag_id: convertEmptyStringToNull(param.companyTagId),
-            $company_id: convertEmptyStringToNull(param.companyId),
-            $company_name: convertEmptyStringToNull(param.companyName),
-            $tag_id: convertEmptyStringToNull(param.tagId),
-            $seq: convertEmptyStringToNull(param.seq),
-            $create_datetime: dayjs(now).format("YYYY-MM-DD HH:mm:ss"),
-            $update_datetime: dayjs(now).format("YYYY-MM-DD HH:mm:ss"),
-        },
-    });
-}
-
-/**
- * 
  * @param {string} param companyId
  */
 export async function _deleteCompanyTagByCompanyId(param) {
@@ -453,11 +517,8 @@ export async function _deleteCompanyTagByCompanyIds(param) {
     });
 }
 
-const SQL_SELECT = `SELECT company_tag_id, company_id, company_name,tag_id,seq ,create_datetime, update_datetime FROM company_tag`;
+const SQL_SELECT = `SELECT company_tag_id, company_id, company_name,tag_id,seq ,create_datetime, update_datetime,source_type,source FROM company_tag`;
 const SQL_SELECT_BY_ID = `${SQL_SELECT} WHERE company_tag_id = ?`;
-const SQL_INSERT = `
-INSERT INTO company_tag (company_tag_id, company_id, company_name,tag_id,seq,create_datetime, update_datetime) VALUES ($company_tag_id, $company_id, $company_name,$tag_id,$seq ,$create_datetime, $update_datetime)
-`;
 const SQL_DELETE_BY_COMPANY_ID = `
 DELETE FROM company_tag WHERE company_id = ?
 `;
@@ -470,12 +531,12 @@ const getSqlDeleteByCompanyIds = (ids) => {
 }
 
 const SQL_SELECT_DTO_BY_COMPANY_ID = `
-SELECT t1.company_tag_id, t1.company_id, t1.company_name,t1.tag_id, t2.tag_name,t1.seq ,t1.create_datetime, t1.update_datetime FROM company_tag AS t1  LEFT JOIN tag AS t2 ON t1.tag_id = t2.tag_id where company_id = ? ORDER BY t1.seq ASC;
+SELECT t1.company_tag_id, t1.company_id, t1.company_name,t1.tag_id, t2.tag_name,t1.seq ,t1.create_datetime, t1.update_datetime,t1.source_type,t1.source,t2.is_public FROM company_tag AS t1  LEFT JOIN tag AS t2 ON t1.tag_id = t2.tag_id where company_id = ? ORDER BY t1.seq ASC;
 `;
 
 function genSqlSelectDTOByCompanyIds(ids) {
     let idsString = "'" + ids.join("','") + "'";
     return `
-    SELECT t1.company_tag_id, t1.company_id, t1.company_name,t1.tag_id, t2.tag_name,t1.seq ,t1.create_datetime, t1.update_datetime FROM company_tag AS t1  LEFT JOIN tag AS t2 ON t1.tag_id = t2.tag_id where company_id in (${idsString}) ORDER BY t1.seq ASC;
+    SELECT t1.company_tag_id, t1.company_id, t1.company_name,t1.tag_id, t2.tag_name,t1.seq ,t1.create_datetime, t1.update_datetime,t1.source_type,t1.source,t2.is_public FROM company_tag AS t1  LEFT JOIN tag AS t2 ON t1.tag_id = t2.tag_id where company_id in (${idsString}) ORDER BY t1.seq ASC;
     `;
 }

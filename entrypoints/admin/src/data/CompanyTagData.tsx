@@ -1,3 +1,5 @@
+import { CompanyTagDTO } from "@/common/data/dto/companyTagDTO";
+
 export type CompanyTagData = {
     companyId: string;
     companyName: string;
@@ -5,4 +7,5 @@ export type CompanyTagData = {
     updateDatetime: string;
     nameArray: string[];
     idArray: string[];
+    tagArray: CompanyTagDTO[]
 }

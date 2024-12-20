@@ -1,5 +1,5 @@
-export class JobTagExportBO {
-    jobIds;
+export class CompanyTagExportBO {
+    companyIds;
     source;
     startDatetimeForUpdate;
     endDatetimeForUpdate;

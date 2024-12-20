@@ -10,16 +10,16 @@ import Card from "antd/es/card/Card";
 import Paragraph from "antd/es/typography/Paragraph";
 import dayjs from "dayjs";
 import { useJob } from "../hooks/job";
-import { useJobTag } from "../hooks/jobTag";
+import { useTag } from "../hooks/tag";
 
 import { TAG_SOURCE_TYPE_CUSTOM } from "@/common";
 import { QuestionCircleOutlined } from "@ant-design/icons";
 import { JobData } from "../data/JobData";
+import CustomTag from "./CustomTag";
 import "./JobItemCard.css";
-import JobTag from "./JobTag";
 
 const { platformLogo, platformFormat } = useJob();
-const { convertToTagData } = useJobTag();
+const { convertToTagData } = useTag();
 
 const getTimeColorByOffsetTimeDay = (datetime) => {
   let offsetTimeDay = -1;
@@ -75,9 +75,23 @@ const JobItemCard: React.FC<JobItemCardProps> = (props) => {
   const genJobTag = (jobTagList) => {
     if (jobTagList) {
       const result = [];
-      convertToTagData(jobTagList?.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM)).map((item) => {
+      convertToTagData(jobTagList?.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM)).map((item,index) => {
         result.push(
-          <JobTag item={item} color="#1677ff"></JobTag>
+          <CustomTag item={item} color="#1677ff" key={index}></CustomTag>
+        );
+      })
+      return result;
+    } else {
+      return null;
+    }
+  }
+
+  const genCompanyTag = (companyTagList) => {
+    if (companyTagList && companyTagList.length > 0) {
+      const result = [];
+      convertToTagData(companyTagList).map((item,index) => {
+        result.push(
+          <CustomTag item={item} color="#faad14" key={index}></CustomTag>
         );
       })
       return result;
@@ -118,12 +132,7 @@ const JobItemCard: React.FC<JobItemCardProps> = (props) => {
           </Text>
         </Flex>
         <Flex className={styles.marginTop} wrap={true} gap={2}>
-          {companyTagList &&
-            companyTagList.map((item, index) => (
-              <Tag className={styles.tag} key={index} color="warning">
-                {item.tagName}
-              </Tag>
-            ))}
+          {genCompanyTag(companyTagList)}
         </Flex>
         <Flex className={styles.marginTop}>
           {companyUrl ? (

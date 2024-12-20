@@ -2,14 +2,14 @@ import { Icon } from "@iconify/react";
 import { Tag, Tooltip } from "antd";
 import React from "react";
 import { TagData } from "../data/TagData";
-import styles from "./JobTag.module.css";
+import styles from "./CustomTag.module.css";
 
-interface JobTagProps {
+interface CustomTagProps {
     color?: string,
     item: TagData,
 }
 
-const JobTag: React.FC<JobTagProps> = ({
+const CustomTag: React.FC<CustomTagProps> = ({
     color, item
 }) => {
 
@@ -20,4 +20,4 @@ const JobTag: React.FC<JobTagProps> = ({
     );
 };
 
-export default JobTag;
+export default CustomTag;

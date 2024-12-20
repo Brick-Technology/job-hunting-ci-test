@@ -1,5 +1,7 @@
 import { CompanyBO } from "../data/bo/companyBO";
+import { CompanyTagBatchAddOrUpdateBO } from "../data/bo/companyTagBatchAddOrUpdateBO";
 import { CompanyTagBO } from "../data/bo/companyTagBO";
+import { CompanyTagExportBO } from "../data/bo/companyTagExportBO";
 import { JobTagExportBO } from "../data/bo/jobTagExportBO";
 import { JobTagSearchBO } from "../data/bo/jobTagSearchBO";
 import { SearchCompanyBO } from "../data/bo/searchCompanyBO";
@@ -32,7 +34,6 @@ import { SearchTaskDTO } from "../data/dto/searchTaskDTO";
 import { StatisticJobBrowseDTO } from "../data/dto/statisticJobBrowseDTO";
 import { invoke } from "./bridge";
 import { CONTENT_SCRIPT } from "./bridgeCommon";
-
 
 export const JobApi = {
   /**
@@ -276,8 +277,7 @@ export const JobApi = {
   * @returns []
   */
   jobTagExport: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.jobTagExport
-      .name, param, { invokeEnv: invokeEnv });
+    let result = await invoke(this.jobTagExport.name, param, { invokeEnv: invokeEnv });
     return result.data;
   },
 
@@ -372,7 +372,7 @@ export const CompanyApi = {
 
   /**
   *
-  * @param {CompanyTagBO[]} param
+  * @param {CompanyTagBatchAddOrUpdateBO} param
   */
   batchAddOrUpdateCompanyTag: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
     return await invoke(this.batchAddOrUpdateCompanyTag.name, param, { invokeEnv: invokeEnv });
@@ -380,7 +380,7 @@ export const CompanyApi = {
 
   /**
   *
-  * @param {CompanyTagBO[]} param
+  * @param {CompanyTagBatchAddOrUpdateBO} param
   */
   batchAddOrUpdateCompanyTagWithTransaction: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
     return await invoke(this.batchAddOrUpdateCompanyTagWithTransaction.name, param, { invokeEnv: invokeEnv });
@@ -455,6 +455,16 @@ export const CompanyApi = {
     return result.data;
   },
 
+  /**
+  * 
+  * @param {CompanyTagExportBO} param 
+  * @returns []
+  */
+  companyTagExport: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
+    let result = await invoke(this.companyTagExport
+      .name, param, { invokeEnv: invokeEnv });
+    return result.data;
+  },
 };
 
 export const TagApi = {

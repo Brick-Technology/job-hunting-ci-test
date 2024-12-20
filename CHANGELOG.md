@@ -6,6 +6,10 @@
 
 1. (Sidepanel)添加数据库删除功能。
 
+### ✏️ Changed
+
+1. 更改公司标签，新增sourceType(来源类型)，source（来源）。
+
 ## 2.1.1(2024-12-19)
 
 ### 🐛 Fixed

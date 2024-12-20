@@ -7,13 +7,13 @@ import Markdown from "marked-react";
 import { CompanyData } from "../data/CompanyData";
 import { JobData } from "../data/JobData";
 import { useJob } from "../hooks/job";
+import CustomTag from "./CustomTag";
 import styles from "./JobItemTable.module.css";
-import JobTag from "./JobTag";
 const { platformFormat } = useJob();
 const { Text } = Typography;
 
-import { useJobTag } from "../hooks/jobTag";
-const { convertToTagData } = useJobTag();
+import { useTag } from "../hooks/tag";
+const { convertToTagData } = useTag();
 
 export type JobItemTableProps = {
   data: JobData;
@@ -44,9 +44,23 @@ const JobItemTable: React.FC<JobItemTableProps> = (props) => {
   const genJobTag = (jobTagList) => {
     if (jobTagList) {
       const result = [];
-      convertToTagData(jobTagList?.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM)).map((item) => {
+      convertToTagData(jobTagList?.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM)).map((item,index) => {
         result.push(
-          <JobTag item={item} color="#1677ff"></JobTag>
+          <CustomTag item={item} color="#1677ff" key={index}></CustomTag>
+        );
+      })
+      return result.length > 0 ? result : <Text>无</Text>;
+    } else {
+      return null;
+    }
+  }
+
+  const genCompanyTag = (companyTagList) => {
+    if (companyTagList) {
+      const result = [];
+      convertToTagData(companyTagList).map((item,index) => {
+        result.push(
+          <CustomTag key={index} item={item} color="#faad14"></CustomTag>
         );
       })
       return result.length > 0 ? result : <Text>无</Text>;
@@ -263,13 +277,7 @@ const JobItemTable: React.FC<JobItemTableProps> = (props) => {
       children: (
         <>
           <Flex wrap={true} gap={2}>
-            {companyTagList && companyTagList.length > 0
-              ? companyTagList.map((item, index) => (
-                <Tag className={styles.tag} key={index} color="warning">
-                  {item.tagName}
-                </Tag>
-              ))
-              : <Text>无</Text>}
+            {genCompanyTag(companyTagList)}
           </Flex>
         </>
       ),

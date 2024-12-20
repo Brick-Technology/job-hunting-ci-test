@@ -30,9 +30,9 @@ import { CompanyApi, DataSharePartnerApi, DBApi, FileApi, JobApi, TaskApi, TaskD
 import { BACKGROUND } from "../../../common/api/bridgeCommon";
 import { EXCEPTION, GithubApi } from "../../../common/api/github";
 import { TASK_DATA_DOWNLOAD_MAX_DAY } from "../../../common/config";
+import { CompanyTagExportBO } from "../../../common/data/bo/companyTagExportBO";
 import { JobTagExportBO } from "../../../common/data/bo/jobTagExportBO";
 import { SearchCompanyBO } from "../../../common/data/bo/searchCompanyBO";
-import { SearchCompanyTagBO } from "../../../common/data/bo/searchCompanyTagBO";
 import { SearchDataSharePartnerBO } from "../../../common/data/bo/searchDataSharePartnerBO";
 import { SearchJobBO } from "../../../common/data/bo/searchJobBO";
 import { SearchTaskBO } from "../../../common/data/bo/searchTaskBO";
@@ -58,8 +58,8 @@ import {
     validImportData
 } from "../../../common/excel";
 import { debugLog, errorLog, infoLog } from "../../../common/log";
-import { getMergeDataListForCompany, getMergeDataListForCompanyTag, getMergeDataListForJob, getMergeDataListForJobTag } from "../../../common/service/dataSyncService";
-import { dateToStr } from "../../../common/utils";
+import { getMergeDataListForCompany, getMergeDataListForJob, getMergeDataListForTag } from "../../../common/service/dataSyncService";
+import { dateToStr, genIdFromText } from "../../../common/utils";
 import { bytesToBase64 } from "../../../common/utils/base64";
 import { getToken, setToken } from "./authService";
 import { getUser } from "./userService";
@@ -160,10 +160,9 @@ export async function calculateUploadTask({ userName, repoName }) {
                     type: TASK_TYPE_COMPANY_DATA_UPLOAD, startDatetime: dataSyncStartDatetime, endDatetime: today, userName, repoName,
                     total: (await getCompanyData({ startDatetime: dataSyncStartDatetime, endDatetime: today })).total
                 });
-                //上传所有的公司标签记录，以便全量更新
                 await addDataUploadTask({
-                    type: TASK_TYPE_COMPANY_TAG_DATA_UPLOAD, startDatetime: null, endDatetime: null, userName, repoName,
-                    total: (await getCompanyTagData({ startDatetime: null, endDatetime: null })).total
+                    type: TASK_TYPE_COMPANY_TAG_DATA_UPLOAD, startDatetime: dataSyncStartDatetime, endDatetime: today, userName, repoName,
+                    total: (await getCompanyTagData({ startDatetime: dataSyncStartDatetime, endDatetime: today })).total
                 });
                 await addDataUploadTask({
                     type: TASK_TYPE_JOB_TAG_DATA_UPLOAD, startDatetime: dataSyncStartDatetime, endDatetime: today, userName, repoName,
@@ -317,12 +316,28 @@ TASK_HANDLE_MAP.set(TASK_TYPE_COMPANY_DATA_MERGE, async (dataId) => {
 })
 TASK_HANDLE_MAP.set(TASK_TYPE_COMPANY_TAG_DATA_MERGE, async (dataId) => {
     return mergeDataByDataId(dataId, TASK_TYPE_COMPANY_TAG_DATA_MERGE, DATA_TYPE_NAME_COMPANY_TAG, COMPANY_TAG_FILE_HEADER, companyTagExcelDataToObjectArray, async (items, taskDataMerge) => {
-        //处理数据冲突问题，合并标签
-        let targetList = await getMergeDataListForCompanyTag(items, async (ids) => {
-            return await CompanyApi.getAllCompanyTagDTOByCompanyIds(ids, { invokeEnv: BACKGROUND });
-        })
-        await CompanyApi.batchAddOrUpdateCompanyTag(targetList, { invokeEnv: BACKGROUND });
-        return targetList.length;
+        let userDTO = await getUser();
+        if (userDTO) {
+            let username = userDTO.login;
+            //处理数据冲突问题，根据更新时间合并
+            let targetList = await getMergeDataListForTag(items, "companyName", async (companyNames) => {
+                let searchParam = new CompanyTagExportBO();
+                //如果数据是当前登录用户，则将source设置为空，作为本地用户
+                searchParam.source = taskDataMerge.username == username ? "" : taskDataMerge.username;
+                searchParam.companyIds = companyNames.map(item => genIdFromText(item));
+                return await CompanyApi.companyTagExport(searchParam, { invokeEnv: BACKGROUND });
+            })
+            if (targetList.length > 0) {
+                //如果补充source信息
+                targetList.forEach(item => {
+                    item.source = taskDataMerge.username == username ? null : taskDataMerge.username;
+                });
+            }
+            await CompanyApi.batchAddOrUpdateCompanyTag({ items: targetList, overrideUpdateDatetime: true }, { invokeEnv: BACKGROUND });
+            return targetList.length;
+        } else {
+            throw `[Task Data Merge] login user not found`;
+        }
     });
 })
 TASK_HANDLE_MAP.set(TASK_TYPE_JOB_TAG_DATA_MERGE, async (dataId) => {
@@ -331,7 +346,7 @@ TASK_HANDLE_MAP.set(TASK_TYPE_JOB_TAG_DATA_MERGE, async (dataId) => {
         if (userDTO) {
             let username = userDTO.login;
             //处理数据冲突问题，根据更新时间合并
-            let targetList = await getMergeDataListForJobTag(items, "jobId", async (ids) => {
+            let targetList = await getMergeDataListForTag(items, "jobId", async (ids) => {
                 let searchParam = new JobTagExportBO();
                 //如果数据是当前登录用户，则将source设置为空，作为本地用户
                 searchParam.source = taskDataMerge.username == username ? "" : taskDataMerge.username;
@@ -474,16 +489,17 @@ async function getCompanyData({ startDatetime, endDatetime }) {
 }
 
 async function getCompanyTagData({ startDatetime, endDatetime }) {
-    let searchParam = new SearchCompanyTagBO();
-    searchParam.pageNum = 1;
-    searchParam.pageSize = MAX_RECORD_COUNT;
+    let searchParam = new CompanyTagExportBO();
+    searchParam.source = "";
     searchParam.startDatetimeForUpdate = startDatetime;
     searchParam.endDatetimeForUpdate = endDatetime;
-    searchParam.orderByColumn = "updateDatetime";
-    searchParam.orderBy = "DESC";
-    return CompanyApi.searchCompanyTag(searchParam, {
+    const items = await CompanyApi.companyTagExport(searchParam, {
         invokeEnv: BACKGROUND,
-    });
+    })
+    return {
+        total: items.length,
+        items
+    };
 }
 
 async function getJobTagData({ startDatetime, endDatetime }) {

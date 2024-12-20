@@ -19,18 +19,20 @@ import {
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import BasicTable from "../../components/BasicTable";
-import JobTag from "../../components/JobTag";
+import CustomTag from "../../components/CustomTag";
 import { JobTagData } from "../../data/JobTagData";
 import { JobTagEditData } from "../../data/JobTagEditData";
 import { WhitelistData } from "../../data/WhitelistData";
 import { useJob } from "../../hooks/job";
 import { useJobTag } from "../../hooks/jobTag";
+import { useTag } from "../../hooks/tag";
 import JobTagEdit from "./JobTagEdit";
 import styles from "./JobTagView.module.css";
 const { platformFormat } = useJob();
 
 const { Text } = Typography;
-const { convertToJobTagDataList, convertSortField, convertToTagData } = useJobTag();
+const { convertToTagData } = useTag();
+const { convertToJobTagDataList, convertSortField } = useJobTag();
 dayjs.extend(duration)
 
 const fillSearchParam = (searchParam, values) => {
@@ -77,9 +79,9 @@ const JobTagView: React.FC = () => {
       dataIndex: 'tagArray',
       render: (value: JobTagDTO[]) => {
         const result = [];
-        value.filter(item => item.sourceType == TAG_SOURCE_TYPE_PLATFORM).map((item) => {
+        value.filter(item => item.sourceType == TAG_SOURCE_TYPE_PLATFORM).map((item,index) => {
           result.push(
-            <Tag className={styles.tag} key={item.id}>{item.tagName}</Tag>
+            <Tag className={styles.tag} key={index}>{item.tagName}</Tag>
           );
         })
         return <Flex wrap gap={2}>{result}</Flex>;
@@ -92,9 +94,9 @@ const JobTagView: React.FC = () => {
       render: (value: JobTagDTO[]) => {
         const result = [];
         const tagData = convertToTagData(value.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM && item.source == null));
-        tagData.map((item) => {
+        tagData.map((item,index) => {
           result.push(
-            <JobTag item={item}></JobTag>
+            <CustomTag item={item} key={index}></CustomTag>
           );
         })
         return <Flex wrap gap={2}>{result}</Flex>;
@@ -109,7 +111,7 @@ const JobTagView: React.FC = () => {
         const tagData = convertToTagData(value.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM && item.source != null));
         tagData.map((item) => {
           result.push(
-            <JobTag item={item}></JobTag>
+            <CustomTag item={item}></CustomTag>
           );
         })
         return <Flex wrap gap={2}>{result}</Flex>;

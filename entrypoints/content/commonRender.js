@@ -50,9 +50,9 @@ import { CompanyTagBO } from "../../common/data/bo/companyTagBO";
 
 import { JobTagBO } from "../../common/data/bo/jobTagBO";
 
-import { useJobTag } from "@/common/hooks/jobTag";
+import { useTag } from "@/common/hooks/tag";
 import "iconify-icon";
-const { convertToTagData } = useJobTag();
+const { convertToTagData } = useTag();
 
 export function renderTimeTag(
   divElement,
@@ -676,27 +676,27 @@ export function renderFunctionPanel(
         jobCardItemDom: targetDom
       })
     );
-    functionPanelDiv.appendChild(createAllJobTag(item));
+    functionPanelDiv.appendChild(createOtherJobTag(item));
     functionPanelDiv.appendChild(createMyJobTag(item));
     functionPanelDiv.appendChild(createCommentWrapper(item));
   });
 }
 
-function createAllJobTag(item) {
+function createOtherJobTag(item) {
   const wrapper = document.createElement("div");
   wrapper.className = "__job_tag_wrapper";
   const labelDiv = document.createElement("div");
   labelDiv.className = "__job_tag_label";
-  labelDiv.textContent = "职位标签(伙伴)：";
+  labelDiv.textContent = "职位标签：";
   wrapper.appendChild(labelDiv);
   const jobTagDiv = document.createElement("div");
   jobTagDiv.className = "__job_tag_all";
   wrapper.appendChild(jobTagDiv);
-  asyncRenderAllTag(jobTagDiv, item);
+  asyncRenderOtherJobTag(jobTagDiv, item);
   return wrapper;
 }
 
-async function asyncRenderAllTag(div, item) {
+async function asyncRenderOtherJobTag(div, item) {
   const jobTagDTO = (await JobApi.jobTagGetAllDTOByJobId(item.jobId)).filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM && item.source != null);
   convertToTagData(jobTagDTO).forEach(item => {
     div.appendChild(createTag(item))
@@ -1264,24 +1264,53 @@ export function createSearchCompanyLink(keyword) {
 
 export function createCompanyTag(companyName) {
   const dom = document.createElement("div");
-  dom.className = "__company_info_quick_search_item";
-  let labelDiv = document.createElement("div");
+  dom.appendChild(createOtherCompanyTag(companyName));
+  dom.appendChild(createMyCompanyTag(companyName));
+  return dom;
+}
+
+function createOtherCompanyTag(companyName) {
+  let companyId = genIdFromText(companyName);
+  const root = document.createElement("div");
+  root.className = "__company_info_quick_search_item";
+  const labelDiv = document.createElement("div");
   labelDiv.className = "__company_info_quick_search_item_label";
   labelDiv.textContent = "公司标签：";
-  dom.appendChild(labelDiv);
+  root.appendChild(labelDiv);
   const tagDiv = document.createElement("div");
   tagDiv.className = "__company_tag";
-  dom.appendChild(tagDiv);
+  root.appendChild(tagDiv);
+  asyncRenderCompanyJobTag(tagDiv, companyId);
+  return root;
+}
+
+async function asyncRenderCompanyJobTag(div, companyId) {
+  const companyTagDTO = (await CompanyApi.getAllCompanyTagDTOByCompanyId(companyId)).filter(item => !(item.sourceType == TAG_SOURCE_TYPE_CUSTOM && item.source == null));
+  convertToTagData(companyTagDTO).forEach(item => {
+    div.appendChild(createTag(item))
+  });
+}
+
+function createMyCompanyTag(companyName) {
+  const root = document.createElement("div");
+  root.className = "__company_info_quick_search_item";
+  const labelDiv = document.createElement("div");
+  labelDiv.className = "__company_info_quick_search_item_label";
+  labelDiv.textContent = "公司标签(我)：";
+  const tagDiv = document.createElement("div");
+  tagDiv.className = "__company_tag";
+  root.appendChild(labelDiv);
+  root.appendChild(tagDiv);
   asyncRenderTag(tagDiv, "公司", async () => {
     let companyId = genIdFromText(companyName);
-    return CompanyApi.getAllCompanyTagDTOByCompanyId(companyId);
+    return (await CompanyApi.getAllCompanyTagDTOByCompanyId(companyId)).filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM && item.source == null);
   }, async (tags) => {
     let param = new CompanyTagBO();
     param.companyName = companyName;
     param.tags = tags;
     return CompanyApi.addOrUpdateCompanyTag(param)
   });
-  return dom;
+  return root;
 }
 
 async function asyncRenderTag(div, title, getAllDTOFunction, saveTagFunction) {

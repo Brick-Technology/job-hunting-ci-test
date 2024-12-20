@@ -1,7 +1,8 @@
+import { CompanyTagDTO } from "@/common/data/dto/companyTagDTO";
 export type CompanyData = {
   id: string;
   name: string;
-  companyTagList?: { tagName: string }[];
+  companyTagList?: CompanyTagDTO[];
   url?: string;
   status: string;
   startDate: Date;

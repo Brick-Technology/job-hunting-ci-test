@@ -6,12 +6,12 @@ import {
   Button,
   Col,
   DatePicker,
+  Flex,
   Form,
   Input,
   Modal,
   Space,
   TableColumnsType,
-  Tag,
   Typography, message
 } from "antd";
 import dayjs from "dayjs";
@@ -19,6 +19,7 @@ import duration from "dayjs/plugin/duration";
 import React from "react";
 import BasicTable from "../../components/BasicTable";
 import CompanyItemTable from "../../components/CompanyItemTable";
+import CustomTag from "../../components/CustomTag";
 import { CompanyData } from "../../data/CompanyData";
 import { CompanyTagEditData } from "../../data/CompanyTagEditData";
 import { WhitelistData } from "../../data/WhitelistData";
@@ -28,6 +29,11 @@ const { RangePicker } = DatePicker;
 const { Text } = Typography;
 const { convertToCompanyDataList, convertSortField } = useCompany();
 dayjs.extend(duration)
+
+import { CompanyTagDTO } from "@/common/data/dto/companyTagDTO";
+
+import { useTag } from "../../hooks/tag";
+const { convertToTagData } = useTag();
 
 const searchFields =
 {
@@ -59,7 +65,6 @@ const fillSearchParam = (searchParam, values) => {
     searchParam.startDateStartDatetime = null;
     searchParam.startDateEndDatetime = null;
   }
-
 }
 
 const CompanyView: React.FC = () => {
@@ -112,18 +117,17 @@ const CompanyView: React.FC = () => {
     {
       title: '公司标签',
       dataIndex: 'companyTagList',
-      render: (value: { tagName: string }[]) => {
+      render: (value: CompanyTagDTO[]) => {
         const result = [];
-        if (value && value.length > 0) {
-          value.map((item) => {
-            result.push(
-              <Tag key={item.tagName}>{item.tagName}</Tag>
-            );
-          })
-        }
-        return result;
+        const tagData = convertToTagData(value || []);
+        tagData.map((item, index) => {
+          result.push(
+            <CustomTag key={index} item={item}></CustomTag>
+          );
+        })
+        return <Flex wrap gap={2}>{result}</Flex>;
       },
-      minWidth: 100,
+      minWidth: 200,
     },
     {
       title: '社保人数',

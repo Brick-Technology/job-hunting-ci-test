@@ -36,13 +36,8 @@ export function useCompany() {
             sourceRefreshDatetime,
             createDatetime,
             updateDatetime,
+            companyTagList,
         } = item ?? {};
-        const companyTagList = [];
-        if (tagNameArray) {
-            tagNameArray.forEach(item => {
-                companyTagList.push({ tagName: item });
-            })
-        }
         return {
             id: companyId,
             name: companyName,

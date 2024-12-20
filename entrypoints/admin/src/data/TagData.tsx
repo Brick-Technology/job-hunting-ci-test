@@ -4,10 +4,10 @@ export type TagData = {
     createDatetime?: string;
     updateDatetime?: string;
     isPublic: number;
-    sourceList: {
+    sourceList?: {
         source: string,
         createDatetime?: string,
         updateDatetime?: string,
     }[];
-    self:boolean,
+    self?:boolean,
 }

@@ -20,20 +20,20 @@ import {
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import BasicTable from "../../components/BasicTable";
+import CustomTag from "../../components/CustomTag";
 import JobItemTable from "../../components/JobItemTable";
-import JobTag from "../../components/JobTag";
 import { CompanyData } from "../../data/CompanyData";
 import { JobData } from "../../data/JobData";
 import { JobTagEditData } from "../../data/JobTagEditData";
 import { WhitelistData } from "../../data/WhitelistData";
 import { useJob } from "../../hooks/job";
-import { useJobTag } from "../../hooks/jobTag";
+import { useTag } from "../../hooks/tag";
 import JobTagEdit from "./JobTagEdit";
 const { RangePicker } = DatePicker;
 const { Text } = Typography;
 const { convertToJobDataList, platformFormat, convertSortField } = useJob();
 dayjs.extend(duration)
-const { convertToTagData } = useJobTag();
+const { convertToTagData } = useTag();
 
 import styles from "./JobView.module.css";
 
@@ -153,9 +153,9 @@ const JobView: React.FC = () => {
       render: (value: JobTagDTO[]) => {
         const result = [];
         const tagData = convertToTagData(value ? value.filter(item => item.sourceType == TAG_SOURCE_TYPE_PLATFORM) : []);
-        tagData.map((item) => {
+        tagData.map((item, index) => {
           result.push(
-            <Tag className={styles.tag} key={item.id}>{item.tagName}</Tag>
+            <Tag className={styles.tag} key={index}>{item.tagName}</Tag>
           );
         })
         return <Flex wrap gap={2}>{result}</Flex>;
@@ -168,9 +168,9 @@ const JobView: React.FC = () => {
       render: (value: JobTagDTO[]) => {
         const result = [];
         const tagData = convertToTagData(value ? value.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM) : []);
-        tagData.map((item) => {
+        tagData.map((item, index) => {
           result.push(
-            <JobTag item={item}></JobTag>
+            <CustomTag key={index} item={item}></CustomTag>
           );
         })
         return <Flex wrap gap={2}>{result}</Flex>;
@@ -180,18 +180,18 @@ const JobView: React.FC = () => {
     {
       title: '公司标签',
       dataIndex: 'company',
-      render: (value: CompanyData) => {
+      render: (obj: CompanyData) => {
+        const value = obj.companyTagList;
         const result = [];
-        if (value && value.companyTagList && value.companyTagList.length > 0) {
-          value.companyTagList.map((item) => {
-            result.push(
-              <Tag key={item.tagName}>{item.tagName}</Tag>
-            );
-          })
-        }
+        const tagData = convertToTagData(value || []);
+        tagData.map((item, index) => {
+          result.push(
+            <CustomTag key={index} item={item}></CustomTag>
+          );
+        })
         return <Flex wrap gap={2}>{result}</Flex>;
       },
-      minWidth: 300,
+      minWidth: 200,
     },
     {
       title: '地区',

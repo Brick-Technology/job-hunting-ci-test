@@ -1,4 +1,6 @@
+import { useTag as _useTag } from "@/common/hooks/tag";
 import { TagData } from "../data/TagData";
+const { convertToTagData } = _useTag();
 
 export function useTag() {
 
@@ -36,5 +38,5 @@ export function useTag() {
         return sortFieldMap[key];
     }
 
-    return { convertToDataList, convertToData, convertSortField }
+    return { convertToDataList, convertToData, convertSortField, convertToTagData }
 }

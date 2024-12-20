@@ -147,6 +147,7 @@ export const CompanyService = {
         }
         resultItem.tagNameArray = [];
         resultItem.tagIdArray = [];
+        resultItem.companyTagList = [];
         items.push(resultItem);
       }
       let sqlCountSubTable = "";
@@ -163,6 +164,7 @@ export const CompanyService = {
         companyTagDTOList.forEach(item => {
           itemIdObjectMap.get(item.companyId).tagNameArray.push(item.tagName);
           itemIdObjectMap.get(item.companyId).tagIdArray.push(item.tagId);
+          itemIdObjectMap.get(item.companyId).companyTagList.push(item);
         });
       }
       //count
@@ -510,6 +512,7 @@ export async function _getCompanyDTOByIds(companyIds) {
     }
     resultItem.tagNameArray = [];
     resultItem.tagIdArray = [];
+    resultItem.companyTagList = [];
     items.push(resultItem);
   }
   let ids = [];
@@ -523,6 +526,7 @@ export async function _getCompanyDTOByIds(companyIds) {
     companyTagDTOList.forEach(item => {
       itemIdObjectMap.get(item.companyId).tagNameArray.push(item.tagName);
       itemIdObjectMap.get(item.companyId).tagIdArray.push(item.tagId);
+      itemIdObjectMap.get(item.companyId).companyTagList.push(item);
     });
   }
   return items;

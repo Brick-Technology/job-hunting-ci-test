@@ -313,7 +313,10 @@ async function _jobTagExport(param) {
                 `AND t1.source = '${param.source}'`
         }
     }
-    let sqlQuery = `SELECT t1.job_id AS jobId,GROUP_CONCAT(t2.tag_name) AS tagNameArray,MAX(t1.update_datetime) AS updateDatetime FROM job_tag AS t1 LEFT JOIN tag AS t2 ON t1.tag_id = t2.tag_id ${joinCondition} WHERE t1.source_type = 0 ${whereCondition} AND t2.is_public = 1 GROUP BY t1.job_id ORDER BY t1.seq ASC;`;
+    if (param.isPublic != null) {
+        whereCondition += ` AND t2.is_public = ${param.isPublic}`
+    }
+    let sqlQuery = `SELECT t1.job_id AS jobId,GROUP_CONCAT(t2.tag_name) AS tagNameArray,MAX(t1.update_datetime) AS updateDatetime FROM job_tag AS t1 LEFT JOIN tag AS t2 ON t1.tag_id = t2.tag_id ${joinCondition} WHERE t1.source_type = 0 ${whereCondition} GROUP BY t1.job_id ORDER BY t1.seq ASC;`;
     let queryRows = [];
     (await getDb()).exec({
         sql: sqlQuery,

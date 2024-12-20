@@ -13,6 +13,7 @@ import { ChangeLogV5 } from './changeLog/changeLogV5';
 import { ChangeLogV6 } from './changeLog/changeLogV6';
 import { ChangeLogV7 } from './changeLog/changeLogV7';
 import { ChangeLogV8 } from './changeLog/changeLogV8';
+import { ChangeLogV9 } from './changeLog/changeLogV9';
 import { postErrorMessage, postSuccessMessage } from "./util";
 
 const JOB_DB_FILE_NAME = "job.sqlite3";
@@ -369,6 +370,7 @@ export const Database = {
       changelogList.push(new ChangeLogV6());
       changelogList.push(new ChangeLogV7());
       changelogList.push(new ChangeLogV8());
+      changelogList.push(new ChangeLogV9());
       initChangeLog(changelogList);
       sqlite3InitModule({
         print: debugLog,

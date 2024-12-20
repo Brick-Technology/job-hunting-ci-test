@@ -6,11 +6,11 @@ import Link from "antd/es/typography/Link";
 import * as React from "react";
 import { JobData } from "../../data/JobData";
 import { useJob } from "../../hooks/job";
-import JobTag from "../JobTag";
+import CustomTag from "../CustomTag";
 import styles from "./JobPopup.module.css";
 
-import { useJobTag } from "../../hooks/jobTag";
-const { convertToTagData } = useJobTag();
+import { useTag } from "../../hooks/tag";
+const { convertToTagData } = useTag();
 
 const { Text } = Typography;
 
@@ -44,10 +44,24 @@ const JobPopup: React.FC<JobPopupProps> = ({ data, onClick }) => {
       const result = [];
       convertToTagData(jobTagList?.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM)).map((item) => {
         result.push(
-          <JobTag item={item} color="#1677ff"></JobTag>
+          <CustomTag item={item} color="#1677ff"></CustomTag>
         );
       })
       return result;
+    } else {
+      return null;
+    }
+  }
+
+  const genCompanyTag = (companyTagList) => {
+    if (companyTagList) {
+      const result = [];
+      convertToTagData(companyTagList).map((item, index) => {
+        result.push(
+          <CustomTag key={index} item={item} color="#faad14"></CustomTag>
+        );
+      })
+      return result.length > 0 ? result : <Text>无</Text>;
     } else {
       return null;
     }
@@ -137,16 +151,8 @@ const JobPopup: React.FC<JobPopupProps> = ({ data, onClick }) => {
             ) : null}
           </Flex>
           <Flex style={{ marginTop: "5px" }} wrap={true} gap={2}>
-            {companyTagList != null && companyTagList.length > 0 ? (
-              <>
-                <Text>公司标签：</Text>
-                {companyTagList.map((item, index) => (
-                  <Tag className={styles.tag} color="#faad14" key={`${index}`}>
-                    {item.tagName}
-                  </Tag>
-                ))}
-              </>
-            ) : null}
+            <Text>公司标签：</Text>
+            {genCompanyTag(companyTagList)}
           </Flex>
         </Flex>
       </Popup>

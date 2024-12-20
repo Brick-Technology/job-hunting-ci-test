@@ -1,7 +1,7 @@
 import { CompanyApi, JobApi } from "@/common/api";
+import { CompanyTagExportBO } from "@/common/data/bo/companyTagExportBO";
 import { JobTagExportBO } from "@/common/data/bo/jobTagExportBO";
 import { SearchCompanyBO } from "@/common/data/bo/searchCompanyBO";
-import { SearchCompanyTagBO } from "@/common/data/bo/searchCompanyTagBO";
 import { SearchJobBO } from "@/common/data/bo/searchJobBO";
 import {
     COMPANY_FILE_HEADER, COMPANY_TAG_FILE_HEADER,
@@ -13,9 +13,10 @@ import {
     jobTagDataToExcelJSONArray, jobTagExcelDataToObjectArray
 } from "@/common/excel";
 import {
-    getMergeDataListForCompany, getMergeDataListForCompanyTag,
-    getMergeDataListForJob, getMergeDataListForJobTag
+    getMergeDataListForCompany,
+    getMergeDataListForJob, getMergeDataListForTag
 } from "@/common/service/dataSyncService";
+import { genIdFromText } from "@/common/utils";
 export function useData() {
 
     //10 million
@@ -64,29 +65,31 @@ export function useData() {
     }
 
     const getCompanyTagDataToExcelJsonArray = async () => {
-        let searchParam = new SearchCompanyTagBO();
-        searchParam.pageNum = 1;
-        searchParam.pageSize = MAX_RECORD_COUNT;
-        searchParam.orderByColumn = "updateDatetime";
-        searchParam.orderBy = "DESC";
-        let data = await CompanyApi.searchCompanyTag(searchParam);
-        let list = data.items;
+        let searchParam = new CompanyTagExportBO();
+        searchParam.source = "";
+        searchParam.isPublic = null;
+        let list = await CompanyApi.companyTagExport(searchParam);
         let result = companyTagDataToExcelJSONArray(list);
         return result;
     }
 
     const saveCompanyTagData = async (data) => {
-        let companyTagBOList = companyTagExcelDataToObjectArray(data);
-        let targetList = await getMergeDataListForCompanyTag(companyTagBOList, async (ids) => {
-            return await CompanyApi.getAllCompanyTagDTOByCompanyIds(ids);
+        let result = companyTagExcelDataToObjectArray(data);
+        let targetList = await getMergeDataListForTag(result, "companyName", async (companyNames) => {
+            let searchParam = new CompanyTagExportBO();
+            searchParam.source = "";
+            searchParam.isPublic = null;
+            searchParam.companyIds = companyNames.map(item => genIdFromText(item));
+            return await CompanyApi.companyTagExport(searchParam);
         })
-        await CompanyApi.batchAddOrUpdateCompanyTagWithTransaction(targetList);
+        await CompanyApi.batchAddOrUpdateCompanyTagWithTransaction({ items: targetList, overrideUpdateDatetime: true });
         return targetList;
     }
 
     const getJobTagDataToExcelJsonArray = async () => {
         let searchParam = new JobTagExportBO();
         searchParam.source = "";
+        searchParam.isPublic = null;
         let list = await JobApi.jobTagExport(searchParam);
         let result = jobTagDataToExcelJSONArray(list);
         return result;
@@ -94,13 +97,14 @@ export function useData() {
 
     const saveJobTagData = async (data) => {
         let result = jobTagExcelDataToObjectArray(data);
-        let targetList = await getMergeDataListForJobTag(result, "jobId", async (ids) => {
+        let targetList = await getMergeDataListForTag(result, "jobId", async (ids) => {
             let searchParam = new JobTagExportBO();
             searchParam.source = "";
             searchParam.jobIds = ids;
+            searchParam.isPublic = null;
             return await JobApi.jobTagExport(searchParam);
         })
-        await JobApi.jobTagBatchAddOrUpdateWithTransaction({ items: targetList, overrideUpdateDatetime:true});
+        await JobApi.jobTagBatchAddOrUpdateWithTransaction({ items: targetList, overrideUpdateDatetime: true });
         return targetList;
     }
 

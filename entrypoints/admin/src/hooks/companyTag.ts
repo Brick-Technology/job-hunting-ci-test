@@ -18,6 +18,7 @@ export function useCompanyTag() {
             updateDatetime,
             tagIdArray,
             tagNameArray,
+            tagArray,
         } = item ?? {};
         return {
             companyId,
@@ -26,6 +27,7 @@ export function useCompanyTag() {
             updateDatetime,
             nameArray: tagNameArray,
             idArray: tagIdArray,
+            tagArray
         }
     }
 
