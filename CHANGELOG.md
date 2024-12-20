@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## WIP
+
+### 🐛 Fixed
+
+1. (Sidepanel)修复主页图表默认显示tooltip的问题。
+
+### 🔨 Dependency
+
+1. Update @ant-design/charts ^2.2.5
+
 ## 2.2.0(2024-12-20)
 
 ### ⭐ Added

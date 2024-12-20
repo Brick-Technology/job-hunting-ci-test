@@ -108,25 +108,6 @@ const BasicChart: React.FC<BasicChartProps> = (props) => {
       radiusTopRight: 10,
     },
     onReady: ({ chart }) => {
-      try {
-        const { height } = chart._container.getBoundingClientRect();
-        const tooltipItem =
-          props.data[Math.floor(Math.random() * props.data.length)];
-        chart.on(
-          "afterrender",
-          () => {
-            chart.emit("tooltip:show", {
-              data: {
-                data: tooltipItem,
-              },
-              offsetY: height / 2 - 60,
-            });
-          },
-          true
-        );
-      } catch (e) {
-        console.error(e);
-      }
     },
   };
   return (
@@ -403,7 +384,7 @@ const DashboardView: React.FC = () => {
         setChartData(chartResult);
       };
       statistic();
-      return () => {};
+      return () => { };
     },
     [
       //这里的值改变时，会执行上面return的匿名函数

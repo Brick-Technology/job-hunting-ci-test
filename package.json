@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@0xecho/button": "^0.0.17",
-    "@ant-design/charts": "^2.2.3",
+    "@ant-design/charts": "^2.2.5",
     "@ant-design/icons": "^5.5.1",
     "@ant-design/pro-components": "^2.8.2",
     "@pansy/lnglat-transform": "^1.0.3",
