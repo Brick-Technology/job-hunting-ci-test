@@ -3,9 +3,11 @@ import { Message } from "../../../common/api/message";
 import { JobTagBatchAddOrUpdateBO } from "../../../common/data/bo/jobTagBatchAddOrUpdateBO";
 import { JobTagBO } from "../../../common/data/bo/jobTagBO";
 import { JobTagExportBO } from "../../../common/data/bo/jobTagExportBO";
+import { JobTagNameStatisticBO } from "../../../common/data/bo/jobTagNameStatisticBO";
 import { JobTagSearchBO } from "../../../common/data/bo/jobTagSearchBO";
 import { JobTag } from "../../../common/data/domain/jobTag";
 import { JobTagDTO } from "../../../common/data/dto/jobTagDTO";
+import { JobTagNameStatisticDTO } from "../../../common/data/dto/jobTagNameStatisticDTO";
 import { JobTagSearchDTO } from "../../../common/data/dto/jobTagSearchDTO";
 import { JobTagStatisticDTO } from "../../../common/data/dto/jobTagStatisticDTO";
 import { genIdFromText, genUniqueId, isBlank } from "../../../common/utils";
@@ -14,7 +16,6 @@ import { postErrorMessage, postSuccessMessage } from "../util";
 import { BaseService } from "./baseService";
 import { _getByIds as _jobGetByIds } from "./jobService";
 import { _addNotExistsTags, _searchWithTagInfo } from "./tagService";
-
 const JOB_ID_COLUMN = "job_id";
 
 const SERVICE_INSTANCE = new BaseService("job_tag", "id",
@@ -277,7 +278,42 @@ export const JobTagService = {
             postErrorMessage(message, "[worker] jobTagExport error : " + e.message);
         }
     },
-
+    /**
+   *
+   * @param {Message} message
+   * @param {JobTagNameStatisticBO} param
+   *
+   * @returns {JobTagNameStatisticDTO}
+   */
+    jobTagNameStatistic: async function (message, param) {
+        try {
+            let limitStart = (param.pageNum - 1) * param.pageSize;
+            let limitEnd = param.pageSize;
+            let limit = " limit " + limitStart + "," + limitEnd;
+            let result = new JobTagNameStatisticDTO();
+            let sqlTagNameTotal = `SELECT tag_name AS name,COUNT(t1.job_id) AS total FROM job_tag t1 LEFT JOIN tag t2 ON t1.tag_id = t2.tag_id GROUP BY t1.tag_id ORDER BY total DESC ${limit}`;
+            let totalTagNameTotalQueryResult = [];
+            (await getDb()).exec({
+                sql: sqlTagNameTotal,
+                rowMode: "object",
+                resultRows: totalTagNameTotalQueryResult,
+            });
+            let totalJobQueryResult = [];
+            (await getDb()).exec({
+                sql: `SELECT COUNT(*) total FROM (SELECT t1.job_id FROM job_tag  t1 GROUP BY t1.job_id) t1`,
+                rowMode: "object",
+                resultRows: totalJobQueryResult,
+            });
+            result.items = totalTagNameTotalQueryResult;
+            result.total = totalJobQueryResult[0].total;
+            postSuccessMessage(message, result);
+        } catch (e) {
+            postErrorMessage(
+                message,
+                "[worker] jobTagNameStatistic error : " + e.message
+            );
+        }
+    },
 };
 
 /**

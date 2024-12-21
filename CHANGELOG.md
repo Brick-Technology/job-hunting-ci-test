@@ -5,6 +5,7 @@
 ### ⭐ Added
 
 1. (Sidepanel)添加GitHub API计量展示(Core,Graphql)。
+1. (Sidepanel)添加职位标签统计图表(主页)。
 
 ### 🐛 Fixed
 

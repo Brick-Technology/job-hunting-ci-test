@@ -3,6 +3,7 @@ import { CompanyTagBatchAddOrUpdateBO } from "../data/bo/companyTagBatchAddOrUpd
 import { CompanyTagBO } from "../data/bo/companyTagBO";
 import { CompanyTagExportBO } from "../data/bo/companyTagExportBO";
 import { JobTagExportBO } from "../data/bo/jobTagExportBO";
+import { JobTagNameStatisticBO } from "../data/bo/jobTagNameStatisticBO";
 import { JobTagSearchBO } from "../data/bo/jobTagSearchBO";
 import { SearchCompanyBO } from "../data/bo/searchCompanyBO";
 import { SearchCompanyTagBO } from "../data/bo/searchCompanyTagBO";
@@ -246,6 +247,17 @@ export const JobApi = {
    */
   jobTagStatistic: async function () {
     let result = await invoke(this.jobTagStatistic.name, {});
+    return result.data;
+  },
+
+
+  /**
+   * 
+   * @param {JobTagNameStatisticBO} param 
+   * @returns JobTagNameStatisticDTO
+   */
+  jobTagNameStatistic: async function (param) {
+    let result = await invoke(this.jobTagNameStatistic.name, param);
     return result.data;
   },
 

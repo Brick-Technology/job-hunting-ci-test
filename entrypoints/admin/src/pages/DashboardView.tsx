@@ -119,7 +119,62 @@ const BasicChart: React.FC<BasicChartProps> = (props) => {
   );
 };
 
-import { Column } from "@ant-design/charts";
+type BackgroundChartData = {
+  items: BasicChartData[];
+  total: number;
+};
+
+type BackgroundChartProps = {
+  title: string;
+  data: BackgroundChartData;
+};
+
+const BackgroundChart: React.FC<BackgroundChartProps> = ({ title, data }) => {
+
+  const config = {
+    data: data.items,
+    xField: 'name',
+    yField: 'total',
+    style: {
+      // 圆角样式
+      radiusTopLeft: 10,
+      radiusTopRight: 10,
+    },
+    markBackground: {
+      label: {
+        text: ({ originData }) => {
+          return `${((originData.total / data.total) * 100).toFixed(2)}% | ${originData.total} / ${data.total}`;
+        },
+        position: 'right',
+      },
+    },
+    scale: {
+      y: {
+        domain: [0, data.total],
+      },
+    },
+    axis: {
+      x: {
+        size: 70,
+        tick: false,
+        title: false,
+        labelAutoHide: false,
+      },
+      y: {
+        grid: false,
+        tick: false,
+        label: false,
+        title: false,
+      },
+    },
+  };
+  return <Card style={{ margin: 10 }}>
+    <Bar height={300} title={title} {...config} />
+  </Card>
+};
+
+
+import { Bar, Column } from "@ant-design/charts";
 import { logo } from "../assets";
 
 const jobWebsiteList = [
@@ -268,6 +323,7 @@ const convertToChartData = ({
 const DashboardView: React.FC = () => {
   const [todayStatisticData, setTodayStatisticData] = useState([]);
   const [chartData, setChartData] = useState([]);
+  const [tagNameGroupData, setTagNameGroupData] = useState<BackgroundChartData>({ items: [], total: 0 });
 
   useEffect(
     () => {
@@ -382,6 +438,8 @@ const DashboardView: React.FC = () => {
           }),
         });
         setChartData(chartResult);
+        let tagNameGroupDataResult = await JobApi.jobTagNameStatistic({ pageNum: 1, pageSize: 15 });
+        setTagNameGroupData(tagNameGroupDataResult);
       };
       statistic();
       return () => { };
@@ -466,6 +524,9 @@ const DashboardView: React.FC = () => {
         </Col>
       </Row>
       <Row>
+        <Col key="tagNameGroup" xs={24} sm={24} md={12} lg={12} xl={8} xxl={6}>
+          <BackgroundChart title="常见标签(公司数/总公司数)" data={tagNameGroupData}></BackgroundChart>
+        </Col>
         {chartData.map((item, index) => (
           <Col key={index} xs={24} sm={24} md={12} lg={12} xl={8} xxl={6}>
             <BasicChart title={item.title} data={item.data} />
