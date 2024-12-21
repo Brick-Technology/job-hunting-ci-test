@@ -1,9 +1,9 @@
+import dayjs from "dayjs";
 import { Message } from "../../../common/api/message";
 import { SearchFileBO } from "../../../common/data/bo/searchFileBO";
-import { SearchFileDTO } from "../../../common/data/dto/searchFileDTO";
 import { File } from "../../../common/data/domain/file";
+import { SearchFileDTO } from "../../../common/data/dto/searchFileDTO";
 import { BaseService } from "./baseService";
-
 const SERVICE_INSTANCE = new BaseService("file", "id",
     () => {
         return new File();
@@ -11,7 +11,37 @@ const SERVICE_INSTANCE = new BaseService("file", "id",
     () => {
         return new SearchFileDTO();
     },
-    null
+    (param) => {
+        let whereCondition = "";
+        if (param.name) {
+            whereCondition += ` AND name LIKE '%${param.name}%'`;
+        }
+        if (param.startDatetimeForCreate) {
+            whereCondition +=
+                " AND create_datetime >= '" +
+                dayjs(param.startDatetimeForCreate).format("YYYY-MM-DD HH:mm:ss") +
+                "'";
+        }
+        if (param.endDatetimeForCreate) {
+            whereCondition +=
+                " AND create_datetime < '" +
+                dayjs(param.endDatetimeForCreate).format("YYYY-MM-DD HH:mm:ss") +
+                "'";
+        }
+        if (param.startDatetimeForUpdate) {
+            whereCondition +=
+                " AND update_datetime >= '" +
+                dayjs(param.startDatetimeForUpdate).format("YYYY-MM-DD HH:mm:ss") +
+                "'";
+        }
+        if (param.endDatetimeForUpdate) {
+            whereCondition +=
+                " AND update_datetime < '" +
+                dayjs(param.endDatetimeForUpdate).format("YYYY-MM-DD HH:mm:ss") +
+                "'";
+        }
+        return whereCondition;
+    }
 );
 
 export const FileService = {

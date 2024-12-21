@@ -8,6 +8,7 @@ import "./App.css";
 import RootLayout from "./layout/RootLayout";
 import BbsView from "./pages/BbsView";
 import DashboardView from "./pages/DashboardView";
+import FileView from "./pages/FileView";
 import SettingView from "./pages/SettingView";
 import AutomateView from "./pages/assistant/AutomateView";
 import FavoriteJobView from "./pages/assistant/FavoriteJobView";
@@ -79,6 +80,7 @@ const App: React.FC = () => {
           <Route path="dataSharePlanStatistic" element={<DataSharePlanStatisticView />} />
           <Route path="task" element={<TaskView />} />
           <Route path="partner" element={<PartnerView />} />
+          <Route path="file" element={<FileView />} />
           <Route path="setting" element={<SettingView />} />
           <Route path="*" element={<DashboardView />} />
         </Route>

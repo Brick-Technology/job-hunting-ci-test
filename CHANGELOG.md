@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## WIP
+
+### ⭐ Added
+
+1. (Sidepanel)添加文件管理页面。
+
 ## 2.3.0(2024-12-21)
 
 ### ⭐ Added

@@ -1,6 +1,7 @@
 import {
   CommentOutlined,
   DatabaseOutlined,
+  FileOutlined,
   HomeOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -10,12 +11,11 @@ import {
 } from "@ant-design/icons";
 import { Button, Flex, Layout, Menu, theme } from "antd";
 import React, { useState } from "react";
-import { Outlet } from "react-router";
-import logo from "../assets/logo.svg";
-import { useNavigate } from "react-router";
-import HeaderRight from "./HeaderRight";
-import useDataSharePlanStore from "../store/DataSharePlanStore";
+import { Outlet, useNavigate } from "react-router";
 import { useShallow } from "zustand/shallow";
+import logo from "../assets/logo.svg";
+import useDataSharePlanStore from "../store/DataSharePlanStore";
+import HeaderRight from "./HeaderRight";
 const { Header, Sider, Content } = Layout;
 
 const siderStyle: React.CSSProperties = {
@@ -108,6 +108,11 @@ const RootLayout: React.FC = () => {
               children: [
                 ...genDataSharePlanMenu()
               ],
+            },
+            {
+              key: "file",
+              icon: <FileOutlined />,
+              label: "文件",
             },
             {
               key: "setting",

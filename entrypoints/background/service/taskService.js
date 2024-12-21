@@ -61,6 +61,7 @@ import { debugLog, errorLog, infoLog } from "../../../common/log";
 import { getMergeDataListForCompany, getMergeDataListForJob, getMergeDataListForTag } from "../../../common/service/dataSyncService";
 import { dateToStr, genIdFromText } from "../../../common/utils";
 import { bytesToBase64 } from "../../../common/utils/base64";
+import { getExcelDataFromZipFile } from "../../../common/zip";
 import { getToken, setToken } from "./authService";
 import { getUser } from "./userService";
 
@@ -603,18 +604,6 @@ async function mergeDataByDataId(dataId, taskType, dataTypeName, fileHeader, exc
     }
     //TODO 考虑自动删除文件内容，以便节省存储空间
     //TODO 如果删除文件，则注意添加事务
-}
-
-async function getExcelDataFromZipFile(base64Content, dataTypeName) {
-    let promise = new Promise((resolve, reject) => {
-        JSZip.loadAsync(base64Content, { base64: true }).then(async zip => {
-            let zipFile = zip.file(`${dataTypeName}.xlsx`);
-            resolve(await zipFile.async("arraybuffer"));
-        }).catch(e => {
-            reject(e);
-        })
-    });
-    return promise;
 }
 
 async function downloadDataByDataId(dataId, dataTypeName, taskType) {

@@ -1,4 +1,5 @@
 import { dbDelete, dbExport, dbImport } from "@/common/api/common";
+import { downloadBlob } from "@/common/file";
 import { base64ToBytes, bytesToBase64 } from "@/common/utils/base64.js";
 import { Icon } from "@iconify/react";
 import { Button, Flex, Input, Modal, Popconfirm, Spin, Switch, Typography, message } from "antd";
@@ -35,29 +36,6 @@ const DatabaseBackupRestore: React.FC<DatabaseBackupRestoreProps> = ({ }) => {
             setExportLoading(false);
         }
     }
-
-    const downloadBlob = function (data, fileName, mimeType) {
-        let blob, url;
-        blob = new Blob([data], {
-            type: mimeType,
-        });
-        url = window.URL.createObjectURL(blob);
-        downloadURL(url, fileName);
-        setTimeout(function () {
-            return window.URL.revokeObjectURL(url);
-        }, 1000);
-    };
-
-    const downloadURL = function (data, fileName) {
-        let a;
-        a = document.createElement("a");
-        a.href = data;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.style = "display: none";
-        a.click();
-        a.remove();
-    };
 
     const handleFileImport = async (e) => {
         setFiles(e.target.files);

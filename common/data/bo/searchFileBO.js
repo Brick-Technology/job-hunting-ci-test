@@ -1,6 +1,10 @@
 import { PageBO } from "./pageBO";
 
 export class SearchFileBO extends PageBO {
+    startDatetimeForCreate;
+    endDatetimeForCreate;
+    startDatetimeForUpdate;
+    endDatetimeForUpdate;
     orderByColumn;
     /**
      * ASC,DESC
