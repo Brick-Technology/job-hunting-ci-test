@@ -379,7 +379,7 @@ export async function runTask() {
     searchParam.pageNum = 1;
     searchParam.pageSize = MAX_RECORD_COUNT;
     searchParam.statusList = [TASK_STATUS_READY, TASK_STATUS_RUNNING, TASK_STATUS_ERROR];
-    // searchParam.endRetryCount = TASK_STATUS_ERROR_MAX_RETRY_COUNT;
+    searchParam.endRetryCount = TASK_STATUS_ERROR_MAX_RETRY_COUNT;
     searchParam.orderByColumn = "createDatetime";
     searchParam.orderBy = "ASC";
     let taskResult = await TaskApi.searchTask(searchParam, { invokeEnv: BACKGROUND });

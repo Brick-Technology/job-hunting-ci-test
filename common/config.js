@@ -28,8 +28,8 @@ export const UI_DEFAULT_PAGE_SIZE = 20;
 
 //公司数据有效时间
 export const COMPANY_DATA_EXPRIE_DAY = 90;//day
-
-export const TASK_STATUS_ERROR_MAX_RETRY_COUNT = 3;
+//最多重试60*24*2次，与TASK_LOOP_DELAY相关(一分钟任务最多会执行两次，执行一天都没完成，则不执行)
+export const TASK_STATUS_ERROR_MAX_RETRY_COUNT = 2880;
 export const TASK_DATA_DOWNLOAD_MAX_DAY = 60;//day
 export const TASK_CHART_DEFAULT_RANGE_DAY = 14;//day
 export const TASK_LOOP_DELAY = 30000;//ms
