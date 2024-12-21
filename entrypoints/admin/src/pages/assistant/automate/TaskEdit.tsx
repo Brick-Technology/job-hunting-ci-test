@@ -1,7 +1,7 @@
+import { MISSION_AUTO_BROWSE_JOB_SEARCH_PAGE, PLATFORM_51JOB, PLATFORM_BOSS, PLATFORM_LAGOU, PLATFORM_LIEPIN, PLATFORM_ZHILIAN } from "@/common";
 import { Button, Flex, Form, FormProps, Input, Radio, Select, Slider, Space, Spin } from "antd";
 import SubmitButton from "../../../components/SubmitButton";
 import { TaskData } from "../../../data/TaskData";
-import { MISSION_AUTO_BROWSE_JOB_SEARCH_PAGE, PLATFORM_51JOB, PLATFORM_BOSS, PLATFORM_ZHILIAN, PLATFORM_LAGOU, PLATFORM_LIEPIN } from "@/common";
 
 const missionTypes = [{
     label: "自动浏览职位搜索页", value: MISSION_AUTO_BROWSE_JOB_SEARCH_PAGE,
@@ -25,6 +25,7 @@ const TaskEditView: React.FC<TaskEditProps> = ({ data, onSave }) => {
     const [loading, setLoading] = useState<boolean>(false);
 
     const onSaveHandle: FormProps<TaskData>["onFinish"] = async (values) => {
+        values.id = data?.id;
         values.type = MISSION_AUTO_BROWSE_JOB_SEARCH_PAGE;
         try {
             setLoading(true);
