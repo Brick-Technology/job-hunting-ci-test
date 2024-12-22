@@ -28,7 +28,8 @@ const { RangePicker } = DatePicker;
 dayjs.extend(duration)
 
 const fillSearchParam = (searchParam, values) => {
-    const { createDatetimeRange, updateDatetimeRange, name } = values;
+    const { createDatetimeRange, updateDatetimeRange, name, id } = values;
+    searchParam.id = id;
     searchParam.name = name;
     if (createDatetimeRange && createDatetimeRange.length > 0) {
         searchParam.startDatetimeForCreate = dayjs(createDatetimeRange[0]);
@@ -154,6 +155,14 @@ const FileView: React.FC = () => {
 
     const searchFields = {
         common: [
+            <Col span={8} key="id">
+                <Form.Item
+                    name={`id`}
+                    label={`编号`}
+                >
+                    <Input allowClear placeholder="请输入编号"></Input>
+                </Form.Item>
+            </Col>,
             <Col span={8} key="name">
                 <Form.Item
                     name={`name`}

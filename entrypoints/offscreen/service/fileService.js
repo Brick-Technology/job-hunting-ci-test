@@ -13,6 +13,9 @@ const SERVICE_INSTANCE = new BaseService("file", "id",
     },
     (param) => {
         let whereCondition = "";
+        if (param.id) {
+            whereCondition += ` AND id LIKE '%${param.id}%'`;
+        }
         if (param.name) {
             whereCondition += ` AND name LIKE '%${param.name}%'`;
         }

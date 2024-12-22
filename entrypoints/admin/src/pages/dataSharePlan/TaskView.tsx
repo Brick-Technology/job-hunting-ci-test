@@ -157,10 +157,13 @@ const TaskView: React.FC = () => {
                     <div>
                         <Icon icon="mdi:database-plus" />数据量：{value.dataCount ?? 0}
                     </div>
+                    <div>
+                        <Icon icon="mdi:file" />文件编号：<Text copyable>{value.dataId}</Text>
+                    </div>
                 </Col>
                     : null}
             </>,
-            minWidth: 200,
+            minWidth: 300,
         },
         {
             title: '执行耗时',
