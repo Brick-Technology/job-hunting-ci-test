@@ -563,6 +563,43 @@ export const Database = {
       );
     }
   },
+  dbSize: async function (message, param) {
+    try {
+      let sql = `SELECT page_count * page_size as total FROM pragma_page_count(), pragma_page_size()`;
+      let queryRows = [];
+      (await getDb()).exec({
+        sql: sql,
+        rowMode: "object",
+        resultRows: queryRows,
+      });
+      const total = queryRows[0].total;
+      postSuccessMessage(message, { total });
+    } catch (e) {
+      postErrorMessage(
+        message,
+        "[worker] dbSize error : " + e.message
+      );
+    }
+  },
+  dbSchemaVersion: async function (message, param) {
+    try {
+      let sql = `SELECT num FROM version;`;
+      let queryRows = [];
+      (await getDb()).exec({
+        sql: sql,
+        rowMode: "object",
+        resultRows: queryRows,
+      });
+      const version = queryRows[0].num;
+      postSuccessMessage(message, { version });
+    } catch (e) {
+      postErrorMessage(
+        message,
+        "[worker] dbSchemaVersion error : " + e.message
+      );
+    }
+  }
+  
 };
 
 /**

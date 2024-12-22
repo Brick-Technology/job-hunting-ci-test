@@ -9,6 +9,7 @@ import {
   SettingOutlined,
   ShareAltOutlined,
 } from "@ant-design/icons";
+import { Icon } from "@iconify/react";
 import { Button, Flex, Layout, Menu, theme } from "antd";
 import React, { useState } from "react";
 import { Outlet, useNavigate } from "react-router";
@@ -113,6 +114,11 @@ const RootLayout: React.FC = () => {
               key: "file",
               icon: <FileOutlined />,
               label: "文件",
+            },
+            {
+              key: "system",
+              icon: <Icon icon="icon-park-outline:system" />,
+              label: "系统",
             },
             {
               key: "setting",

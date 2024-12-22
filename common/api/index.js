@@ -1122,7 +1122,17 @@ export const FileApi = {
     let result = await invoke(this.fileGetAllMergedNotDeleteFile.name, param, { invokeEnv: invokeEnv });
     return result.data;
   },
-  
+
+  /**
+   * 
+   * @param {void} param 
+   * @returns FileStatisticDTO[]
+   */
+  fileStatistic: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
+    let result = await invoke(this.fileStatistic.name, param, { invokeEnv: invokeEnv });
+    return result.data;
+  },
+
 }
 
 export const TaskDataMergeApi = {

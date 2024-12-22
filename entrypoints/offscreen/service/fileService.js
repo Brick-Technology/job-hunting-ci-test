@@ -3,8 +3,9 @@ import { Message } from "../../../common/api/message";
 import { SearchFileBO } from "../../../common/data/bo/searchFileBO";
 import { File } from "../../../common/data/domain/file";
 import { FileDTO } from "../../../common/data/dto/fileDTO";
+import { FileStatisticDTO } from "../../../common/data/dto/fileStatisticDTO";
 import { SearchFileDTO } from "../../../common/data/dto/searchFileDTO";
-import { getAll } from "../database";
+import { getAll, getDb } from "../database";
 import { postErrorMessage, postSuccessMessage } from "../util";
 import { BaseService } from "./baseService";
 
@@ -120,6 +121,59 @@ export const FileService = {
                 "[worker] fileGetAllMergedNotDeleteFile error : " + e.message
             );
         }
-    }
+    },
 
+    /**
+     *
+     * @param {Message} message
+     * @param {void} param
+     */
+    fileStatistic: async function (message, param) {
+        try {
+            let result = new FileStatisticDTO();
+
+            const mergeFileSizeTotalSql = `SELECT IFNULL(SUM(t1.size),0) AS total  from file t1 LEFT JOIN task_data_merge t2 ON t1.id = t2.data_id LEFT JOIN task t3 ON t2.id = t3.data_id`;
+            let mergeFileSizeTotal = [];
+            (await getDb()).exec({
+                sql: mergeFileSizeTotalSql,
+                rowMode: "object",
+                resultRows: mergeFileSizeTotal,
+            });
+            result.mergeFileSizeTotal = mergeFileSizeTotal[0].total;
+
+            const mergeNotDeleteFileSizeTotalSql = `SELECT IFNULL(SUM(t1.size),0) AS total  from file t1 LEFT JOIN task_data_merge t2 ON t1.id = t2.data_id LEFT JOIN task t3 ON t2.id = t3.data_id WHERE t1.is_delete = 0`;
+            let mergeNotDeleteFileSizeTotal = [];
+            (await getDb()).exec({
+                sql: mergeNotDeleteFileSizeTotalSql,
+                rowMode: "object",
+                resultRows: mergeNotDeleteFileSizeTotal,
+            });
+            result.mergeNotDeleteFileSizeTotal = mergeNotDeleteFileSizeTotal[0].total;
+
+            const mergeFileCountSql = `SELECT COUNT(*) AS total  from file t1 LEFT JOIN task_data_merge t2 ON t1.id = t2.data_id LEFT JOIN task t3 ON t2.id = t3.data_id`;
+            let mergeFileCount = [];
+            (await getDb()).exec({
+                sql: mergeFileCountSql,
+                rowMode: "object",
+                resultRows: mergeFileCount,
+            });
+            result.mergeFileCount = mergeFileCount[0].total;
+
+            const mergeNotDeleteFileCountSql = `SELECT COUNT(*) AS total  from file t1 LEFT JOIN task_data_merge t2 ON t1.id = t2.data_id LEFT JOIN task t3 ON t2.id = t3.data_id WHERE t1.is_delete = 0`;
+            let mergeNotDeleteFileCount = [];
+            (await getDb()).exec({
+                sql: mergeNotDeleteFileCountSql,
+                rowMode: "object",
+                resultRows: mergeNotDeleteFileCount,
+            });
+            result.mergeNotDeleteFileCount = mergeNotDeleteFileCount[0].total;
+
+            postSuccessMessage(message, result);
+        } catch (e) {
+            postErrorMessage(
+                message,
+                "[worker] fileStatistic error : " + e.message
+            );
+        }
+    },
 };

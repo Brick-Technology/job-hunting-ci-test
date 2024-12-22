@@ -29,6 +29,16 @@ export async function dbDelete() {
   return result.data;
 }
 
+export async function dbSize() {
+  let result = await invoke("dbSize", {});
+  return result.data;
+}
+
+export async function dbSchemaVersion() {
+  let result = await invoke("dbSchemaVersion", {});
+  return result.data;
+}
+
 /**
  * 提交网络请求
  * @param {string} param url
