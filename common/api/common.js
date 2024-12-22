@@ -39,6 +39,21 @@ export async function dbSchemaVersion() {
   return result.data;
 }
 
+export async function dbGetAllTableName() {
+  let result = await invoke("dbGetAllTableName", {});
+  return result.data;
+}
+
+/**
+ * 
+ * @param {{sql:string}} param 
+ * @returns Promise<{result:any}>
+ */
+export async function dbExec(param) {
+  let result = await invoke("dbExec", param);
+  return result.data;
+}
+
 /**
  * 提交网络请求
  * @param {string} param url

@@ -598,8 +598,42 @@ export const Database = {
         "[worker] dbSchemaVersion error : " + e.message
       );
     }
+  },
+  dbExec: async function (message, param) {
+    try {
+      let sql = param.sql;
+      let queryRows = [];
+      (await getDb()).exec({
+        sql: sql,
+        rowMode: "object",
+        resultRows: queryRows,
+      });
+      postSuccessMessage(message, { result: queryRows });
+    } catch (e) {
+      postErrorMessage(
+        message,
+        "[worker] dbExec error : " + e.message
+      );
+    }
+  },
+  dbGetAllTableName: async function (message, param) {
+    try {
+      let sql = `SELECT name FROM sqlite_master where type ='table'`;
+      let queryRows = [];
+      (await getDb()).exec({
+        sql: sql,
+        rowMode: "object",
+        resultRows: queryRows,
+      });
+      postSuccessMessage(message, { result: queryRows });
+    } catch (e) {
+      postErrorMessage(
+        message,
+        "[worker] dbGetAllTableName error : " + e.message
+      );
+    }
   }
-  
+
 };
 
 /**
