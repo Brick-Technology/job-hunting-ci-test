@@ -134,6 +134,20 @@
     <img src="docs\introduction\company-aiqicha.jpg" alt="aiqicha" width="1000px"/>
 </div>
 
+### 管理页面
+
+#### 打开管理页面
+
+<div style="margin-top:30px">
+    <img src="docs\introduction\chrome_extension_sidepanel_open.png" alt="chrome_extension_sidepanel_open" width="1000px"/>
+</div>
+
+#### 管理页面首页（需点击插件图标打开）
+
+<div style="margin-top:30px">
+    <img src="docs\introduction\sidepanel_admin_home.png" alt="sidepanel_admin_home" width="1000px"/>
+</div>
+
 ### 数据共享计划
 
 <div style="margin-top:30px">
@@ -150,20 +164,6 @@
 
 <div style="margin-top:30px">
     <img src="docs\introduction\chrome_extension_data_share_partner.png" alt="chrome_extension_data_share_partner" width="1000px"/>
-</div>
-
-### 管理页面
-
-#### 打开管理页面
-
-<div style="margin-top:30px">
-    <img src="docs\introduction\chrome_extension_sidepanel_open.png" alt="chrome_extension_sidepanel_open" width="1000px"/>
-</div>
-
-#### 管理页面首页（需点击插件图标打开）
-
-<div style="margin-top:30px">
-    <img src="docs\introduction\sidepanel_admin_home.png" alt="sidepanel_admin_home" width="1000px"/>
 </div>
 
 #### 个人助理
@@ -189,24 +189,6 @@
 
 <div style="margin-top:30px">
     <img src="docs\introduction\sidepanel_admin_job.png" alt="sidepanel_admin_job" width="1000px"/>
-</div>
-
-#### 公司管理
-
-<div style="margin-top:30px">
-    <img src="docs\introduction\sidepanel_admin_company.png" alt="sidepanel_admin_company" width="1000px"/>
-</div>
-
-#### 公司标签管理
-
-<div style="margin-top:30px">
-    <img src="docs\introduction\sidepanel_admin_company_tag.png" alt="sidepanel_admin_company_tag" width="1000px"/>
-</div>
-
-#### 职位标签管理
-
-<div style="margin-top:30px">
-    <img src="docs\introduction\sidepanel_admin_job_tag.png" alt="sidepanel_admin_job_tag" width="1000px"/>
 </div>
 
 #### 系统设置
