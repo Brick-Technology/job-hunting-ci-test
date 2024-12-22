@@ -19,6 +19,9 @@ const SERVICE_INSTANCE = new BaseService("file", "id",
         if (param.name) {
             whereCondition += ` AND name LIKE '%${param.name}%'`;
         }
+        if (param.isDelete != null) {
+            whereCondition += ` AND is_delete = ${param.isDelete}`;
+        }
         if (param.startDatetimeForCreate) {
             whereCondition +=
                 " AND create_datetime >= '" +
@@ -89,6 +92,18 @@ export const FileService = {
      */
     fileDeleteByIds: async function (message, param) {
         SERVICE_INSTANCE.deleteByIds(message, param);
+    },
+    /**
+     *
+     * @param {Message} message
+     * @param {string[]} param ids
+     */
+    fileLogicDeleteByIds: async function (message, param) {
+        SERVICE_INSTANCE.batchUpdate(message, {
+            id: param,
+            content: "",
+            isDelete: 1,
+        });
     }
 
 };

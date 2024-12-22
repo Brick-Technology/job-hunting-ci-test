@@ -88,7 +88,7 @@ const SettingView: React.FC = () => {
                   try {
                     downloadLatest(versionObject);
                   } catch (e) {
-                    messageApi.error(e);
+                    messageApi.error(e.message);
                   }
                 }}><Icon icon="mdi:download" />下载新版本</Button>
               </Flex> : <Text type="success" onClick={() => {

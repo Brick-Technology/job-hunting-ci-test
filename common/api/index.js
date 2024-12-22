@@ -1103,6 +1103,16 @@ export const FileApi = {
     return result.data;
   },
 
+  /**
+   * 
+   * @param {string[]} param ids
+   * @returns 
+   */
+  fileLogicDeleteByIds: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
+    let result = await invoke(this.fileLogicDeleteByIds.name, param, { invokeEnv: invokeEnv });
+    return result.data;
+  },
+
 }
 
 export const TaskDataMergeApi = {

@@ -29,7 +29,7 @@ import {
 import { CompanyApi, DataSharePartnerApi, DBApi, FileApi, JobApi, TaskApi, TaskDataDownloadApi, TaskDataMergeApi, TaskDataUploadApi } from "../../../common/api";
 import { BACKGROUND } from "../../../common/api/bridgeCommon";
 import { EXCEPTION, GithubApi } from "../../../common/api/github";
-import { TASK_DATA_DOWNLOAD_MAX_DAY } from "../../../common/config";
+import { TASK_DATA_DOWNLOAD_MAX_DAY, TASK_STATUS_ERROR_MAX_RETRY_COUNT } from "../../../common/config";
 import { CompanyTagExportBO } from "../../../common/data/bo/companyTagExportBO";
 import { JobTagExportBO } from "../../../common/data/bo/jobTagExportBO";
 import { SearchCompanyBO } from "../../../common/data/bo/searchCompanyBO";

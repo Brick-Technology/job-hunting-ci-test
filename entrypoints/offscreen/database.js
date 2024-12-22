@@ -6,6 +6,7 @@ import { convertEmptyStringToNull, toHump, toLine } from "../../common/utils";
 import { base64ToBytes, bytesToBase64 } from "../../common/utils/base64.js";
 import { getChangeLogList, initChangeLog } from "./changeLog";
 import { ChangeLogV1 } from "./changeLog/changeLogV1";
+import { ChangeLogV10 } from './changeLog/changeLogV10';
 import { ChangeLogV2 } from "./changeLog/changeLogV2";
 import { ChangeLogV3 } from './changeLog/changeLogV3';
 import { ChangeLogV4 } from './changeLog/changeLogV4';
@@ -126,6 +127,51 @@ export async function update(obj, tableName, idColumn, param, { overrideUpdateDa
     sql: updateSQL,
     bind: bindObject,
   });
+}
+
+export async function batchUpdate(obj, tableName, idColumn, param, { overrideUpdateDatetime = false } = {}) {
+  const targetObj = Object.assign(obj, param)
+  const idArray = targetObj[idColumn];
+  let ids = "'" + idArray.join("','") + "'";
+  targetObj[idColumn] = ids;
+  targetObj.updateDatetime = targetObj.updateDatetime ?? dayjs().format("YYYY-MM-DD HH:mm:ss");
+  const updateSQL = genBatchFullUpdateSQL(targetObj, tableName, idColumn, ids, { overrideUpdateDatetime });
+  const bindObject = genFullBindObject(targetObj, { overrideUpdateDatetime });
+  delete bindObject[`$${idColumn}`];
+  delete bindObject.$create_datetime;
+  let keys = Object.keys(bindObject);
+  for (let n = 0; n < keys.length; n++) {
+    let key = keys[n];
+    if (bindObject[key] == null) {
+      delete bindObject[key];
+    }
+  }
+  if (isDebug()) {
+    debugLog(`[database] [update] updateSQL = ${updateSQL}`)
+    debugLog(`[database] [update] bindObject = ${JSON.stringify(bindObject)}`)
+  }
+  return (await getDb()).exec({
+    sql: updateSQL,
+    bind: bindObject,
+  });
+}
+
+export function genBatchFullUpdateSQL(obj, tableName, idColumn, ids, { overrideUpdateDatetime }) {
+  let column = [];
+  let keys = Object.keys(obj);
+  for (let n = 0; n < keys.length; n++) {
+    let key = keys[n];
+    if (key != "createDatetime" && key != idColumn) {
+      if (obj[key] != null) {
+        if (obj[key] == "") {
+          column.push(`${toLine(key)}=NULL`);
+        } else {
+          column.push(`${toLine(key)}=$${toLine(key)}`);
+        }
+      }
+    }
+  }
+  return `UPDATE ${tableName} SET ${column.join(",")} WHERE ${idColumn} in (${ids})`;
 }
 
 export function genFullUpdateSQL(obj, tableName, idColumn) {
@@ -371,6 +417,7 @@ export const Database = {
       changelogList.push(new ChangeLogV7());
       changelogList.push(new ChangeLogV8());
       changelogList.push(new ChangeLogV9());
+      changelogList.push(new ChangeLogV10());
       initChangeLog(changelogList);
       sqlite3InitModule({
         print: debugLog,

@@ -1,6 +1,6 @@
 import { Message } from "../../../common/api/message";
 import { genUniqueId } from "../../../common/utils";
-import { batchDel, batchGet, del, insert, one, search, searchCount, update } from "../database";
+import { batchDel, batchGet, batchUpdate, del, insert, one, search, searchCount, update } from "../database";
 import { postErrorMessage, postSuccessMessage } from "../util";
 
 export class BaseService {
@@ -136,6 +136,47 @@ export class BaseService {
      */
     async _deleteByIds(ids, column, { otherCondition } = { otherCondition: null }) {
         return batchDel(this.tableName, column ?? this.tableIdColumn, ids, { otherCondition });
+    }
+
+    /**
+     * @param {string[]} ids
+     * @param {string} column 
+     */
+    async _updateByIds(ids, column, { otherCondition } = { otherCondition: null }) {
+        return batchDel(this.tableName, column ?? this.tableIdColumn, ids, { otherCondition });
+    }
+
+
+    /**
+     *
+     * @param {Message} message
+     * @param {*} param
+     */
+    async batchUpdate(message, param, column) {
+        try {
+            if (param.id && param.id.length > 0) {
+                await this._batchUpdate(param, column);
+                postSuccessMessage(message, {});
+            } else {
+                postErrorMessage(
+                    message,
+                    "[worker] batchUpdate error : ids is empty"
+                );
+            }
+        } catch (e) {
+            postErrorMessage(
+                message,
+                "[worker] batchUpdate error : " + e.message
+            );
+        }
+    }
+
+    /**
+     * 
+     * @param {*} param 
+     */
+    async _batchUpdate(param, column, { overrideUpdateDatetime = false } = {}) {
+        return batchUpdate(this.entityClassCreateFunction(), this.tableName, column ?? this.tableIdColumn, param, { overrideUpdateDatetime });
     }
 
     /**

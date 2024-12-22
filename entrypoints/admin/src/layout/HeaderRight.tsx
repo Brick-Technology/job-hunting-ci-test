@@ -167,7 +167,7 @@ const HeaderRight: React.FC = () => {
                     try {
                         downloadLatest(versionObject);
                     } catch (e) {
-                        messageApi.error(e);
+                        messageApi.error(e.message);
                     }
                 }}
             >

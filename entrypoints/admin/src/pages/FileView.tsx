@@ -11,6 +11,7 @@ import {
     Form,
     Input,
     Modal,
+    Select,
     Space,
     TableColumnsType,
     Typography, message
@@ -28,9 +29,10 @@ const { RangePicker } = DatePicker;
 dayjs.extend(duration)
 
 const fillSearchParam = (searchParam, values) => {
-    const { createDatetimeRange, updateDatetimeRange, name, id } = values;
+    const { createDatetimeRange, updateDatetimeRange, name, id, isDelete } = values;
     searchParam.id = id;
     searchParam.name = name;
+    searchParam.isDelete = isDelete;
     if (createDatetimeRange && createDatetimeRange.length > 0) {
         searchParam.startDatetimeForCreate = dayjs(createDatetimeRange[0]);
         searchParam.endDatetimeForCreate = dayjs(createDatetimeRange[1]);
@@ -108,6 +110,13 @@ const FileView: React.FC = () => {
             sorter: true,
         },
         {
+            title: '文件状态',
+            dataIndex: 'isDelete',
+            render: (value: boolean) => <Text>{value ? `已删除` : `正常`}</Text>,
+            minWidth: 100,
+            sorter: true,
+        },
+        {
             title: '操作',
             key: 'action',
             fixed: "right",
@@ -122,7 +131,7 @@ const FileView: React.FC = () => {
                             setIsEditModalOpen(true);
                         } catch (e) {
                             errorLog(e);
-                            messageApi.error(e);
+                            messageApi.error(e.message);
                         }
                     }}>预览</Button>
                     <Button type="link" onClick={() => {
@@ -132,7 +141,7 @@ const FileView: React.FC = () => {
                             exportExcelFromBase64ZipFile(record.content, fileName + ".xlsx");
                         } catch (e) {
                             errorLog(e);
-                            messageApi.error(e);
+                            messageApi.error(e.message);
                         }
                     }}>下载</Button>
                     <Button type="link" onClick={async () => {
@@ -145,7 +154,7 @@ const FileView: React.FC = () => {
                             );
                         } catch (e) {
                             errorLog(e);
-                            messageApi.error(e);
+                            messageApi.error(e.message);
                         }
                     }}>下载源文件</Button>
                 </Space>
@@ -171,6 +180,14 @@ const FileView: React.FC = () => {
                     <Input allowClear placeholder="请输入名称" />
                 </Form.Item>
             </Col>,
+            <Col span={8} key="isDelete">
+                <Form.Item
+                    name={`isDelete`}
+                    label={`文件状态`}
+                >
+                    <Select allowClear options={[{ value: 0, label: <span>正常</span> }, { value: 1, label: <span>已删除</span> }]} />
+                </Form.Item>
+            </Col>,
         ],
         expand: [
             <Col span={8} key="createDatetimeRange">
@@ -194,9 +211,9 @@ const FileView: React.FC = () => {
 
     const onDelete = async (keys: React.Key[]) => {
         try {
-            await FileApi.fileDeleteByIds(keys);
+            await FileApi.fileLogicDeleteByIds(keys);
         } catch (e) {
-            messageApi.error(e);
+            messageApi.error(e.message);
         }
         tableRef?.current.refresh();
     }
@@ -217,6 +234,7 @@ const FileView: React.FC = () => {
                 },
                 orderByColumn: "createDatetime",
                 searchParam: {
+                    isDelete: 0,
                 }
             }}
             rowKeyFunction={(record) => { return record.id }}
