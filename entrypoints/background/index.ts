@@ -15,7 +15,7 @@ import { convertPureJobDetailUrl, paramsToObject, parseToLineObjectToToHumpObjec
 import { AuthService, getOauth2LoginMessageMap, getToken, setToken } from "./service/authService";
 import { AutomateService } from "./service/automateService";
 import { SystemService } from "./service/systemService";
-import { calculateDataSharePartnerList, calculateDownloadTask, calculateUploadTask, runTask } from "./service/taskService";
+import { calculateDataSharePartnerList, calculateDownloadTask, calculateUploadTask, runScheduleTask, runTask } from "./service/taskService";
 import { getUser, setUser, UserService } from "./service/userService";
 import { postErrorMessage, postSuccessMessage } from "./util";
 
@@ -227,6 +227,8 @@ export default defineBackground(() => {
               infoLog(`[TASK] Data share plan disable`);
               infoLog(`[TASK] Data share plan task skip`);
             }
+            infoLog(`[TASK] runScheduleTask`)
+            await runScheduleTask();
           } catch (e) {
             errorLog(e);
           }

@@ -6,7 +6,7 @@ export class File {
 	content;
 	size;
 	type;
-    createDatetime;
-    updateDatetime;
-	isDelete;
+	createDatetime;
+	updateDatetime;
+	isDelete = 0;
 }

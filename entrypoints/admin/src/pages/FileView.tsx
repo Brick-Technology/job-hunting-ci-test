@@ -121,7 +121,7 @@ const FileView: React.FC = () => {
             key: 'action',
             fixed: "right",
             render: (_, record) => (
-                <Space size="middle">
+                !record.isDelete ? <Space size="middle">
                     <Button type="link" onClick={async () => {
                         const zipFileName = record.name;
                         const fileName = getFileName(zipFileName);
@@ -157,7 +157,7 @@ const FileView: React.FC = () => {
                             messageApi.error(e.message);
                         }
                     }}>下载源文件</Button>
-                </Space>
+                </Space> : null
             ),
         },
     ];

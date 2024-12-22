@@ -29,7 +29,7 @@ import {
 import { CompanyApi, DataSharePartnerApi, DBApi, FileApi, JobApi, TaskApi, TaskDataDownloadApi, TaskDataMergeApi, TaskDataUploadApi } from "../../../common/api";
 import { BACKGROUND } from "../../../common/api/bridgeCommon";
 import { EXCEPTION, GithubApi } from "../../../common/api/github";
-import { TASK_DATA_DOWNLOAD_MAX_DAY, TASK_STATUS_ERROR_MAX_RETRY_COUNT } from "../../../common/config";
+import { HISTORY_FILE_MAX_SIZE, TASK_DATA_DOWNLOAD_MAX_DAY, TASK_STATUS_ERROR_MAX_RETRY_COUNT } from "../../../common/config";
 import { CompanyTagExportBO } from "../../../common/data/bo/companyTagExportBO";
 import { JobTagExportBO } from "../../../common/data/bo/jobTagExportBO";
 import { SearchCompanyBO } from "../../../common/data/bo/searchCompanyBO";
@@ -372,6 +372,33 @@ async function isLogin() {
     return (await getToken()) ? true : false;
 }
 
+export async function runScheduleTask() {
+    infoLog("[TASK] [SCHEDULE] runScheduleTask")
+    await scheduleClearFile();
+}
+
+async function scheduleClearFile() {
+    infoLog("[TASK] [SCHEDULE] scheduleClearFile")
+    const mergedFileList = await FileApi.fileGetAllMergedNotDeleteFile({}, { invokeEnv: BACKGROUND });
+    let totalSize = 0;
+    let readyToDeleteFileIdList = [];
+    for (let i = 0; i < mergedFileList.length; i++) {
+        const item = mergedFileList[i];
+        totalSize += item.size;
+        if (HISTORY_FILE_MAX_SIZE >= 0 && totalSize > HISTORY_FILE_MAX_SIZE) {
+            readyToDeleteFileIdList.push(item.id);
+        }
+    }
+    const readyToDeleteFileIdListCount = readyToDeleteFileIdList.length;
+    infoLog(`[TASK] [SCHEDULE] history file max size = ${HISTORY_FILE_MAX_SIZE},file count readyDelete/merged  = ${readyToDeleteFileIdListCount}/${mergedFileList.length}`)
+    if (readyToDeleteFileIdListCount > 0) {
+        await FileApi.fileLogicDeleteByIds(readyToDeleteFileIdList, { invokeEnv: BACKGROUND });
+        infoLog(`[TASK] [SCHEDULE] delete history file count = ${readyToDeleteFileIdList.length}`);
+    } else {
+        infoLog(`[TASK] [SCHEDULE] no history file to delete`);
+    }
+}
+
 export async function runTask() {
     debugLog(`[TASK RUN] starting`)
     //获取按创建时间升序需要执行的任务
@@ -602,8 +629,6 @@ async function mergeDataByDataId(dataId, taskType, dataTypeName, fileHeader, exc
         await DBApi.dbRollbackTransaction({}, { invokeEnv: BACKGROUND });
         throw e;
     }
-    //TODO 考虑自动删除文件内容，以便节省存储空间
-    //TODO 如果删除文件，则注意添加事务
 }
 
 async function downloadDataByDataId(dataId, dataTypeName, taskType) {

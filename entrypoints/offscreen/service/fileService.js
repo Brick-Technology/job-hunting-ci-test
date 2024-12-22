@@ -2,8 +2,12 @@ import dayjs from "dayjs";
 import { Message } from "../../../common/api/message";
 import { SearchFileBO } from "../../../common/data/bo/searchFileBO";
 import { File } from "../../../common/data/domain/file";
+import { FileDTO } from "../../../common/data/dto/fileDTO";
 import { SearchFileDTO } from "../../../common/data/dto/searchFileDTO";
+import { getAll } from "../database";
+import { postErrorMessage, postSuccessMessage } from "../util";
 import { BaseService } from "./baseService";
+
 const SERVICE_INSTANCE = new BaseService("file", "id",
     () => {
         return new File();
@@ -104,6 +108,18 @@ export const FileService = {
             content: "",
             isDelete: 1,
         });
+    },
+    fileGetAllMergedNotDeleteFile: async function (message, param) {
+        try {
+            let sql = `SELECT t1.id AS id,t1.size AS size,t3.update_datetime AS updateDatetime from file t1 LEFT JOIN task_data_merge t2 ON t1.id = t2.data_id LEFT JOIN task t3 ON t2.id = t3.data_id WHERE t1.is_delete = 0 AND t3.status = 'FINISHED' ORDER BY t3.update_datetime DESC`
+            const result = await getAll(sql, {}, new FileDTO());
+            postSuccessMessage(message, result);
+        } catch (e) {
+            postErrorMessage(
+                message,
+                "[worker] fileGetAllMergedNotDeleteFile error : " + e.message
+            );
+        }
     }
 
 };

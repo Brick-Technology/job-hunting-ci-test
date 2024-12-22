@@ -34,6 +34,9 @@ export const TASK_DATA_DOWNLOAD_MAX_DAY = 60;//day
 export const TASK_CHART_DEFAULT_RANGE_DAY = 14;//day
 export const TASK_LOOP_DELAY = 30000;//ms
 
+//历史文件最大保留容量，单位:byte，默认，10MB（0:不保留文件，负数:保留全部文件）
+export const HISTORY_FILE_MAX_SIZE = 1024 * 1024 * 10;
+
 //图表刷新间隔
 export const CHARTS_LOOP_DELAY = 5000;//ms
 //全局统计间隔
