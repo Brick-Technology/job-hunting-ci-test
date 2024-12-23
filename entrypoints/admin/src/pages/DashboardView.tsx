@@ -1,4 +1,5 @@
 import {
+  MAX_RECORD_COUNT,
   PLATFORM_51JOB,
   PLATFORM_BOSS,
   PLATFORM_JOBSDB,
@@ -14,6 +15,7 @@ import {
   TYPE_ENUM_MONTH,
   TYPE_ENUM_WEEK,
 } from "@/common/data/bo/jobStatisticGroupByPublishDateBO";
+import { SearchJobBO } from "@/common/data/bo/searchJobBO";
 import { Icon } from "@iconify/react";
 import { Card, Col, Flex, Row, Typography } from "antd";
 import { useJob } from "../hooks/job";
@@ -225,6 +227,19 @@ const convertCompanyInsuranceName = (name) => {
   return COMPANY_INSURANCE_OBJECT[name] ?? name;
 };
 
+const JOB_SALARY_NAME_ARRAY = [
+  "<3k",
+  "3k-6k",
+  "6k-9k",
+  "9k-12k",
+  "12k-15k",
+  "15k-18k",
+  "18k-21k",
+  "18k-21k",
+  "21k-24k",
+  ">24k",
+];
+
 const convertToChartData = ({
   queryResult,
   convertNameFunction = null,
@@ -255,6 +270,15 @@ const convertToChartData = ({
   });
   return result;
 };
+
+const convertObjectToChartData = (items) => {
+  const result = [];
+  const keys = Object.keys(items);
+  keys.forEach(key => {
+    result.push({ name: key, total: items[key] });
+  });
+  return result;
+}
 
 const DashboardView: React.FC = () => {
   const [todayStatisticData, setTodayStatisticData] = useState([]);
@@ -294,7 +318,7 @@ const DashboardView: React.FC = () => {
           count: statisticCompany.todayAddCount,
           previousCount: statisticCompany.yesterdayAddCount,
           totalCount: statisticCompany.totalCompany,
-          unit: "个",
+          unit: "间",
         });
         todayResult.push({
           name: "今天标签公司新增",
@@ -312,6 +336,17 @@ const DashboardView: React.FC = () => {
         });
         setTodayStatisticData(todayResult);
         let chartResult = [];
+        const statisticJobSearchGroupByAvgSalaryParam = new SearchJobBO();
+        statisticJobSearchGroupByAvgSalaryParam.pageNum = 1;
+        statisticJobSearchGroupByAvgSalaryParam.pageSize = MAX_RECORD_COUNT;
+        const statisticJobSearchGroupByAvgSalaryResult = await JobApi.statisticJobSearchGroupByAvgSalary({ statisticJobSearchGroupByAvgSalaryParam });
+        chartResult.push({
+          title: "职位薪资分析",
+          data: convertToChartData({
+            queryResult: convertObjectToChartData(statisticJobSearchGroupByAvgSalaryResult),
+            defaultNameArray: JOB_SALARY_NAME_ARRAY,
+          }),
+        });
         chartResult.push({
           title: "职位发布时间分析(按月)",
           data: convertToChartData({
