@@ -604,6 +604,7 @@ const DashboardView: React.FC = () => {
             <Text>标签公司职位占比(职位数/总职位数)</Text>
             <Flex flex={1}>
               <Select
+                showSearch
                 style={{ width: "100%" }}
                 options={whitelist}
                 defaultValue={jobStatisticJobCompanyTagGroupByPlatformValue}
@@ -619,6 +620,7 @@ const DashboardView: React.FC = () => {
             <Text>标签公司职位TOP(职位数/总职位数)</Text>
             <Flex flex={1}>
               <Select
+                showSearch
                 style={{ width: "100%" }}
                 options={whitelist}
                 defaultValue={jobStatisticJobCompanyTagGroupByCompanyValue}
