@@ -1,10 +1,11 @@
 import dayjs from "dayjs";
 import { Message } from "../../../common/api/message";
 import { JobStatisticGroupByPublishDateBO, TYPE_ENUM_DAY, TYPE_ENUM_HOUR, TYPE_ENUM_MONTH, TYPE_ENUM_WEEK } from "../../../common/data/bo/jobStatisticGroupByPublishDateBO";
+import { JobStatisticJobCompanyTagGroupByCompanyBO } from "../../../common/data/bo/jobStatisticJobCompanyTagGroupByCompanyBO";
+import { JobStatisticJobCompanyTagGroupByPlatformBO } from "../../../common/data/bo/jobStatisticJobCompanyTagGroupByPlatformBO";
 import { JobTagBO } from "../../../common/data/bo/jobTagBO";
 import { SearchJobBO } from "../../../common/data/bo/searchJobBO";
 import { Job } from "../../../common/data/domain/job";
-import { ChartBasicDTO } from "../../../common/data/dto/chartBasicDTO";
 import { JobDTO } from "../../../common/data/dto/jobDTO";
 import { SearchJobDTO } from "../../../common/data/dto/searchJobDTO";
 import { StatisticJobBrowseDTO } from "../../../common/data/dto/statisticJobBrowseDTO";
@@ -499,6 +500,65 @@ export const JobService = {
     }
   },
 
+  /**
+   *
+   * @param {Message} message
+   * @param {JobStatisticJobCompanyTagGroupByPlatformBO} param
+   */
+  jobStatisticJobCompanyTagGroupByPlatform: async function (message, param) {
+    try {
+      let whereCondition = "";
+      if (isNotEmpty(param.tagName)) {
+        whereCondition += ` AND tag_id = '${genIdFromText(param.tagName)}'`;
+      }
+      if (whereCondition.startsWith(" AND")) {
+        whereCondition = whereCondition.replace("AND", "");
+        whereCondition = " WHERE " + whereCondition;
+      }
+      let sql = `select t1.job_platform AS name, COUNT(*) AS count from job t1 LEFT JOIN company_tag t2 ON t1.job_company_name = t2.company_name ${whereCondition} GROUP BY t1.job_platform ORDER BY count DESC`;
+      let result = await jobStatistic({ sql });
+      postSuccessMessage(message, result);
+    } catch (e) {
+      postErrorMessage(
+        message,
+        "[worker] jobStatisticJobTagGroupByPlatform error : " + e.message
+      );
+    }
+  },
+  /**
+   *
+   * @param {Message} message
+   * @param {JobStatisticJobCompanyTagGroupByCompanyBO} param
+   */
+  jobStatisticJobCompanyTagGroupByCompany: async function (message, param) {
+    try {
+      let limitStart = (param.pageNum - 1) * param.pageSize;
+      let limitEnd = param.pageSize;
+      let limit = " limit " + limitStart + "," + limitEnd;
+      let whereCondition = "";
+      if (isNotEmpty(param.tagName)) {
+        whereCondition += ` AND tag_id = '${genIdFromText(param.tagName)}'`;
+      }
+      if (whereCondition.startsWith(" AND")) {
+        whereCondition = whereCondition.replace("AND", "");
+        whereCondition = " WHERE " + whereCondition;
+      }
+      let sql = `SELECT t1.job_company_name AS name, COUNT(*) AS count from job t1 LEFT JOIN company_tag t2 ON t1.job_company_name = t2.company_name ${whereCondition} GROUP BY t1.job_company_name ORDER BY count DESC ${limit}`;
+      let items = await jobStatistic({ sql });
+      let countRows = [];
+      (await getDb()).exec({
+        sql: `SELECT COUNT(*) AS count from job t1 LEFT JOIN company_tag t2 ON t1.job_company_name = t2.company_name ${whereCondition}`,
+        rowMode: "object",
+        resultRows: countRows
+      });
+      postSuccessMessage(message, { items, total: countRows[0].count });
+    } catch (e) {
+      postErrorMessage(
+        message,
+        "[worker] jobStatisticJobCompanyTagGroupByCompany error : " + e.message
+      );
+    }
+  },
 };
 
 const convertEnum = (value) => {
@@ -524,7 +584,7 @@ async function jobStatistic({ sql }) {
     resultRows
   });
   resultRows.forEach(item => {
-    result.push(Object.assign(new ChartBasicDTO(), item));
+    result.push(item);
   });
   return result;
 }

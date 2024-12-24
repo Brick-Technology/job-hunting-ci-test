@@ -7,7 +7,7 @@ import {
   PLATFORM_LIEPIN,
   PLATFORM_ZHILIAN,
 } from "@/common";
-import { CompanyApi, JobApi } from "@/common/api";
+import { CompanyApi, JobApi, TagApi } from "@/common/api";
 import {
   JobStatisticGroupByPublishDateBO,
   TYPE_ENUM_DAY,
@@ -17,7 +17,7 @@ import {
 } from "@/common/data/bo/jobStatisticGroupByPublishDateBO";
 import { SearchJobBO } from "@/common/data/bo/searchJobBO";
 import { Icon } from "@iconify/react";
-import { Card, Col, Flex, Row, Typography } from "antd";
+import { Card, Col, Flex, Row, Select, Typography } from "antd";
 import { useJob } from "../hooks/job";
 
 import "./DashboardView.css";
@@ -26,7 +26,9 @@ const { Text, Link } = Typography;
 
 type BasicChartData = {
   name: string;
-  total: number;
+  count: number;
+  total?: number;
+  percentage?: number;
 };
 
 type BasicChartProps = {
@@ -49,8 +51,8 @@ const BasicChart: React.FC<BasicChartProps> = (props) => {
   };
   return (
     <>
-      <Card style={{ margin: 10 }}>
-        <Column height={300} title={props.title} {...config} />
+      <Card title={props.title} style={{ margin: 10 }}>
+        <Column height={300}  {...config} />
       </Card>
     </>
   );
@@ -58,20 +60,27 @@ const BasicChart: React.FC<BasicChartProps> = (props) => {
 
 type BackgroundChartData = {
   items: BasicChartData[];
-  total: number;
+  total?: number | number[];
 };
 
 type BackgroundChartProps = {
-  title: string;
+  title: string | ReactNode;
   data: BackgroundChartData;
+  xSize?: number;
+  loading: boolean;
 };
 
-const BackgroundChart: React.FC<BackgroundChartProps> = ({ title, data }) => {
-
+const BackgroundChart: React.FC<BackgroundChartProps> = ({ title, data, xSize = 100, loading = true }) => {
+  let yField = "count";
+  if (data.items.length > 0) {
+    if (Object.keys(data.items[0]).includes("percentage")) {
+      yField = "percentage";
+    }
+  }
   const config = {
     data: data.items,
     xField: 'name',
-    yField: 'total',
+    yField: yField,
     style: {
       // 圆角样式
       radiusTopLeft: 10,
@@ -80,22 +89,31 @@ const BackgroundChart: React.FC<BackgroundChartProps> = ({ title, data }) => {
     markBackground: {
       label: {
         text: ({ originData }) => {
-          return `${((originData.total / data.total) * 100).toFixed(2)}% | ${originData.total} / ${data.total}`;
+          if (data.total != null) {
+            return `${((originData.count / data.total) * 100).toFixed(2)}% | ${originData.count} / ${data.total}`;
+          } else {
+            if (originData.total == 0) {
+              return "N/A";
+            } else {
+              return `${((originData.count / originData.total) * 100).toFixed(2)}% | ${originData.count} / ${originData.total}`;
+            }
+          }
         },
         position: 'right',
       },
     },
     scale: {
       y: {
-        domain: [0, data.total],
+        domain: [0, data.total ?? 100],
       },
     },
     axis: {
       x: {
-        size: 70,
+        size: xSize,
         tick: false,
         title: false,
         labelAutoHide: false,
+        labelAutoEllipsis: true,
       },
       y: {
         grid: false,
@@ -105,15 +123,17 @@ const BackgroundChart: React.FC<BackgroundChartProps> = ({ title, data }) => {
       },
     },
   };
-  return <Card style={{ margin: 10 }}>
-    <Bar height={300} title={title} {...config} />
+  return <Card loading={loading} title={title} style={{ margin: 10 }}>
+    <Bar height={300}  {...config} />
   </Card>
 };
 
 
 import { Bar, Column } from "@ant-design/charts";
+import { ReactNode } from "react";
 import { logo } from "../assets";
 import StatisticCard from "../components/StatisticCard";
+import { WhitelistData } from "../data/WhitelistData";
 
 const jobWebsiteList = [
   {
@@ -244,6 +264,8 @@ const convertToChartData = ({
   queryResult,
   convertNameFunction = null,
   defaultNameArray = null,
+  countKey = "total",
+  fetchCountKey = "total",
 }) => {
   let result = [];
   let nameArray = [];
@@ -263,10 +285,10 @@ const convertToChartData = ({
     let filterItem = queryResult.filter((item) => {
       return item.name == name;
     });
-    result.push({
-      name: convertNameFunction ? convertNameFunction(name) : name,
-      total: filterItem.length > 0 ? filterItem[0].total : 0,
-    });
+    let obj = {};
+    obj[`name`] = convertNameFunction ? convertNameFunction(name) : name;
+    obj[`${countKey}`] = filterItem.length > 0 ? (filterItem[0])[`${fetchCountKey}`] : 0;
+    result.push(obj);
   });
   return result;
 };
@@ -284,6 +306,26 @@ const DashboardView: React.FC = () => {
   const [todayStatisticData, setTodayStatisticData] = useState([]);
   const [chartData, setChartData] = useState([]);
   const [tagNameGroupData, setTagNameGroupData] = useState<BackgroundChartData>({ items: [], total: 0 });
+  const [tagNameGroupDataLoading, setTagNameGroupDataLoading] = useState(true);
+  const [jobStatisticJobCompanyTagGroupByPlatformData, setJobStatisticJobCompanyTagGroupByPlatform] = useState<BackgroundChartData>({ items: [] });
+  const [jobStatisticJobCompanyTagGroupByPlatformDataLoading, setJobStatisticJobCompanyTagGroupByPlatformLoading] = useState(true);
+  const [jobStatisticJobCompanyTagGroupByPlatformValue, setJobStatisticJobCompanyTagGroupByPlatformValue] = useState("外包");
+  const [jobStatisticJobCompanyTagGroupByCompanyValue, setJobStatisticJobCompanyTagGroupByCompanyValue] = useState("外包");
+  const [jobStatisticJobCompanyTagGroupByCompanyData, setJobStatisticJobCompanyTagGroupByCompany] = useState<BackgroundChartData>({ items: [], total: 0 });
+  const [jobStatisticJobCompanyTagGroupByCompanyDataLoading, setJobStatisticJobCompanyTagGroupByCompanyLoading] = useState(true);
+  const [whitelist, setWhitelist] = useState<WhitelistData[]>([]);
+
+  useEffect(() => {
+    const getWhitelist = async () => {
+      let allTags = await TagApi.getAllTag();
+      let tagItems = [];
+      allTags.forEach((item) => {
+        tagItems.push({ value: item.tagName, code: item.tagId });
+      });
+      setWhitelist(tagItems);
+    };
+    getWhitelist();
+  }, []);
 
   useEffect(
     () => {
@@ -408,9 +450,14 @@ const DashboardView: React.FC = () => {
             convertNameFunction: convertCompanyInsuranceName,
           }),
         });
-        setChartData(chartResult);
-        let tagNameGroupDataResult = await JobApi.jobTagNameStatistic({ pageNum: 1, pageSize: 15 });
-        setTagNameGroupData(tagNameGroupDataResult);
+        try {
+          setTagNameGroupDataLoading(true);
+          setChartData(chartResult);
+          let tagNameGroupDataResult = await JobApi.jobTagNameStatistic({ pageNum: 1, pageSize: 15 });
+          setTagNameGroupData(tagNameGroupDataResult);
+        } finally {
+          setTagNameGroupDataLoading(false);
+        }
       };
       statistic();
       return () => { };
@@ -419,6 +466,60 @@ const DashboardView: React.FC = () => {
       //这里的值改变时，会执行上面return的匿名函数
     ]
   );
+
+  useEffect(() => {
+    queryJobStatisticJobTagGroupByPlatform();
+  }, [jobStatisticJobCompanyTagGroupByPlatformValue]);
+
+  const queryJobStatisticJobTagGroupByPlatform = async () => {
+    try {
+      setJobStatisticJobCompanyTagGroupByPlatformLoading(true);
+      let jobStatisticJobCompanyTagGroupByPlatformResult = await JobApi.jobStatisticJobCompanyTagGroupByPlatform({ tagName: jobStatisticJobCompanyTagGroupByPlatformValue });
+      let jobStatisticJobGroupByPlatformResult = await JobApi.jobStatisticJobCompanyTagGroupByPlatform({});
+      let result = convertToChartData({
+        queryResult: jobStatisticJobCompanyTagGroupByPlatformResult,
+        defaultNameArray: PLATFORM_NAME_ARRAY,
+        countKey: 'count',
+        fetchCountKey: 'count',
+      });
+      const jobStatisticJobCompanyTagGroupByPlatformResultMap = new Map<string, { name: string, count: number }>(result.map(obj => [obj.name, obj]))
+      const jobStatisticJobGroupByPlatformResultMap = new Map<string, { name: string, count: number }>(jobStatisticJobGroupByPlatformResult.map(obj => [obj.name, obj]));
+      const items = [];
+      PLATFORM_NAME_ARRAY.forEach(name => {
+        let obj: any = Object.assign({}, jobStatisticJobCompanyTagGroupByPlatformResultMap.get(name));
+        obj.total = jobStatisticJobGroupByPlatformResultMap.get(name)?.count ?? 0;
+        items.push(obj);
+      })
+      items.forEach(item => {
+        item.name = platformFormat(item.name);
+        item.percentage = item.total == 0 ? 0 : ((item.count / item.total) * 100).toFixed(2);
+      })
+      items.sort((a, b) => {
+        let aValue = a.total == 0 ? 0 : (a.count / a.total);
+        let bValue = b.total == 0 ? 0 : (b.count / b.total);
+        return -(aValue - bValue);
+      })
+      setJobStatisticJobCompanyTagGroupByPlatform({ items });
+    } finally {
+      setJobStatisticJobCompanyTagGroupByPlatformLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    queryJobStatisticJobTagGroupByCompany();
+  }, [jobStatisticJobCompanyTagGroupByCompanyValue]);
+
+  const queryJobStatisticJobTagGroupByCompany = async () => {
+    try {
+      setJobStatisticJobCompanyTagGroupByCompanyLoading(true);
+      let jobStatisticJobCompanyTagGroupByCompanyResult = await JobApi.jobStatisticJobCompanyTagGroupByCompany(
+        { pageNum: 1, pageSize: 15, tagName: jobStatisticJobCompanyTagGroupByCompanyValue }
+      );
+      setJobStatisticJobCompanyTagGroupByCompany(jobStatisticJobCompanyTagGroupByCompanyResult);
+    } finally {
+      setJobStatisticJobCompanyTagGroupByCompanyLoading(false);
+    }
+  }
 
   return (
     <>
@@ -496,7 +597,37 @@ const DashboardView: React.FC = () => {
       </Row>
       <Row>
         <Col key="tagNameGroup" xs={24} sm={24} md={12} lg={12} xl={8} xxl={6}>
-          <BackgroundChart title="常见标签(公司数/总公司数)" data={tagNameGroupData}></BackgroundChart>
+          <BackgroundChart title="职位常见标签(公司数/总公司数)" data={tagNameGroupData} loading={tagNameGroupDataLoading}></BackgroundChart>
+        </Col>
+        <Col key="jobStatisticJobCompanyTagGroupByPlatform" xs={24} sm={24} md={12} lg={12} xl={8} xxl={6}>
+          <BackgroundChart loading={jobStatisticJobCompanyTagGroupByPlatformDataLoading} title={<Flex align="center" justify="center">
+            <Text>标签公司职位占比(职位数/总职位数)</Text>
+            <Flex flex={1}>
+              <Select
+                style={{ width: "100%" }}
+                options={whitelist}
+                defaultValue={jobStatisticJobCompanyTagGroupByPlatformValue}
+                onSelect={(value => {
+                  setJobStatisticJobCompanyTagGroupByPlatformValue(value);
+                })}
+              />
+            </Flex>
+          </Flex>} data={jobStatisticJobCompanyTagGroupByPlatformData}></BackgroundChart>
+        </Col>
+        <Col key="jobStatisticJobCompanyTagGroupByCompany" xs={24} sm={24} md={12} lg={12} xl={8} xxl={6}>
+          <BackgroundChart loading={jobStatisticJobCompanyTagGroupByCompanyDataLoading} title={<Flex align="center" justify="center">
+            <Text>标签公司职位TOP(职位数/总职位数)</Text>
+            <Flex flex={1}>
+              <Select
+                style={{ width: "100%" }}
+                options={whitelist}
+                defaultValue={jobStatisticJobCompanyTagGroupByCompanyValue}
+                onSelect={(value => {
+                  setJobStatisticJobCompanyTagGroupByCompanyValue(value);
+                })}
+              />
+            </Flex>
+          </Flex>} data={jobStatisticJobCompanyTagGroupByCompanyData} xSize={130}></BackgroundChart>
         </Col>
         {chartData.map((item, index) => (
           <Col key={index} xs={24} sm={24} md={12} lg={12} xl={8} xxl={6}>

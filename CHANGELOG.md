@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## WIP
+
+### ⭐ Added
+
+1. (Sidepanel)新增标签公司职位占比图表，标签公司职位TOP图表.
+
 ## 2.5.0(2024-12-23)
 
 ### ⭐ Added

@@ -2,6 +2,8 @@ import { CompanyBO } from "../data/bo/companyBO";
 import { CompanyTagBatchAddOrUpdateBO } from "../data/bo/companyTagBatchAddOrUpdateBO";
 import { CompanyTagBO } from "../data/bo/companyTagBO";
 import { CompanyTagExportBO } from "../data/bo/companyTagExportBO";
+import { JobStatisticJobCompanyTagGroupByCompanyBO } from "../data/bo/jobStatisticJobCompanyTagGroupByCompanyBO";
+import { JobStatisticJobCompanyTagGroupByPlatformBO } from "../data/bo/jobStatisticJobCompanyTagGroupByPlatformBO";
 import { JobTagExportBO } from "../data/bo/jobTagExportBO";
 import { JobTagNameStatisticBO } from "../data/bo/jobTagNameStatisticBO";
 import { JobTagSearchBO } from "../data/bo/jobTagSearchBO";
@@ -290,6 +292,28 @@ export const JobApi = {
   */
   jobTagExport: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
     let result = await invoke(this.jobTagExport.name, param, { invokeEnv: invokeEnv });
+    return result.data;
+  },
+
+  /**
+  * 
+  * @param {JobStatisticJobCompanyTagGroupByPlatformBO} param 
+  * @returns []
+  */
+  jobStatisticJobCompanyTagGroupByPlatform: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
+    let result = await invoke(this.jobStatisticJobCompanyTagGroupByPlatform
+      .name, param, { invokeEnv: invokeEnv });
+    return result.data;
+  },
+
+  /**
+  * 
+  * @param {JobStatisticJobCompanyTagGroupByCompanyBO} param 
+  * @returns []
+  */
+  jobStatisticJobCompanyTagGroupByCompany: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
+    let result = await invoke(this.jobStatisticJobCompanyTagGroupByCompany
+      .name, param, { invokeEnv: invokeEnv });
     return result.data;
   },
 

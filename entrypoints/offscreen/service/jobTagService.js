@@ -291,7 +291,7 @@ export const JobTagService = {
             let limitEnd = param.pageSize;
             let limit = " limit " + limitStart + "," + limitEnd;
             let result = new JobTagNameStatisticDTO();
-            let sqlTagNameTotal = `SELECT tag_name AS name,COUNT(t1.job_id) AS total FROM job_tag t1 LEFT JOIN tag t2 ON t1.tag_id = t2.tag_id GROUP BY t1.tag_id ORDER BY total DESC ${limit}`;
+            let sqlTagNameTotal = `SELECT tag_name AS name,COUNT(t1.job_id) AS count FROM job_tag t1 LEFT JOIN tag t2 ON t1.tag_id = t2.tag_id GROUP BY t1.tag_id ORDER BY count DESC ${limit}`;
             let totalTagNameTotalQueryResult = [];
             (await getDb()).exec({
                 sql: sqlTagNameTotal,
