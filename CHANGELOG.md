@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## WIP
+
+### 🐛 Fixed
+
+1. (ContentScript)修正职位卡片样式（拉勾网）.
+
 ## 2.6.1(2024-12-25)
 
 ### 🐛 Fixed
