@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## WIP
+
+### 🔨 Dependency
+
+1. Update most of dependencies.
+
 ## 2.6.2(2025-01-03)
 
 ### 🐛 Fixed
