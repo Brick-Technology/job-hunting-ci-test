@@ -49,7 +49,7 @@ export function invoke(
           message.error +
           "]"
         );
-        chrome.runtime.sendMessage(message);
+        sendMessage(message);
       } else if (invokeEnv == BACKGROUND) {
         message.from = BACKGROUND;
         message.to = OFFSCREEN;
@@ -68,7 +68,7 @@ export function invoke(
           message.error +
           "]"
         );
-        chrome.runtime.sendMessage(message);
+        sendMessage(message);
         try {
           //for firefox hack
           if (window) {
@@ -87,6 +87,40 @@ export function invoke(
     }
   });
   return promise;
+}
+
+const chunkSize = 1024 * 1024 * 50;
+
+async function sendMessage(message) {
+  let param = message.param;
+  if (typeof param === 'string' && param.length > chunkSize) {
+    let resultLength = param.length;
+    let chunkTotal = parseInt(resultLength / chunkSize);
+    if (resultLength % chunkSize > 0) {
+      chunkTotal += 1;
+    }
+    for (let i = 0; i < chunkTotal; i++) {
+      let currentLength = i * chunkSize;
+      let chunk = i + 1;
+      message.chunk = chunk;
+      message.chunkTotal = chunkTotal;
+      if (chunk == chunkTotal) {
+        //last chunk
+        message.param = param.slice(currentLength, resultLength);
+        await _sendMessage(message);
+      } else {
+        let nextLength = chunk * chunkSize;
+        message.param = param.slice(currentLength, nextLength);
+        await _sendMessage(message);
+      }
+    }
+  }else{
+    await _sendMessage(message);
+  }
+}
+
+async function _sendMessage(message) {
+  await chrome.runtime.sendMessage(message);
 }
 
 const callbackIdAndDataMap = new Map();
