@@ -2,6 +2,10 @@
 
 ## WIP
 
+### 🐛 Fixed
+
+1. (Sidepanel)修复因数据库容量较大时数据库导出功能异常的问题.
+
 ### 🔨 Dependency
 
 1. Update most of dependencies.

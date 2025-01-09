@@ -1,6 +1,6 @@
-import { debugLog, errorLog } from "../log";
-import { CONTENT_SCRIPT, BACKGROUND, OFFSCREEN } from "./bridgeCommon.js";
 import { v4 as uuidv4 } from "uuid";
+import { debugLog, errorLog } from "../log";
+import { BACKGROUND, CONTENT_SCRIPT, OFFSCREEN } from "./bridgeCommon.js";
 
 export const EVENT_BRIDGE = "EVENT_BRIDGE";
 
@@ -36,18 +36,18 @@ export function invoke(
       if (invokeEnv == CONTENT_SCRIPT) {
         debugLog(
           "1.[content script][send][" +
-            message.from +
-            " -> " +
-            message.to +
-            "] message [action=" +
-            message.action +
-            ",invokeEnv=" +
-            message.invokeEnv +
-            ",callbackId=" +
-            message.callbackId +
-            ",error=" +
-            message.error +
-            "]"
+          message.from +
+          " -> " +
+          message.to +
+          "] message [action=" +
+          message.action +
+          ",invokeEnv=" +
+          message.invokeEnv +
+          ",callbackId=" +
+          message.callbackId +
+          ",error=" +
+          message.error +
+          "]"
         );
         chrome.runtime.sendMessage(message);
       } else if (invokeEnv == BACKGROUND) {
@@ -55,18 +55,18 @@ export function invoke(
         message.to = OFFSCREEN;
         debugLog(
           "1.[background script][send][" +
-            message.from +
-            " -> " +
-            message.to +
-            "] message [action=" +
-            message.action +
-            ",invokeEnv=" +
-            message.invokeEnv +
-            ",callbackId=" +
-            message.callbackId +
-            ",error=" +
-            message.error +
-            "]"
+          message.from +
+          " -> " +
+          message.to +
+          "] message [action=" +
+          message.action +
+          ",invokeEnv=" +
+          message.invokeEnv +
+          ",callbackId=" +
+          message.callbackId +
+          ",error=" +
+          message.error +
+          "]"
         );
         chrome.runtime.sendMessage(message);
         try {
@@ -89,38 +89,82 @@ export function invoke(
   return promise;
 }
 
+const callbackIdAndDataMap = new Map();
+
 export function init() {
   chrome.runtime.onMessage.addListener(function (result, sender, sendResponse) {
     let message = result;
+    let callbackId = message.callbackId;
     if (message.from == BACKGROUND && message.to == CONTENT_SCRIPT) {
       //message = {action,callbackId,param,data,error}
       debugLog(
         "12.[content script][receive][" +
-          message.from +
-          " -> " +
-          message.to +
-          "] message [action=" +
-          message.action +
-          ",invokeEnv=" +
-          message.invokeEnv +
-          ",callbackId=" +
-          message.callbackId +
-          ",error=" +
-          message.error +
-          "]"
+        message.from +
+        " -> " +
+        message.to +
+        "] message [action=" +
+        message.action +
+        ",invokeEnv=" +
+        message.invokeEnv +
+        ",callbackId=" +
+        callbackId +
+        ",error=" +
+        message.error +
+        "]"
       );
-      let promiseHook = getAndRemovePromiseHook(message.callbackId);
-      if (promiseHook) {
-        if (message.error) {
-          message.message = message.error;
-          promiseHook.reject(message);
+      let chunk = message.chunk
+      let chunkTotal = message.chunkTotal;
+      let isReturn = true;
+      let isChunk = (chunk != null && chunkTotal != null);
+      if (isChunk) {
+        if (chunk == chunkTotal) {
+          isReturn = true;
         } else {
-          promiseHook.resolve(message);
+          isReturn = false;
         }
+      }
+      let data = message.data;
+      if (!callbackIdAndDataMap.has(callbackId)) {
+        callbackIdAndDataMap.set(callbackId, data);
       } else {
-        errorLog(
-          `callbackId = ${message.callbackId} lost callback promiseHook`
-        );
+        if (isChunk) {
+          if (typeof data === 'string') {
+            let originalData = callbackIdAndDataMap.get(callbackId);
+            callbackIdAndDataMap.set(callbackId, originalData.concat(data));
+          } else {
+            let promiseHook = getAndRemovePromiseHook(callbackId);
+            if (promiseHook) {
+              message.message = `unsupported chunk data type = ${typeof data}`;
+              promiseHook.reject(message);
+            } else {
+              errorLog(
+                `callbackId = ${callbackId} lost callback promiseHook`
+              );
+            }
+            callbackIdAndDataMap.delete(callbackId);
+            return;
+          }
+        }
+      }
+      if (isReturn) {
+        try {
+          let promiseHook = getAndRemovePromiseHook(callbackId);
+          if (promiseHook) {
+            if (message.error) {
+              message.message = message.error;
+              promiseHook.reject(message);
+            } else {
+              message.data = callbackIdAndDataMap.get(callbackId);
+              promiseHook.resolve(message);
+            }
+          } else {
+            errorLog(
+              `callbackId = ${callbackId} lost callback promiseHook`
+            );
+          }
+        } finally {
+          callbackIdAndDataMap.delete(callbackId);
+        }
       }
     }
   });
