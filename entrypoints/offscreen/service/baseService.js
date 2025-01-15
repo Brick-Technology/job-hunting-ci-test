@@ -1,6 +1,6 @@
 import { Message } from "../../../common/api/message";
-import { genUniqueId } from "../../../common/utils";
-import { batchDel, batchGet, batchUpdate, del, insert, one, search, searchCount, update } from "../database";
+import { genUniqueId, toHump } from "../../../common/utils";
+import { batchDel, batchGet, batchUpdate, del, insert, one, search, searchCount, update, batchInsertOrReplace } from "../database";
 import { postErrorMessage, postSuccessMessage } from "../util";
 
 export class BaseService {
@@ -184,19 +184,32 @@ export class BaseService {
      * @param {*} param 
      */
     async _addOrUpdate(param, { overrideUpdateDatetime = false } = {}) {
-        let needUpdate = false;
-        if (param[this.tableIdColumn]) {
-            needUpdate = (await one(this.entityClassCreateFunction(), this.tableName, this.tableIdColumn, param[this.tableIdColumn]) ? true : false);
-        } else {
-            needUpdate = false;
+        let idKey = toHump(this.tableIdColumn);
+        if (param[idKey] == null) {
+            param[idKey] = genUniqueId();
         }
-        if (needUpdate) {
-            await update(this.entityClassCreateFunction(), this.tableName, this.tableIdColumn, param, { overrideUpdateDatetime });
-        } else {
-            param[this.tableIdColumn] = genUniqueId();
-            await insert(this.entityClassCreateFunction(), this.tableName, param, { overrideUpdateDatetime });
-        }
+        await batchInsertOrReplace(this.entityClassCreateFunction(), this.tableName, [param], { overrideUpdateDatetime });
         return param;
+    }
+
+    /**
+     * 
+     * @param {[]} params
+     */
+    async _batchAddOrUpdate(params, { overrideUpdateDatetime = false, genIdFunction = null } = {}) {
+        for (let i = 0; i < params.length; i++) {
+            let item = params[i];
+            let idKey = toHump(this.tableIdColumn);
+            if (item[idKey] == null) {
+                if (genIdFunction) {
+                    item[idKey] = genIdFunction(item);
+                } else {
+                    item[idKey] = genUniqueId();
+                }
+            }
+        }
+        await batchInsertOrReplace(this.entityClassCreateFunction(), this.tableName, params, { overrideUpdateDatetime });
+        return params;
     }
 }
 

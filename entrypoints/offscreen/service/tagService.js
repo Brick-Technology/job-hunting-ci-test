@@ -140,15 +140,21 @@ export async function _addNotExistsTags(tags) {
     }
     const existsTags = await _batchGetTagByIds(tagIds);
     const existsTagIds = existsTags.map(item => item.tagId);
+    let targetTags = [];
     for (let i = 0; i < uniqueTags.length; i++) {
         let tagName = uniqueTags[i];
         let id = genIdFromText(tagName);
         if (!existsTagIds.includes(id)) {
             let tag = new Tag();
             tag.tagName = tagName;
-            await _addOrUpdateTag(tag);
+            targetTags.push(tag);
         }
     }
+    await SERVICE_INSTANCE._batchAddOrUpdate(targetTags, {
+        genIdFunction: (item) => {
+            return genIdFromText(item.tagName);
+        }
+    });
 }
 
 /**

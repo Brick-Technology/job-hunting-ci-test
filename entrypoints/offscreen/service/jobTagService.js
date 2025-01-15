@@ -387,6 +387,56 @@ export async function _addOrUpdateJobTag(param, overrideUpdateDatetime) {
 
 /**
  * 
+ * @param {JobTagBO} jobTagBOs 
+ */
+export async function _batchAddOrUpdateJobTag(jobTagBOs, overrideUpdateDatetime) {
+    let allTags = [];
+    jobTagBOs.map(item => { return item.tags }).forEach(items => {
+        allTags.push(...items);
+    })
+    await _addNotExistsTags(allTags);
+    let sourceTypeSourceAndJobIdsMap = new Map();
+    let sourceTypeSourceAndSourceTypeMap = new Map();
+    let sourceTypeSourceAndSourceMap = new Map();
+    for (let i = 0; i < jobTagBOs.length; i++) {
+        let item = jobTagBOs[i];
+        let key = item.sourceType + "_" + item.source;
+        if (!sourceTypeSourceAndJobIdsMap.has(key)) {
+            sourceTypeSourceAndJobIdsMap.set(key, []);
+            sourceTypeSourceAndSourceTypeMap.set(key, item.sourceType);
+            sourceTypeSourceAndSourceMap.set(key, item.source);
+        }
+        sourceTypeSourceAndJobIdsMap.get(key).push(item.jobId);
+    }
+    for (let key in sourceTypeSourceAndJobIdsMap.keys()) {
+        let ids = sourceTypeSourceAndJobIdsMap.get(key);
+        let sourceType = sourceTypeSourceAndSourceTypeMap.get(key);
+        let source = sourceTypeSourceAndSourceMap.get(key);
+        await SERVICE_INSTANCE.deleteByIds(ids, JOB_ID_COLUMN, { otherCondition: `source_type=${sourceType} AND ${source ? "source = '" + source + "'" : "source IS NULL"}` });
+    }
+    let jobTags = [];
+    for (let i = 0; i < jobTagBOs.length; i++) {
+        let item = jobTagBOs[i];
+        let jobId = item.jobId;
+        for (let i = 0; i < item.tags.length; i++) {
+            let tagName = item.tags[i];
+            let tagId = genIdFromText(tagName);
+            let jobTag = new JobTag();
+            jobTag.id = genUniqueId();
+            jobTag.jobId = jobId;
+            jobTag.tagId = tagId;
+            jobTag.seq = i;
+            jobTag.sourceType = item.sourceType;
+            jobTag.source = item.source;
+            jobTag.updateDatetime = item.updateDatetime;
+            jobTags.push(jobTag);
+        }
+    }
+    await SERVICE_INSTANCE._batchAddOrUpdate(jobTags, { overrideUpdateDatetime });
+}
+
+/**
+ * 
  * @param {string} param id
  * 
  * @return JobTagDTO[]

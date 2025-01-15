@@ -12,12 +12,13 @@ import { StatisticJobBrowseDTO } from "../../../common/data/dto/statisticJobBrow
 import { StatisticJobSearchGroupByAvgSalaryDTO } from "../../../common/data/dto/statisticJobSearchGroupByAvgSalaryDTO";
 import { TAG_SOURCE_TYPE_PLATFORM } from "../../../common/index";
 import { convertEmptyStringToNull, dateToStr, genIdFromText, isNotEmpty, toHump } from "../../../common/utils";
-import { getDb, getOne } from "../database";
+import { getDb, getOne, batchInsertOrReplace } from "../database";
 import { postErrorMessage, postSuccessMessage } from "../util";
 import { BaseService } from "./baseService";
 import { _getCompanyDTOByIds } from "./companyService";
 import { _getAllCompanyTagDTOByCompanyIds } from "./companyTagService";
-import { _addOrUpdateJobTag, _getAllJobTagDTOByJobIds } from "./jobTagService";
+import { _addOrUpdateJobTag, _getAllJobTagDTOByJobIds, _batchAddOrUpdateJobTag } from "./jobTagService";
+import { JobBrowseHistory } from "../../../common/data/domain/jobBrowseHistory";
 
 const JOB_VISIT_TYPE_SEARCH = "SEARCH";
 const JOB_VISIT_TYPE_DETAIL = "DETAIL";
@@ -44,9 +45,7 @@ export const JobService = {
       (await getDb()).exec({
         sql: "BEGIN TRANSACTION",
       });
-      for (let i = 0; i < param.length; i++) {
-        await insertOrUpdateJobAndBrowseHistory(param[i], now);
-      }
+      batchInsertOrUpdateJobAndBrowseHistory(param, now);
       (await getDb()).exec({
         sql: "COMMIT",
       });
@@ -72,8 +71,8 @@ export const JobService = {
       const now = new Date();
       for (let i = 0; i < param.length; i++) {
         await _insertOrUpdateJob(param[i], now);
-        await _insertJobTag(param[i]);
       }
+      await _batchInsertJobTag(param);
       postSuccessMessage(message, {});
     } catch (e) {
       postErrorMessage(
@@ -95,8 +94,8 @@ export const JobService = {
       });
       for (let i = 0; i < param.length; i++) {
         await _insertOrUpdateJob(param[i], now);
-        await _insertJobTag(param[i]);
       }
+      await _batchInsertJobTag(param);
       (await getDb()).exec({
         sql: "COMMIT",
       });
@@ -685,6 +684,15 @@ function genJobSearchWhereConditionSql(param) {
   return whereCondition;
 }
 
+async function batchInsertOrUpdateJobAndBrowseHistory(jobs, now) {
+  for (let i = 0; i < jobs.length; i++) {
+    let job = jobs[i];
+    await _insertOrUpdateJob(job, now, { update: false });
+  }
+  await batchAddJobBrowseHistory(jobs, now, JOB_VISIT_TYPE_SEARCH);
+  await _batchInsertJobTag(jobs);
+}
+
 async function insertOrUpdateJobAndBrowseHistory(param, now) {
   await _insertOrUpdateJob(param, now, { update: false });
   await _insertJobTag(param);
@@ -709,6 +717,31 @@ async function _insertJobTag(param) {
   }
   entity.tags = tags;
   await _addOrUpdateJobTag(entity);
+}
+
+/**
+ * 
+ * @param {Job} param 
+ */
+async function _batchInsertJobTag(jobs) {
+  let jobTags = [];
+  for (let i = 0; i < jobs.length; i++) {
+    let job = jobs[i];
+    let entity = new JobTagBO();
+    entity.jobId = job.jobId;
+    entity.sourceType = TAG_SOURCE_TYPE_PLATFORM;
+    entity.source = job.jobPlatform;
+    let tags = [];
+    if (job.skillTag) {
+      tags.push(...job.skillTag.split(",").filter(item => isNotEmpty(item)))
+    }
+    if (job.welfareTag) {
+      tags.push(...job.welfareTag.split(",").filter(item => isNotEmpty(item)))
+    }
+    entity.tags = tags;
+    jobTags.push(entity);
+  }
+  await _batchAddOrUpdateJobTag(jobTags);
 }
 
 async function _insertOrUpdateJob(param, now, { update = true } = {}) {
@@ -847,6 +880,20 @@ async function _insertOrUpdateJob(param, now, { update = true } = {}) {
       },
     });
   }
+}
+
+async function batchAddJobBrowseHistory(jobs, date, type) {
+  let items = [];
+  let datetime = dayjs(date).format("YYYY-MM-DD HH:mm:ss");
+  for (let i = 0; i < jobs.length; i++) {
+    let job = jobs[i];
+    items.push({
+      jobId: job.jobId,
+      jobVisitDatetime: datetime,
+      jobVisitType: type,
+    })
+  }
+  return await batchInsertOrReplace(new JobBrowseHistory(), "job_browse_history", items);
 }
 
 async function addJobBrowseHistory(jobId, date, type) {

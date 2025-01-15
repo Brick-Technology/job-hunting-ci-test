@@ -114,6 +114,86 @@ export async function insert(obj, tableName, param, { overrideUpdateDatetime = f
   });
 }
 
+export async function batchInsertOrReplace(obj, tableName, params, { overrideUpdateDatetime = false } = {}) {
+  if (params && params.length > 0) {
+    //https://www.sqlite.org/limits.html
+    //Maximum Number Of Host Parameters In A Single SQL Statement
+    //To prevent excessive memory allocations, the maximum value of a host parameter number is SQLITE_MAX_VARIABLE_NUMBER, which defaults to 999 for SQLite versions prior to 3.32.0 (2020-05-22) or 32766 for SQLite versions after 3.32.0.
+    let maxVarLength = 32766;
+    let paramVarLength = Object.keys(obj).length;
+    let maxRecordCountForOneExec = Number.parseInt(maxVarLength / paramVarLength);
+    let recordTotal = params.length;
+    let count = Number.parseInt(recordTotal / maxRecordCountForOneExec);
+    let modCount = recordTotal % maxRecordCountForOneExec;
+    if (modCount > 0) {
+      count = count + 1;
+    }
+    for (let i = 0; i < count; i++) {
+      let start = i * maxRecordCountForOneExec;
+      let end = (i + 1) * maxRecordCountForOneExec;
+      if (i == count.length - 1) {
+        //last index
+        end = recordTotal;
+      }
+      let rangeParam = params.slice(start, end);
+      const batchInsertOrReplaceSQL = genRawBatchFullInsertOrReplaceSQL(obj, tableName, rangeParam);
+      if (isDebug()) {
+        debugLog(`[database] [batchInsertOrReplace] batchInsertOrReplaceSQL = ${batchInsertOrReplaceSQL}`)
+      }
+      let bindValue = genInsertValueBindValue(obj, rangeParam, { overrideUpdateDatetime });
+      (await getDb()).exec({
+        sql: batchInsertOrReplaceSQL,
+        bind: bindValue
+      });
+    }
+  }
+}
+
+export function genRawBatchFullInsertOrReplaceSQL(obj, tableName, params) {
+  let column = [];
+  let keys = Object.keys(obj);
+  for (let n = 0; n < keys.length; n++) {
+    let key = keys[n];
+    column.push(toLine(key));
+  }
+  let valuesSql = genInsertValueSQL(obj, params);
+  return `INSERT OR REPLACE INTO ${tableName} (${column.join(",")}) VALUES ${valuesSql}`;
+}
+
+function genInsertValueBindValue(obj, params, { overrideUpdateDatetime = false } = {}) {
+  let now = new Date();
+  let values = [];
+  let keys = Object.keys(obj);
+  for (let i = 0; i < params.length; i++) {
+    let param = params[i];
+    for (let n = 0; n < keys.length; n++) {
+      let key = keys[n];
+      if (key == "createDatetime" || (!overrideUpdateDatetime && key == "updateDatetime")) {
+        values.push(`${dayjs(now).format("YYYY-MM-DD HH:mm:ss")}`);
+      } else if (overrideUpdateDatetime && key == "updateDatetime") {
+        values.push(`${dayjs(param[`${key}`]).format("YYYY-MM-DD HH:mm:ss")}`);
+      } else {
+        let value = convertEmptyStringToNull(param[`${key}`]);
+        values.push(value);
+      }
+    }
+  }
+  return values;
+}
+
+function genInsertValueSQL(obj, params) {
+  let insertValues = [];
+  for (let i = 0; i < params.length; i++) {
+    let values = [];
+    let keys = Object.keys(obj);
+    for (let n = 0; n < keys.length; n++) {
+      values.push("?");
+    }
+    insertValues.push(`(${values.join(",")})`);
+  }
+  return insertValues.join(",");
+}
+
 export async function update(obj, tableName, idColumn, param, { overrideUpdateDatetime = false } = {}) {
   const targetObj = Object.assign(obj, param)
   const updateSQL = genFullUpdateSQL(targetObj, tableName, idColumn);

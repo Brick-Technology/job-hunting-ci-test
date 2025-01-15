@@ -59,6 +59,7 @@ export function _postSuccessMessage(message, data, { chunk = null, chunkTotal = 
 export function postErrorMessage(message, error) {
   message.from = WEB_WORKER;
   message.to = OFFSCREEN;
+  message.error = error;
   errorLog(
     "7.[worker][send][" +
     message.from +
@@ -76,7 +77,6 @@ export function postErrorMessage(message, error) {
   );
   let resultMessage = JSON.parse(JSON.stringify(message));
   debugLog(resultMessage);
-  resultMessage.error = error;
   postMessage({
     data: resultMessage,
   });
