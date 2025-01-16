@@ -134,9 +134,7 @@ export const CompanyTagService = {
      */
     batchAddOrUpdateCompanyTag: async function (message, param) {
         try {
-            for (let i = 0; i < param.items.length; i++) {
-                await _addOrUpdateCompanyTag(param.items[i], param.overrideUpdateDatetime);
-            }
+            await _batchAddOrUpdateCompanyTag(param.items, param.overrideUpdateDatetime);
             postSuccessMessage(message, {});
         } catch (e) {
             postErrorMessage(
@@ -155,9 +153,7 @@ export const CompanyTagService = {
             (await getDb()).exec({
                 sql: "BEGIN TRANSACTION",
             });
-            for (let i = 0; i < param.items.length; i++) {
-                await _addOrUpdateCompanyTag(param.items[i], param.overrideUpdateDatetime);
-            }
+            await _batchAddOrUpdateCompanyTag(param.items, param.overrideUpdateDatetime);
             (await getDb()).exec({
                 sql: "COMMIT",
             });
@@ -440,6 +436,58 @@ async function _companyTagExport(param) {
         resultRows: queryRows,
     });
     return queryRows;
+}
+
+/**
+ * 
+ * @param {CompanyTagBO[]} companyTagBOs 
+ */
+async function _batchAddOrUpdateCompanyTag(companyTagBOs, overrideUpdateDatetime) {
+    let allTags = [];
+    companyTagBOs.map(item => { return item.tags }).forEach(items => {
+        allTags.push(...items);
+    })
+    await _addNotExistsTags(allTags);
+    let sourceTypeSourceAndIdsMap = new Map();
+    let sourceTypeSourceAndSourceTypeMap = new Map();
+    let sourceTypeSourceAndSourceMap = new Map();
+    for (let i = 0; i < companyTagBOs.length; i++) {
+        let item = companyTagBOs[i];
+        let key = item.sourceType + "_" + item.source;
+        if (!sourceTypeSourceAndIdsMap.has(key)) {
+            sourceTypeSourceAndIdsMap.set(key, []);
+            sourceTypeSourceAndSourceTypeMap.set(key, item.sourceType);
+            sourceTypeSourceAndSourceMap.set(key, item.source);
+        }
+        sourceTypeSourceAndIdsMap.get(key).push(genIdFromText(item.companyName));
+    }
+    sourceTypeSourceAndIdsMap.forEach(async (value, key, map) => {
+        let ids = sourceTypeSourceAndIdsMap.get(key);
+        let sourceType = sourceTypeSourceAndSourceTypeMap.get(key);
+        let source = sourceTypeSourceAndSourceMap.get(key);
+        await SERVICE_INSTANCE._deleteByIds(ids, COMPANY_ID_COLUMN, { otherCondition: `source_type=${sourceType} AND ${source ? "source = '" + source + "'" : "source IS NULL"}` });
+    });
+    let companyTags = [];
+    for (let i = 0; i < companyTagBOs.length; i++) {
+        let item = companyTagBOs[i];
+        let companyName = item.companyName;
+        let companyId = genIdFromText(companyName);
+        for (let i = 0; i < item.tags.length; i++) {
+            let tagName = item.tags[i];
+            let tagId = genIdFromText(tagName);
+            let companyTag = new CompanyTag();
+            companyTag.companyTagId = genUniqueId();
+            companyTag.companyId = companyId;
+            companyTag.companyName = companyName;
+            companyTag.tagId = tagId;
+            companyTag.seq = i;
+            companyTag.sourceType = item.sourceType;
+            companyTag.source = item.source;
+            companyTag.updateDatetime = item.updateDatetime;
+            companyTags.push(companyTag);
+        }
+    }
+    await SERVICE_INSTANCE._batchAddOrUpdate(companyTags, { overrideUpdateDatetime });
 }
 
 /**

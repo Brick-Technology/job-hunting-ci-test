@@ -387,7 +387,7 @@ export async function _addOrUpdateJobTag(param, overrideUpdateDatetime) {
 
 /**
  * 
- * @param {JobTagBO} jobTagBOs 
+ * @param {JobTagBO[]} jobTagBOs 
  */
 export async function _batchAddOrUpdateJobTag(jobTagBOs, overrideUpdateDatetime) {
     let allTags = [];
@@ -408,12 +408,12 @@ export async function _batchAddOrUpdateJobTag(jobTagBOs, overrideUpdateDatetime)
         }
         sourceTypeSourceAndJobIdsMap.get(key).push(item.jobId);
     }
-    for (let key in sourceTypeSourceAndJobIdsMap.keys()) {
+    sourceTypeSourceAndJobIdsMap.forEach(async (value, key, map) => {
         let ids = sourceTypeSourceAndJobIdsMap.get(key);
         let sourceType = sourceTypeSourceAndSourceTypeMap.get(key);
         let source = sourceTypeSourceAndSourceMap.get(key);
-        await SERVICE_INSTANCE.deleteByIds(ids, JOB_ID_COLUMN, { otherCondition: `source_type=${sourceType} AND ${source ? "source = '" + source + "'" : "source IS NULL"}` });
-    }
+        await SERVICE_INSTANCE._deleteByIds(ids, JOB_ID_COLUMN, { otherCondition: `source_type=${sourceType} AND ${source ? "source = '" + source + "'" : "source IS NULL"}` });
+    });
     let jobTags = [];
     for (let i = 0; i < jobTagBOs.length; i++) {
         let item = jobTagBOs[i];
