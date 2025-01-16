@@ -23,6 +23,7 @@ import { TaskDataMergeService } from "./service/taskDataMergeService";
 import { TaskDataUploadService } from "./service/taskDataUploadService";
 import { TaskService } from "./service/taskService";
 import { postErrorMessage, postSuccessMessage } from "./util";
+import { isDevEnv } from "../../common";
 
 debugLog("worker ready");
 const ACTION_FUNCTION = new Map();
@@ -66,6 +67,10 @@ const callbackIdAndParamMap = new Map();
 onmessage = function (e) {
   let message = e.data;
   if (message) {
+    if (isDevEnv()) {
+      const time = new Date().getTime();
+      message.invokeTimeList.push({ env: WEB_WORKER, time, offset: time - message.invokeTimeList.slice(-1)[0].time });
+    }
     if (message.from == OFFSCREEN && message.to == WEB_WORKER) {
       let callbackId = message.callbackId;
       debugLog(

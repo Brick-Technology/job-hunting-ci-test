@@ -35,7 +35,7 @@ export function invoke(
         invokeEnv: invokeEnv,
       };
       if (isDevEnv()) {
-        message.invokeStartTime = performance.now();
+        message.invokeTimeList = [{ env: invokeEnv, time: new Date().getTime(), offset: 0 }];
         message.invokeSeq = invokeSeq++;
       }
       if (onMessageCallback) {
@@ -137,6 +137,10 @@ export function init() {
   chrome.runtime.onMessage.addListener(function (result, sender, sendResponse) {
     let message = result;
     let callbackId = message.callbackId;
+    if (isDevEnv()) {
+      const time = new Date().getTime();
+      message.invokeTimeList.push({ env: CONTENT_SCRIPT, time, offset: time - message.invokeTimeList.slice(-1)[0].time });
+    }
     if (message.from == BACKGROUND && message.to == CONTENT_SCRIPT) {
       //message = {action,callbackId,param,data,error}
       debugLog(
@@ -191,11 +195,10 @@ export function init() {
       if (isReturn) {
         try {
           if (isDevEnv()) {
-            message.invokeEndTime = performance.now();
-            let costTime = message.invokeEndTime - message.invokeStartTime;
+            let costTime = message.invokeTimeList.slice(-1)[0].time - message.invokeTimeList.slice(0, 1)[0].time;
             if (costTime > INVOKE_WARN_TIME_COST) {
               //invoke > warnTimeCost to show warning
-              warnLog(`[${message.invokeEnv}][${message.invokeSeq}]Invoke [${message.action}] cost time = %c${costTime.toFixed(2)}ms`, `color:white;background-color:hsl(360 ${costTime / 100} 50%);`);
+              warnLog(`[${message.invokeEnv}][${message.invokeSeq}]Invoke [${message.action}] cost time = %c${costTime.toFixed(2)}ms`, `color:white;background-color:hsl(360 ${costTime / 100} 50%);`, message.invokeTimeList, message);
             }
           }
           let promiseHook = getAndRemovePromiseHook(callbackId);

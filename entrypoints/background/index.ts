@@ -248,6 +248,10 @@ export default defineBackground(() => {
       sendResponse
     ) {
       if (message) {
+        if (isDevEnv()) {
+          const time = new Date().getTime();
+          message.invokeTimeList.push({ env: BACKGROUND, time, offset: time - message.invokeTimeList.slice(-1)[0].time });
+        }
         if (message.from == CONTENT_SCRIPT && message.to == BACKGROUND) {
           //get the tab id from content script page,not the extension page(eg: sidepanel)
           if (sender.tab) {
@@ -336,11 +340,10 @@ export default defineBackground(() => {
             }
           } else if (message.invokeEnv == BACKGROUND) {
             if (isDevEnv()) {
-              message.invokeEndTime = performance.now();
-              let costTime = message.invokeEndTime - message.invokeStartTime;
+              let costTime = message.invokeTimeList.slice(-1)[0].time - message.invokeTimeList.slice(0, 1)[0].time;
               if (costTime > INVOKE_WARN_TIME_COST) {
                 //invoke > warnTimeCost to show warning
-                warnLog(`[${message.invokeEnv}][${message.invokeSeq}]Invoke [${message.action}] cost time = %c${costTime.toFixed(2)}ms`, `color:white;background-color:hsl(360 ${costTime / 100} 50%);`);
+                warnLog(`[${message.invokeEnv}][${message.invokeSeq}]Invoke [${message.action}] cost time = %c${costTime.toFixed(2)}ms`, `color:white;background-color:hsl(360 ${costTime / 100} 50%);`, message.invokeTimeList, message);
               }
             }
             let promiseHook = getAndRemovePromiseHook(message.callbackId);
