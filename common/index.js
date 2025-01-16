@@ -85,3 +85,7 @@ export const TAG_SOURCE_TYPE_PLATFORM = 1;
 export const EVENT_RESPONSE_INFO = "EVENT_RESPONSE_INFO";
 //EVENT KEY
 export const API_SERVER_GITHUB = "github.com";
+
+export const isDevEnv = () => {
+    return import.meta.env.DEV;
+}

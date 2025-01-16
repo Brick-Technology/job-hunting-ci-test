@@ -1,4 +1,5 @@
 import { ConfigApi, JobApi } from "../../common/api";
+import { INVOKE_WARN_TIME_COST } from "../../common/config";
 import { getAndRemovePromiseHook } from "../../common/api/bridge";
 import {
   BACKGROUND,
@@ -10,7 +11,7 @@ import { CONFIG_KEY_DATA_SHARE_PLAN, DEFAULT_DATA_REPO, GITHUB_APP_CLIENT_ID, GI
 import { DataSharePlanConfigDTO } from "../../common/data/dto/dataSharePlanConfigDTO";
 import { OauthDTO } from "../../common/data/dto/oauthDTO";
 import { UserDTO } from "../../common/data/dto/userDTO";
-import { debugLog, errorLog, infoLog } from "../../common/log";
+import { debugLog, errorLog, infoLog, warnLog } from "../../common/log";
 import { convertPureJobDetailUrl, paramsToObject, parseToLineObjectToToHumpObject, randomDelay } from "../../common/utils";
 import { AuthService, getOauth2LoginMessageMap, getToken, setToken } from "./service/authService";
 import { AutomateService } from "./service/automateService";
@@ -18,6 +19,7 @@ import { SystemService } from "./service/systemService";
 import { calculateDataSharePartnerList, calculateDownloadTask, calculateUploadTask, runScheduleTask, runTask } from "./service/taskService";
 import { getUser, setUser, UserService } from "./service/userService";
 import { postErrorMessage, postSuccessMessage } from "./util";
+import { isDevEnv } from "../../common";
 
 export default defineBackground(() => {
   debugLog("background ready");
@@ -333,6 +335,14 @@ export default defineBackground(() => {
               chrome.runtime.sendMessage(message);
             }
           } else if (message.invokeEnv == BACKGROUND) {
+            if (isDevEnv()) {
+              message.invokeEndTime = performance.now();
+              let costTime = message.invokeEndTime - message.invokeStartTime;
+              if (costTime > INVOKE_WARN_TIME_COST) {
+                //invoke > warnTimeCost to show warning
+                warnLog(`[${message.invokeEnv}][${message.invokeSeq}]Invoke [${message.action}] cost time = %c${costTime.toFixed(2)}ms`, `color:white;background-color:hsl(360 ${costTime / 100} 50%);`);
+              }
+            }
             let promiseHook = getAndRemovePromiseHook(message.callbackId);
             if (promiseHook) {
               if (message.error) {

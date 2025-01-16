@@ -1,10 +1,14 @@
 import { v4 as uuidv4 } from "uuid";
-import { debugLog, errorLog } from "../log";
+import { debugLog, errorLog, warnLog } from "../log";
 import { BACKGROUND, CONTENT_SCRIPT, OFFSCREEN } from "./bridgeCommon.js";
+import { INVOKE_WARN_TIME_COST } from "../config.js";
+import { isDevEnv } from "../../common";
 
 export const EVENT_BRIDGE = "EVENT_BRIDGE";
 
 const callbackPromiseHookMap = new Map();
+
+let invokeSeq = 0;
 
 /**
  *
@@ -30,6 +34,10 @@ export function invoke(
         to: BACKGROUND,
         invokeEnv: invokeEnv,
       };
+      if (isDevEnv()) {
+        message.invokeStartTime = performance.now();
+        message.invokeSeq = invokeSeq++;
+      }
       if (onMessageCallback) {
         onMessageCallback(message);
       }
@@ -114,7 +122,7 @@ async function sendMessage(message) {
         await _sendMessage(message);
       }
     }
-  }else{
+  } else {
     await _sendMessage(message);
   }
 }
@@ -182,6 +190,14 @@ export function init() {
       }
       if (isReturn) {
         try {
+          if (isDevEnv()) {
+            message.invokeEndTime = performance.now();
+            let costTime = message.invokeEndTime - message.invokeStartTime;
+            if (costTime > INVOKE_WARN_TIME_COST) {
+              //invoke > warnTimeCost to show warning
+              warnLog(`[${message.invokeEnv}][${message.invokeSeq}]Invoke [${message.action}] cost time = %c${costTime.toFixed(2)}ms`, `color:white;background-color:hsl(360 ${costTime / 100} 50%);`);
+            }
+          }
           let promiseHook = getAndRemovePromiseHook(callbackId);
           if (promiseHook) {
             if (message.error) {

@@ -2,7 +2,8 @@ import dayjs from "dayjs";
 const LEVEL_TRACE = 0;
 const LEVEL_DEBUG = 1;
 const LEVEL_INFO = 2;
-const LEVEL_ERROR = 3;
+const LEVEL_WARN = 3;
+const LEVEL_ERROR = 4;
 export const logLevel = LEVEL_INFO;
 const DATE_FORMAT = "YYYY-MM-DD HH:mm:ss.SSS";
 
@@ -24,6 +25,12 @@ export function traceLog(message) {
   }
 }
 
+export function warnLog(message, ...param) {
+  if (logLevel <= LEVEL_WARN) {
+    console.warn(`${dayjs(new Date()).format(DATE_FORMAT)} ${message}`, ...param);
+  }
+}
+
 export function errorLog(message) {
   if (logLevel <= LEVEL_ERROR) {
     console.error(`${dayjs(new Date()).format(DATE_FORMAT)} ${message}`);
@@ -31,6 +38,6 @@ export function errorLog(message) {
   }
 }
 
-export function isDebug(){
+export function isDebug() {
   return logLevel <= LEVEL_DEBUG;
 }
