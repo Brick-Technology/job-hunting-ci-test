@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## WIP
+## 2.6.5(2025-01-16)
 
 ### 🚀 Performance
 
