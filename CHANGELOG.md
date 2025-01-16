@@ -6,6 +6,7 @@
 
 1. 添加bridge invoke性能检测逻辑(开发模式下默认开启).
 2. (ContentScript)减少职位标签的查询次数.
+3. 提升部份查询的性能.(添加索引涉及的表有:job,job_browse_history,company_tag,job_tag)
 
 ## 2.6.5(2025-01-16)
 
