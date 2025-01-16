@@ -49,7 +49,7 @@ export default function firstOpen(data) {
       },
       { platform: PLATFORM_LAGOU }
     );
-    renderFunctionPanel(
+    await renderFunctionPanel(
       jobDTOList,
       (index) => {
         return children?.[index];

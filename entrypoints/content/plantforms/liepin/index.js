@@ -99,7 +99,7 @@ async function parseData(list, getListItem) {
   });
   hiddenLoadingDOM();
   renderSortJobItem(jobDTOList, getListItem, { platform: PLATFORM_LIEPIN });
-  renderFunctionPanel(jobDTOList, getListItem, {
+  await renderFunctionPanel(jobDTOList, getListItem, {
     searchButtonTitle: "点击快速查询其他信息",
     platform: PLATFORM_LIEPIN,
     getCompanyInfoFunction: async function (url, { item }) {

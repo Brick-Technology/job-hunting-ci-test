@@ -119,7 +119,7 @@ function parseData(list, getListItem) {
       renderSortJobItem(jobDTOList, getListItem, {
         platform: PLATFORM_JOBSDB,
       });
-      renderFunctionPanel(jobDTOList, getListItem, {
+      await renderFunctionPanel(jobDTOList, getListItem, {
         platform: PLATFORM_JOBSDB,
       });
       finalRender(jobDTOList, {

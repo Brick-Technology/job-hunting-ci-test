@@ -120,7 +120,7 @@ export async function parseZhilianData(list, getListItem) {
         getListItem,
         { platform: PLATFORM_ZHILIAN }
       );
-      renderFunctionPanel(
+      await renderFunctionPanel(
         jobDTOList,
         getListItem,
         { platform: PLATFORM_ZHILIAN }

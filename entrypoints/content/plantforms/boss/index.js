@@ -157,7 +157,7 @@ export function handleData(list, getListItem, getJobItemDetailUrlFunction, order
       });
       hiddenLoadingDOM();
       renderSortJobItem(jobDTOList, getListItem, { platform: PLATFORM_BOSS, orderStartIndex });
-      renderFunctionPanel(jobDTOList, getListItem, {
+      await renderFunctionPanel(jobDTOList, getListItem, {
         platform: PLATFORM_BOSS,
         getCompanyInfoFunction: async function (url) {
           const response = await fetch(url);

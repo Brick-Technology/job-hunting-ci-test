@@ -643,12 +643,21 @@ function convertHrActiveTimeDescToOffsetTime(hrActiveTimeDesc) {
 
 
 
-export function renderFunctionPanel(
+export async function renderFunctionPanel(
   list,
   getListItem,
   { platform, getCompanyInfoFunction, searchButtonTitle } = {}
 ) {
   stopAndCleanAbortFunctionHandler();
+  let jobTagDTOArray = await JobApi.jobTagGetAllDTOByJobIds(list.map(item => item.jobId));
+  let jobIdAndDTOMap = new Map();
+  jobTagDTOArray.forEach(item => {
+    let jobId = item.jobId;
+    if (!jobIdAndDTOMap.has(jobId)) {
+      jobIdAndDTOMap.set(jobId, []);
+    }
+    jobIdAndDTOMap.get(jobId).push(item);
+  });
   list.forEach((item, index) => {
     const dom = getListItem(index);
     let targetDom;
@@ -676,13 +685,13 @@ export function renderFunctionPanel(
         jobCardItemDom: targetDom
       })
     );
-    functionPanelDiv.appendChild(createOtherJobTag(item));
-    functionPanelDiv.appendChild(createMyJobTag(item));
+    functionPanelDiv.appendChild(createOtherJobTag(item, jobIdAndDTOMap));
+    functionPanelDiv.appendChild(createMyJobTag(item, jobIdAndDTOMap));
     functionPanelDiv.appendChild(createCommentWrapper(item));
   });
 }
 
-function createOtherJobTag(item) {
+function createOtherJobTag(item, jobIdAndDTOMap) {
   const wrapper = document.createElement("div");
   wrapper.className = "__job_tag_wrapper";
   const labelDiv = document.createElement("div");
@@ -692,12 +701,12 @@ function createOtherJobTag(item) {
   const jobTagDiv = document.createElement("div");
   jobTagDiv.className = "__job_tag_all";
   wrapper.appendChild(jobTagDiv);
-  asyncRenderOtherJobTag(jobTagDiv, item);
+  asyncRenderOtherJobTag(jobTagDiv, item, jobIdAndDTOMap);
   return wrapper;
 }
 
-async function asyncRenderOtherJobTag(div, item) {
-  const jobTagDTO = (await JobApi.jobTagGetAllDTOByJobId(item.jobId)).filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM && item.source != null);
+async function asyncRenderOtherJobTag(div, item, jobIdAndDTOMap) {
+  const jobTagDTO = (jobIdAndDTOMap.get(item.jobId) ?? []).filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM && item.source != null);
   convertToTagData(jobTagDTO).forEach(item => {
     div.appendChild(createTag(item))
   });
@@ -711,7 +720,7 @@ function createTag(item) {
     </div>`)[0];
 }
 
-function createMyJobTag(item) {
+function createMyJobTag(item, jobIdAndDTOMap) {
   const wrapper = document.createElement("div");
   wrapper.className = "__job_tag_wrapper";
   const labelDiv = document.createElement("div");
@@ -722,7 +731,7 @@ function createMyJobTag(item) {
   jobTagDiv.className = "__job_tag";
   wrapper.appendChild(jobTagDiv);
   asyncRenderTag(jobTagDiv, "职位", async () => {
-    return (await JobApi.jobTagGetAllDTOByJobId(item.jobId)).filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM && item.source == null)
+    return (jobIdAndDTOMap.get(item.jobId) ?? []).filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM && item.source == null)
   }, async (tags) => {
     let param = new JobTagBO();
     param.jobId = item.jobId;
