@@ -53,7 +53,7 @@ const JobTagView: React.FC = () => {
     {
       title: '职位编号',
       dataIndex: 'jobId',
-      render: (value: string) => <Text copyable ellipsis title={value}>{value}</Text>,
+      render: (value: string) =>  <Text copyable style={{ width: 100 }} title={value}>{`${value.length > 5 ? value.slice(0, 5) : ''}...`}</Text>,
       minWidth: 100,
     },
     {

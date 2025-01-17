@@ -80,7 +80,7 @@ const CompanyView: React.FC = () => {
     {
       title: '编号',
       dataIndex: 'id',
-      render: (text: string) => <Text copyable ellipsis title={text}>{text}</Text>,
+      render: (value: string) =>  <Text copyable style={{ width: 100 }} title={value}>{`${value.length > 5 ? value.slice(0, 5) : ''}...`}</Text>,
       minWidth: 100,
     },
     {

@@ -8,6 +8,7 @@ import {
   PLATFORM_ZHILIAN,
 } from "@/common";
 import { CompanyApi, JobApi, TagApi } from "@/common/api";
+import { convertToAbbreviation } from "@/common/utils";
 import {
   JobStatisticGroupByPublishDateBO,
   TYPE_ENUM_DAY,
@@ -18,9 +19,24 @@ import {
 import { SearchJobBO } from "@/common/data/bo/searchJobBO";
 import { Icon } from "@iconify/react";
 import { Card, Col, Flex, Row, Select, Typography } from "antd";
+import ReactEChartsCore from 'echarts-for-react/lib/core';
+import {
+  BarChart,
+} from 'echarts/charts';
+import {
+  GridComponent,
+  TitleComponent,
+  TooltipComponent
+} from 'echarts/components';
+import * as echarts from 'echarts/core';
+import {
+  CanvasRenderer,
+} from 'echarts/renderers';
 import { useJob } from "../hooks/job";
-
 import "./DashboardView.css";
+echarts.use(
+  [TitleComponent, TooltipComponent, GridComponent, BarChart, CanvasRenderer]
+);
 
 const { Text, Link } = Typography;
 
@@ -34,25 +50,61 @@ type BasicChartData = {
 type BasicChartProps = {
   title: string;
   data: BasicChartData[];
+  showAll: boolean;
 };
 
 const BasicChart: React.FC<BasicChartProps> = (props) => {
-  const config = {
-    data: props.data,
-    xField: "name",
-    yField: "total",
-    style: {
-      // 圆角样式
-      radiusTopLeft: 10,
-      radiusTopRight: 10,
+  const data = props.data;
+  const nameArray = data.map(item => item.name);
+  const totalArray = data.map(item => item.total);
+  let xAxis = {};
+  if (props.showAll) {
+    xAxis = {
+      data: nameArray,
+      axisLabel: {
+        overflow: 'truncate',
+        interval: 0,
+        rotate: 30,
+      },
+    };
+  } else {
+    xAxis = {
+      overflow: 'truncate',
+      interval: 0,
+      data: nameArray,
+    };
+  }
+  const option = {
+    tooltip: {},
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      containLabel: true
     },
-    onReady: ({ chart }) => {
-    },
+    xAxis,
+    yAxis: {},
+    series: [
+      {
+        itemStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: '#83bff6' },
+            { offset: 0.5, color: '#188df0' },
+            { offset: 1, color: '#188df0' }
+          ])
+        },
+        type: 'bar',
+        data: totalArray
+      }
+    ]
   };
   return (
     <>
       <Card title={props.title} style={{ margin: 10 }}>
-        <Column height={300}  {...config} />
+        <ReactEChartsCore
+          echarts={echarts}
+          option={option}
+        />
       </Card>
     </>
   );
@@ -70,66 +122,99 @@ type BackgroundChartProps = {
   loading: boolean;
 };
 
-const BackgroundChart: React.FC<BackgroundChartProps> = ({ title, data, xSize = 100, loading = true }) => {
-  let yField = "count";
-  if (data.items.length > 0) {
-    if (Object.keys(data.items[0]).includes("percentage")) {
-      yField = "percentage";
-    }
+const BackgroundChart: React.FC<BackgroundChartProps> = ({ title, data, loading = true }) => {
+  const { total, items } = data;
+  let sortItems = items.toReversed();
+  const nameArray = sortItems.map(item => item.name);
+  const countArray = sortItems.map(item => item.count);
+  let calTotal = 0;
+  if (total == null) {
+    countArray.forEach(item => {
+      calTotal += item;
+    });
+  } else {
+    calTotal = total as number;
   }
-  const config = {
-    data: data.items,
-    xField: 'name',
-    yField: yField,
-    style: {
-      // 圆角样式
-      radiusTopLeft: 10,
-      radiusTopRight: 10,
-    },
-    markBackground: {
-      label: {
-        text: ({ originData }) => {
-          if (data.total != null) {
-            return `${((originData.count / data.total) * 100).toFixed(2)}% | ${originData.count} / ${data.total}`;
-          } else {
-            if (originData.total == 0) {
-              return "N/A";
-            } else {
-              return `${((originData.count / originData.total) * 100).toFixed(2)}% | ${originData.count} / ${originData.total}`;
-            }
+  const option = {
+    title: [
+      {
+
+      },
+    ],
+    tooltip: {},
+    grid: [
+      {
+        left: 100,
+        top: 0,
+        bottom: 20,
+        right: 0
+      },
+    ],
+    xAxis: [
+      {
+        type: 'value',
+        max: calTotal,
+        splitLine: {
+          show: false
+        },
+        axisLabel: {
+          hideOverlap: true,
+          formatter: function (value, index) {
+            return convertToAbbreviation(value);
+          }
+        }
+      },
+    ],
+    yAxis: [
+      {
+        type: 'category',
+        data: nameArray,
+        axisLabel: {
+          width: 100,
+          overflow: 'truncate',
+          margin: 0,
+          padding: 5,
+        },
+        splitLine: {
+          show: false
+        }
+      },
+    ],
+    series: [
+      {
+        type: 'bar',
+        stack: 'chart',
+        z: 3,
+        label: {
+          position: 'right',
+          show: true,
+          formatter: (param) => {
+            return `${((param.data / calTotal) * 100).toFixed(2)}%`;
           }
         },
-        position: 'right',
+        data: countArray,
       },
-    },
-    scale: {
-      y: {
-        domain: [0, data.total ?? 100],
+      {
+        type: 'bar',
+        stack: 'chart',
+        silent: true,
+        itemStyle: {
+          color: '#eee'
+        },
+        data: countArray.map(item => {
+          return calTotal - item;
+        })
       },
-    },
-    axis: {
-      x: {
-        size: xSize,
-        tick: false,
-        title: false,
-        labelAutoHide: false,
-        labelAutoEllipsis: true,
-      },
-      y: {
-        grid: false,
-        tick: false,
-        label: false,
-        title: false,
-      },
-    },
+    ]
   };
   return <Card loading={loading} title={title} style={{ margin: 10 }}>
-    <Bar height={300}  {...config} />
+    <ReactEChartsCore
+      echarts={echarts}
+      option={option}
+    />
   </Card>
 };
 
-
-import { Bar, Column } from "@ant-design/charts";
 import { ReactNode } from "react";
 import { logo } from "../assets";
 import StatisticCard from "../components/StatisticCard";
@@ -388,6 +473,7 @@ const DashboardView: React.FC = () => {
             queryResult: convertObjectToChartData(statisticJobSearchGroupByAvgSalaryResult),
             defaultNameArray: JOB_SALARY_NAME_ARRAY,
           }),
+          showAll: true,
         });
         chartResult.push({
           title: "职位发布时间分析(按月)",
@@ -434,6 +520,7 @@ const DashboardView: React.FC = () => {
             defaultNameArray: PLATFORM_NAME_ARRAY,
             convertNameFunction: platformFormat,
           }),
+          showAll: true,
         });
         chartResult.push({
           title: "公司成立年份分段分析",
@@ -441,6 +528,7 @@ const DashboardView: React.FC = () => {
             queryResult: await CompanyApi.companyStatisticGroupByStartDate(),
             defaultNameArray: COMPANY_START_DATE_NAME_ARRAY,
           }),
+          showAll: true,
         });
         chartResult.push({
           title: "公司社保人数分段分析",
@@ -449,6 +537,7 @@ const DashboardView: React.FC = () => {
             defaultNameArray: COMPANY_INSURANCE_NAME_ARRAY,
             convertNameFunction: convertCompanyInsuranceName,
           }),
+          showAll: true,
         });
         try {
           setTagNameGroupDataLoading(true);
@@ -633,7 +722,7 @@ const DashboardView: React.FC = () => {
         </Col>
         {chartData.map((item, index) => (
           <Col key={index} xs={24} sm={24} md={12} lg={12} xl={8} xxl={6}>
-            <BasicChart title={item.title} data={item.data} />
+            <BasicChart title={item.title} data={item.data} showAll={item.showAll} />
           </Col>
         ))}
       </Row>

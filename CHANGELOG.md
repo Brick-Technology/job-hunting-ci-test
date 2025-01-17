@@ -8,6 +8,13 @@
 2. (ContentScript)减少职位标签的查询次数.
 3. 提升部份查询的性能.(添加索引涉及的表有:job,job_browse_history,company_tag,job_tag)
 
+### 🔨 Dependency
+
+1. Delete @ant-design/charts
+2. Delete react-sortable-hoc
+3. Add dnd-kit
+4. Upgrade react to v19
+
 ## 2.6.5(2025-01-16)
 
 ### 🚀 Performance

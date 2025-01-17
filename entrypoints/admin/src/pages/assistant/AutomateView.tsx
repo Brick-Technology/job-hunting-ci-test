@@ -14,11 +14,13 @@ import { MISSION_STATUS_FAILURE, MISSION_STATUS_SUCCESS } from "@/common";
 import { MissionLog } from "@/common/data/domain/missionLog";
 import { MissionLogJobPageDetailDTO } from "@/common/data/dto/missionLogJobPageDetailDTO";
 import { arrayMoveImmutable } from 'array-move';
-import { SortableContainer, SortableElement } from 'react-sortable-hoc';
 import MissionHistory from "../../components/task/MissionHistory";
 import MissionLogDetail from "../../components/task/MissionLogDetail";
 import TaskItemCard from "../../components/task/TaskItemCard";
 import { useTask } from "../../hooks/task";
+import { DndContext } from '@dnd-kit/core';
+import { SortableContext, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 const { convertTaskList } = useTask();
 
@@ -175,36 +177,48 @@ const AutomateView: React.FC<AutomateProps> = (props) => {
         setData(Object.assign([], data));
     }
 
-    const SortableItem = SortableElement(({ item }) => <TaskItemCard
-        key={`task_${item.id}`} data={item}
-        onAccessUrl={onAccessUrl}
-        onEdit={(data) => {
-            setIsTaskModalOpen(true);
-            setEditItem(data);
-        }}
-        onDelete={onDeleteTask}
-        onPlay={play}
-        onShowDetailLogDetail={((item: TaskData) => {
-            setMissionLogDetail(item);
-            setIsMissionLogDetailModalOpen(true);
-        })}
-        onShowHistory={((item: TaskData) => {
-            setHistory(item);
-            setIsHistoryModalOpen(true);
-        })}
-    ></TaskItemCard>);
+    const SortableItem = (props) => {
+        const {
+            attributes,
+            listeners,
+            setNodeRef,
+            transform,
+            transition,
+        } = useSortable({ id: props.id });
 
-    const SortableList = SortableContainer(({ items }) => {
+        const style = {
+            transform: CSS.Transform.toString(transform),
+            transition,
+        };
+
         return (
-            <Flex gap={5} wrap >
-                {items && items.length > 0 ? items.map((item, index) => (
-                    <SortableItem disabled={!isSort} key={`item-${item.id}`} index={index} item={item} />
-                )) : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />}
-            </Flex>
+            <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+                <TaskItemCard
+                    key={`task_${props.item.id}`} data={props.item}
+                    onAccessUrl={onAccessUrl}
+                    onEdit={(data) => {
+                        setIsTaskModalOpen(true);
+                        setEditItem(data);
+                    }}
+                    onDelete={onDeleteTask}
+                    onPlay={play}
+                    onShowDetailLogDetail={((item: TaskData) => {
+                        setMissionLogDetail(item);
+                        setIsMissionLogDetailModalOpen(true);
+                    })}
+                    onShowHistory={((item: TaskData) => {
+                        setHistory(item);
+                        setIsHistoryModalOpen(true);
+                    })}
+                ></TaskItemCard>
+            </div>
         );
-    });
+    }
 
-    const onSortEnd = async ({ oldIndex, newIndex }) => {
+    const onSortEnd = async ({ active, over }) => {
+        let ids = data.map(item => item.id);
+        let oldIndex = ids.indexOf(active.id);
+        let newIndex = ids.indexOf(over.id);
         const result = arrayMoveImmutable(data, oldIndex, newIndex);
         await MissionLogApi.missionSort(result.flatMap(item => item.id));
         setData(result);
@@ -233,7 +247,13 @@ const AutomateView: React.FC<AutomateProps> = (props) => {
                     }} />
                 </Flex>
                 <Flex gap="small" wrap>
-                    <SortableList axis="xy" items={data} onSortEnd={onSortEnd} />
+                    <DndContext onDragEnd={onSortEnd}>
+                        <SortableContext disabled={!isSort} items={data.map(item => item.id)}>
+                            {data && data.length > 0 ? data.map((item, index) => (
+                                <SortableItem key={item.id} id={item.id} item={item}></SortableItem>
+                            )) : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />}
+                        </SortableContext>
+                    </DndContext>
                 </Flex>
             </Space>
             <Modal

@@ -9,20 +9,9 @@ const SubmitButton: React.FC<React.PropsWithChildren<SubmitButtonProps>> = ({
     form,
     children,
 }) => {
-    const [submittable, setSubmittable] = React.useState<boolean>(false);
-
-    // Watch all values
-    const values = Form.useWatch([], form);
-
-    React.useEffect(() => {
-        form
-            .validateFields({ validateOnly: true })
-            .then(() => setSubmittable(true))
-            .catch(() => setSubmittable(false));
-    }, [form, values]);
-
+    //TODO button disable when form field invalid
     return (
-        <Button type="primary" htmlType="submit" disabled={!submittable}>
+        <Button type="primary" htmlType="submit">
             {children}
         </Button>
     );

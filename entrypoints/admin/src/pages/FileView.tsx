@@ -61,8 +61,8 @@ const FileView: React.FC = () => {
         {
             title: '编号',
             dataIndex: 'id',
-            render: (value: string) => <Text copyable ellipsis title={value}>{value}</Text>,
-            minWidth: 100,
+            render: (value: string) => <Text copyable style={{ width: 100 }} title={value}>{`${value.length > 5 ? value.slice(0, 5) : ''}...`}</Text>,
+            width: 100,
         },
         {
             title: '名称',
@@ -92,8 +92,8 @@ const FileView: React.FC = () => {
         {
             title: 'SHA',
             dataIndex: 'sha',
-            render: (value: string) => <Text copyable ellipsis title={value}>{value}</Text>,
-            minWidth: 100,
+            render: (value: string) => <Text copyable style={{ width: 100 }} title={value}>{`${value.length > 5 ? value.slice(0, 5) : ''}...`}</Text>,
+            width: 100,
         },
         {
             title: '创建时间',
