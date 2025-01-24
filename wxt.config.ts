@@ -65,8 +65,8 @@ export default defineConfig({
       copyFileSync(resolve(srcDir, packageName), resolve(outDir, packageName));
       copyFileSync(resolve(srcDir, licenseName), resolve(outDir, licenseName));
       if (wxt.config.mode == 'production') {
-        copyFileSync(resolve(srcDir, "node_modules", "@sqlite.org", "sqlite-wasm", "sqlite-wasm", "jswasm", "sqlite3.wasm"), resolve(outDir, "assets", "sqlite3.wasm"));
-        copyFileSync(resolve(srcDir, "node_modules", "@sqlite.org", "sqlite-wasm", "sqlite-wasm", "jswasm", "sqlite3-opfs-async-proxy.js"), resolve(outDir, "assets", "sqlite3-opfs-async-proxy.js"));
+        copyFileSync(resolve(srcDir, "node_modules", "@electric-sql", "pglite", "dist", "postgres.wasm"), resolve(outDir, "assets", "postgres.wasm"));
+        copyFileSync(resolve(srcDir, "node_modules", "@electric-sql", "pglite", "dist", "postgres.data"), resolve(outDir, "assets", "postgres.data"));
       }
     },
   },
@@ -86,10 +86,11 @@ export default defineConfig({
         [react(), wasm(), Icons(),]
       },
       worker: {
-        plugins: () => [wasm()]
+        plugins: () => [wasm()],
+        format: 'es',
       },
       optimizeDeps: {
-        exclude: ['@sqlite.org/sqlite-wasm']
+        exclude: ['@electric-sql/pglite']
       }
     }
   }

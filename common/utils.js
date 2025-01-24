@@ -139,17 +139,16 @@ export function randomDelay(delayTime, randomRange) {
 }
 
 export function convertEmptyStringToNull(value) {
-  if (isNumeric(value)) {
-    return value;
-  }
-  if (value) {
+  if (value == undefined) {
+    return null;
+  } if (typeof value == 'string') {
     if (isEmpty(value) || isBlank(value)) {
       return null;
     } else {
       return value;
     }
   } else {
-    return null;
+    return value;
   }
 }
 
@@ -198,7 +197,7 @@ export function convertDateStringToDateObject(text) {
 }
 
 export function dateToStr(date, pattern) {
-  return isValidDate(date) ? dayjs(date).format(pattern ?? "YYYY-MM-DD HH:mm:ss") : null;
+  return isValidDate(date) ? (pattern ? dayjs(date).format(pattern) : dayjs(date).format()) : null;
 }
 
 export function genRangeDate(startDatetime, endDatetime) {

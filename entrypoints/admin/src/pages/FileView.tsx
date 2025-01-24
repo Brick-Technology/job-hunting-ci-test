@@ -61,7 +61,7 @@ const FileView: React.FC = () => {
         {
             title: '编号',
             dataIndex: 'id',
-            render: (value: string) => <Text copyable style={{ width: 100 }} title={value}>{`${value.length > 5 ? value.slice(0, 5) : ''}...`}</Text>,
+            render: (value: string) => <Text copyable style={{ width: 100 }} title={value}>{`${value && value.length > 5 ? value.slice(0, 5)+"..." : value}`}</Text>,
             width: 100,
         },
         {
@@ -92,20 +92,20 @@ const FileView: React.FC = () => {
         {
             title: 'SHA',
             dataIndex: 'sha',
-            render: (value: string) => <Text copyable style={{ width: 100 }} title={value}>{`${value.length > 5 ? value.slice(0, 5) : ''}...`}</Text>,
+            render: (value: string) => <Text copyable style={{ width: 100 }} title={value}>{`${value && value.length > 5 ? value.slice(0, 5)+"..." : value}`}</Text>,
             width: 100,
         },
         {
             title: '创建时间',
             dataIndex: 'createDatetime',
-            render: (value: Date) => <Text title={dateToStr(value)}>{dateToStr(value)}</Text>,
+            render: (value: Date) => <Text title={dateToStr(value)}>{dateToStr(value,"YYYY-MM-DD")}</Text>,
             minWidth: 100,
             sorter: true,
         },
         {
             title: '更新时间',
             dataIndex: 'updateDatetime',
-            render: (value: Date) => <Text title={dateToStr(value)}>{dateToStr(value)}</Text>,
+            render: (value: Date) => <Text title={dateToStr(value)}>{dateToStr(value,"YYYY-MM-DD")}</Text>,
             minWidth: 100,
             sorter: true,
         },
@@ -234,7 +234,7 @@ const FileView: React.FC = () => {
                 },
                 orderByColumn: "createDatetime",
                 searchParam: {
-                    isDelete: 0,
+                    isDelete: false,
                 }
             }}
             rowKeyFunction={(record) => { return record.id }}

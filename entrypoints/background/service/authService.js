@@ -1,15 +1,13 @@
-import { postSuccessMessage, postErrorMessage } from "../util";
-import { OauthDTO } from "../../../common/data/dto/oauthDTO";
+import { postErrorMessage, postSuccessMessage } from "@/common/extension/background/util";
 import { ConfigApi } from "../../../common/api";
-import { Config } from "../../../common/data/domain/config";
-import { GITHUB_APP_CLIENT_ID, GITHUB_URL_APP_INSTALL_AUTHORIZE, GITHUB_URL_AUTHORIZE } from "../../../common/config";
 import {
   BACKGROUND,
 } from "../../../common/api/bridgeCommon";
+import { GITHUB_APP_CLIENT_ID, GITHUB_URL_APP_INSTALL_AUTHORIZE, GITHUB_URL_AUTHORIZE, KEY_GITHUB_OAUTH_TOKEN } from "../../../common/config";
+import { Config } from "../../../common/data/domain/config";
+import { OauthDTO } from "../../../common/data/dto/oauthDTO";
 
 const oauth2LoginMessageMap = new Map();
-
-const KEY_GITHUB_OAUTH_TOKEN = "KEY_GITHUB_OAUTH_TOKEN";
 
 export const AuthService = {
   /**
@@ -99,7 +97,7 @@ export async function setToken(token) {
   let config = new Config();
   config.key = KEY_GITHUB_OAUTH_TOKEN;
   config.value = JSON.stringify(token);
-  return ConfigApi.addOrUpdateConfig(config, { invokeEnv: BACKGROUND });
+  return ConfigApi.addOrUpdateConfig(config);
 }
 
 /**
@@ -108,7 +106,7 @@ export async function setToken(token) {
  */
 export async function getToken() {
   let oauthDTO = new OauthDTO();
-  let config = await ConfigApi.getConfigByKey(KEY_GITHUB_OAUTH_TOKEN, { invokeEnv: BACKGROUND });
+  let config = await ConfigApi.getConfigByKey(KEY_GITHUB_OAUTH_TOKEN);
   if (config) {
     let value = JSON.parse(config.value);
     if (value) {

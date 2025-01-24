@@ -1,25 +1,20 @@
-import { ConfigApi, JobApi } from "../../common/api";
-import { INVOKE_WARN_TIME_COST } from "../../common/config";
-import { getAndRemovePromiseHook } from "../../common/api/bridge";
+import { onMessageHandle, postErrorMessage, postSuccessMessage } from "@/common/extension/background/util";
+import useService from "@/common/extension/hooks/service";
+import { AppApi, JobApi } from "../../common/api";
 import {
-  BACKGROUND,
-  CONTENT_SCRIPT,
-  OFFSCREEN,
+  BACKGROUND
 } from "../../common/api/bridgeCommon";
 import { httpFetchGetText, httpFetchJson } from "../../common/api/common";
-import { CONFIG_KEY_DATA_SHARE_PLAN, DEFAULT_DATA_REPO, GITHUB_APP_CLIENT_ID, GITHUB_APP_CLIENT_SECRET, GITHUB_APP_INSTALL_CALLBACK_URL, GITHUB_URL_GET_ACCESS_TOKEN, GITHUB_URL_GET_USER, TASK_LOOP_DELAY } from "../../common/config";
-import { DataSharePlanConfigDTO } from "../../common/data/dto/dataSharePlanConfigDTO";
+import { GITHUB_APP_CLIENT_ID, GITHUB_APP_CLIENT_SECRET, GITHUB_APP_INSTALL_CALLBACK_URL, GITHUB_URL_GET_ACCESS_TOKEN, GITHUB_URL_GET_USER, TASK_LOOP_DELAY } from "../../common/config";
 import { OauthDTO } from "../../common/data/dto/oauthDTO";
 import { UserDTO } from "../../common/data/dto/userDTO";
-import { debugLog, errorLog, infoLog, warnLog } from "../../common/log";
+import { debugLog, errorLog, infoLog } from "../../common/log";
 import { convertPureJobDetailUrl, paramsToObject, parseToLineObjectToToHumpObject, randomDelay } from "../../common/utils";
 import { AuthService, getOauth2LoginMessageMap, getToken, setToken } from "./service/authService";
 import { AutomateService } from "./service/automateService";
+import { EmitterService } from "./service/emitterService";
 import { SystemService } from "./service/systemService";
-import { calculateDataSharePartnerList, calculateDownloadTask, calculateUploadTask, runScheduleTask, runTask } from "./service/taskService";
-import { getUser, setUser, UserService } from "./service/userService";
-import { postErrorMessage, postSuccessMessage } from "./util";
-import { isDevEnv } from "../../common";
+import { setUser, UserService } from "./service/userService";
 
 export default defineBackground(() => {
   debugLog("background ready");
@@ -89,7 +84,7 @@ export default defineBackground(() => {
             code,
           });
           let urlWithParam = `${GITHUB_URL_GET_ACCESS_TOKEN}?${searchParams.toString()}`;
-          let tokenText = await httpFetchGetText(urlWithParam, (abortFunction) => { }, { invokeEnv: BACKGROUND })
+          let tokenText = await httpFetchGetText(urlWithParam, (abortFunction) => { })
           let tokenURLSearchParam = new URLSearchParams(tokenText);
           const tokenObject = paramsToObject(tokenURLSearchParam);
           let oauthDTO = parseToLineObjectToToHumpObject(new OauthDTO(), tokenObject);
@@ -98,7 +93,7 @@ export default defineBackground(() => {
             url: GITHUB_URL_GET_USER, headers: {
               "Authorization": `Bearer ${oauthDTO.accessToken}`,
             }
-          }, (abortFunction) => { }, { invokeEnv: BACKGROUND });
+          }, (abortFunction) => { });
           let userDTO = parseToLineObjectToToHumpObject(new UserDTO(), userResultJson);
           await setUser(userDTO);
           let targetToken = await getToken();
@@ -119,14 +114,10 @@ export default defineBackground(() => {
     if (changeInfo?.status == "complete" && !isSavedByTabId(tab.id)) {
       if (tab.url) {
         let pureUrl = convertPureJobDetailUrl(tab.url);
-        let job = await JobApi.getJobByDetailUrl(pureUrl, {
-          invokeEnv: BACKGROUND,
-        });
+        let job = await JobApi.getJobByDetailUrl(pureUrl);
         if (job) {
           infoLog(`save jobBrowseDetailHistory start jobId = ${job.jobId}`);
-          await JobApi.addJobBrowseDetailHistory(job.jobId, {
-            invokeEnv: BACKGROUND,
-          });
+          await JobApi.addJobBrowseDetailHistory(job.jobId);
           infoLog(`save jobBrowseDetailHistory success jobId = ${job.jobId}`);
           recordSavedByTabId(tab.id);
         }
@@ -152,19 +143,13 @@ export default defineBackground(() => {
 
   const ACTION_FUNCTION = new Map();
 
-  function mergeServiceMethod(actionFunction, source) {
-    let keys = Object.keys(source);
-    for (let i = 0; i < keys.length; i++) {
-      let key = keys[i];
-      actionFunction.set(key, source[key]);
-    }
-  }
+  const { mergeServiceMethod } = useService();
 
   mergeServiceMethod(ACTION_FUNCTION, AuthService)
   mergeServiceMethod(ACTION_FUNCTION, UserService);
   mergeServiceMethod(ACTION_FUNCTION, SystemService);
   mergeServiceMethod(ACTION_FUNCTION, AutomateService);
-
+  mergeServiceMethod(ACTION_FUNCTION, EmitterService);
 
   let creating: any;
   async function setupOffscreenDocument(path: string) {
@@ -181,7 +166,7 @@ export default defineBackground(() => {
         reasons: [
           chrome.offscreen.Reason.WORKERS || chrome.offscreen.Reason.BLOBS,
         ],
-        justification: "To run web worker to run sqlite",
+        justification: "To run database in web worker",
       });
       await creating;
       creating = null;
@@ -194,43 +179,7 @@ export default defineBackground(() => {
           try {
             taskRunCount += 1;
             infoLog(`[Task] Task run seq = < ${taskRunCount} >`)
-            let dataSharePlanConfig = new DataSharePlanConfigDTO();
-            let configValue = await ConfigApi.getConfigByKey(CONFIG_KEY_DATA_SHARE_PLAN, { invokeEnv: BACKGROUND });
-            if (configValue && configValue.value) {
-              dataSharePlanConfig = JSON.parse(configValue.value);
-            }
-            if (dataSharePlanConfig.enable) {
-              infoLog(`[TASK] Data share plan enable`);
-              infoLog(`[TASK] Data share plan task running`);
-              let userDTO = await getUser();
-              if (userDTO) {
-                let userName = userDTO.login;
-                let repoName = DEFAULT_DATA_REPO;
-                infoLog(`[Task] has login info userName = ${userName}`)
-                infoLog(`[Task] calculateUploadTask`)
-                await calculateUploadTask({ userName: userName, repoName: repoName });
-                //获取自身的数据共享计划仓库
-                let shareDataPlanList = [{ username: userName, reponame: DEFAULT_DATA_REPO }];
-                //从数据库中获取数据共享伙伴列表
-                let dataSharePartnerList = await calculateDataSharePartnerList();
-                shareDataPlanList.push(...dataSharePartnerList);
-                infoLog(`[TASK] Share data plan list length = ${shareDataPlanList.length}`);
-                for (let i = 0; i < shareDataPlanList.length; i++) {
-                  let shareItem = shareDataPlanList[i];
-                  await calculateDownloadTask({ userName: shareItem.username, repoName: shareItem.reponame });
-                }
-                infoLog(`[TASK] runTask`)
-                await runTask();
-              } else {
-                infoLog(`[TASK] no login info`)
-                infoLog(`[TASK] skip data share plan`)
-              }
-            } else {
-              infoLog(`[TASK] Data share plan disable`);
-              infoLog(`[TASK] Data share plan task skip`);
-            }
-            infoLog(`[TASK] runScheduleTask`)
-            await runScheduleTask();
+            await AppApi.appBackgroundTaskRun({});
           } catch (e) {
             errorLog(e);
           }
@@ -247,121 +196,7 @@ export default defineBackground(() => {
       sender,
       sendResponse
     ) {
-      if (message) {
-        if (isDevEnv()) {
-          const time = new Date().getTime();
-          message.invokeTimeList.push({ env: BACKGROUND, time, offset: time - message.invokeTimeList.slice(-1)[0].time });
-        }
-        if (message.from == CONTENT_SCRIPT && message.to == BACKGROUND) {
-          //get the tab id from content script page,not the extension page(eg: sidepanel)
-          if (sender.tab) {
-            message.tabId = sender.tab.id;
-          }
-          debugLog(
-            "2.[background][receive][" +
-            message.from +
-            " -> " +
-            message.to +
-            "] message [action=" +
-            message.action +
-            ",invokeEnv=" +
-            message.invokeEnv +
-            ",callbackId=" +
-            message.callbackId +
-            ",error=" +
-            message.error +
-            "]"
-          );
-          let action = message.action;
-          if (ACTION_FUNCTION.has(action)) {
-            debugLog("[background] invoke action = " + action);
-            ACTION_FUNCTION.get(action)(message, message.param);
-          } else {
-            message.from = BACKGROUND;
-            message.to = OFFSCREEN;
-            debugLog(
-              "3.[background][send][" +
-              message.from +
-              " -> " +
-              message.to +
-              "] message [action=" +
-              message.action +
-              ",invokeEnv=" +
-              message.invokeEnv +
-              ",callbackId=" +
-              message.callbackId +
-              ",error=" +
-              message.error +
-              "]"
-            );
-            chrome.runtime.sendMessage(message);
-          }
-        } else if (message.from == OFFSCREEN && message.to == BACKGROUND) {
-          debugLog(
-            "10.[background][receive][" +
-            message.from +
-            " -> " +
-            message.to +
-            "] message [action=" +
-            message.action +
-            ",invokeEnv=" +
-            message.invokeEnv +
-            ",callbackId=" +
-            message.callbackId +
-            ",error=" +
-            message.error +
-            "]"
-          );
-          if (message.invokeEnv == CONTENT_SCRIPT) {
-            message.from = BACKGROUND;
-            message.to = CONTENT_SCRIPT;
-            debugLog(
-              "11.[background][send][" +
-              message.from +
-              " -> " +
-              message.to +
-              "] message [action=" +
-              message.action +
-              ",invokeEnv=" +
-              message.invokeEnv +
-              ",callbackId=" +
-              message.callbackId +
-              ",error=" +
-              message.error +
-              "]"
-            );
-            if (message.tabId) {
-              //content script invoke
-              chrome.tabs.sendMessage(message.tabId, message);
-            } else {
-              //other invoke
-              //Note that extensions cannot send messages to content scripts using this method. To send messages to content scripts, use tabs.sendMessage.
-              chrome.runtime.sendMessage(message);
-            }
-          } else if (message.invokeEnv == BACKGROUND) {
-            if (isDevEnv()) {
-              let costTime = message.invokeTimeList.slice(-1)[0].time - message.invokeTimeList.slice(0, 1)[0].time;
-              if (costTime > INVOKE_WARN_TIME_COST) {
-                //invoke > warnTimeCost to show warning
-                warnLog(`[${message.invokeEnv}][${message.invokeSeq}]Invoke [${message.action}] cost time = %c${costTime.toFixed(2)}ms`, `color:white;background-color:hsl(360 ${costTime / 100} 50%);`, message.invokeTimeList, message);
-              }
-            }
-            let promiseHook = getAndRemovePromiseHook(message.callbackId);
-            if (promiseHook) {
-              if (message.error) {
-                message.message = message.error;
-                promiseHook.reject(message);
-              } else {
-                promiseHook.resolve(message);
-              }
-            } else {
-              errorLog(
-                `callbackId = ${message.callbackId} lost callback promiseHook`
-              );
-            }
-          }
-        }
-      }
+      onMessageHandle(message, sender, ACTION_FUNCTION);
     });
   }
 

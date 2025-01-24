@@ -3,7 +3,7 @@ import { CompanyApi, TagApi } from "@/common/api";
 import { CompanyTagBO } from "@/common/data/bo/companyTagBO";
 import { CompanyTagDTO } from "@/common/data/dto/companyTagDTO";
 import { companyTagDataToExcelJSONArrayForView } from "@/common/excel";
-import { dateToStr } from "@/common/utils";
+import { dateToStr, genIdFromText } from "@/common/utils";
 import {
   Button,
   Col,
@@ -111,7 +111,7 @@ const CompanyTagView: React.FC = () => {
       dataIndex: 'tagArray',
       render: (value: CompanyTagDTO[]) => {
         const result = [];
-        value.filter(item => item.sourceType == TAG_SOURCE_TYPE_PLATFORM).map((item,index) => {
+        value.filter(item => item.sourceType == TAG_SOURCE_TYPE_PLATFORM).map((item, index) => {
           result.push(
             <Tag className={styles.tag} key={index}>{item.tagName}</Tag>
           );
@@ -126,7 +126,7 @@ const CompanyTagView: React.FC = () => {
       render: (value: CompanyTagDTO[]) => {
         const result = [];
         const tagData = convertToTagData(value.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM && item.source == null));
-        tagData.map((item,index) => {
+        tagData.map((item, index) => {
           result.push(
             <CustomTag item={item} key={index}></CustomTag>
           );
@@ -141,7 +141,7 @@ const CompanyTagView: React.FC = () => {
       render: (value: CompanyTagDTO[]) => {
         const result = [];
         const tagData = convertToTagData(value.filter(item => item.sourceType == TAG_SOURCE_TYPE_CUSTOM && item.source != null));
-        tagData.map((item,index) => {
+        tagData.map((item, index) => {
           result.push(
             <CustomTag item={item} key={index}></CustomTag>
           );
@@ -159,7 +159,7 @@ const CompanyTagView: React.FC = () => {
     {
       title: '更新时间',
       dataIndex: 'updateDatetime',
-      render: (value: Date) => <Text title={dateToStr(value)}>{dateToStr(value)}</Text>,
+      render: (value: Date) => <Text title={dateToStr(value)}>{dateToStr(value,"YYYY-MM-DD")}</Text>,
       minWidth: 80,
       sorter: true,
     },
@@ -232,6 +232,9 @@ const CompanyTagView: React.FC = () => {
         data={editCompanyTagData}
         whitelist={whitelist}
         onSave={onCompanyTagSave}
+        validCompanyName={async (value) => {
+          return (await CompanyApi.getAllCompanyTagDTOByCompanyId(genIdFromText(value))).length <= 0;
+        }}
       ></CompanyTagEdit>
     </Modal>
   </>

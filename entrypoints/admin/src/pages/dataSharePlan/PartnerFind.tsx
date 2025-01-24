@@ -1,7 +1,6 @@
 import { Avatar, Button, Flex, Pagination, Space, Spin, Table, TableColumnsType, Tooltip, Typography } from "antd";
 const { Text } = Typography;
 
-import { MAX_RECORD_COUNT } from "@/common";
 import { DataSharePartnerApi } from "@/common/api";
 import { GithubApi } from "@/common/api/github";
 import { COMMENT_PAGE_SIZE, DEFAULT_DATA_REPO, DEFAULT_REPO_TYPE } from "@/common/config";
@@ -113,13 +112,13 @@ const PartnerFind: React.FC<PartnerFindProps> = ({ }) => {
         {
             title: '最近更新时间',
             dataIndex: 'updatedAt',
-            render: (value: string) => <Text>{dateToStr(dayjs(value))}</Text>,
+            render: (value: string) => <Text>{dateToStr(dayjs(value),"YYYY-MM-DD")}</Text>,
             minWidth: 100,
         },
         {
             title: '创建时间',
             dataIndex: 'createdAt',
-            render: (value: string) => <Text>{dateToStr(dayjs(value))}</Text>,
+            render: (value: string) => <Text>{dateToStr(dayjs(value),"YYYY-MM-DD")}</Text>,
             minWidth: 100,
         },
     ]
@@ -138,8 +137,6 @@ const PartnerFind: React.FC<PartnerFindProps> = ({ }) => {
             if (nodes.length > 0) {
                 //获取数据共享计划伙伴
                 const searchDataSharePartnerParam = new SearchDataSharePartnerBO();
-                searchDataSharePartnerParam.pageNum = 1;
-                searchDataSharePartnerParam.pageSize = MAX_RECORD_COUNT;
                 searchDataSharePartnerParam.usernameList = nodes.flatMap(item => item.owner.login);
                 searchDataSharePartnerParam.orderByColumn = "updateDatetime";
                 searchDataSharePartnerParam.orderBy = "DESC";

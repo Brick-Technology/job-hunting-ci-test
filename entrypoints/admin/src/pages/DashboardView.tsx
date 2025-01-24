@@ -1,5 +1,4 @@
 import {
-  MAX_RECORD_COUNT,
   PLATFORM_51JOB,
   PLATFORM_BOSS,
   PLATFORM_JOBSDB,
@@ -75,7 +74,10 @@ const BasicChart: React.FC<BasicChartProps> = (props) => {
     };
   }
   const option = {
-    tooltip: {},
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: { type: 'cross' }
+    },
     grid: {
       left: '3%',
       right: '4%',
@@ -281,15 +283,15 @@ const convertMonthName = (name) => {
 };
 
 let WEEK_NAME_OBJECT = {
-  "0": "星期日",
   "1": "星期一",
   "2": "星期二",
   "3": "星期三",
   "4": "星期四",
   "5": "星期五",
   "6": "星期六",
+  "7": "星期日",
 };
-let WEEK_NAME_ARRAY = ["1", "2", "3", "4", "5", "6", "0"];
+let WEEK_NAME_ARRAY = ["1", "2", "3", "4", "5", "6", "7"];
 const convertWeekName = (name) => {
   return WEEK_NAME_OBJECT[name] ?? name;
 };
@@ -464,8 +466,6 @@ const DashboardView: React.FC = () => {
         setTodayStatisticData(todayResult);
         let chartResult = [];
         const statisticJobSearchGroupByAvgSalaryParam = new SearchJobBO();
-        statisticJobSearchGroupByAvgSalaryParam.pageNum = 1;
-        statisticJobSearchGroupByAvgSalaryParam.pageSize = MAX_RECORD_COUNT;
         const statisticJobSearchGroupByAvgSalaryResult = await JobApi.statisticJobSearchGroupByAvgSalary({ statisticJobSearchGroupByAvgSalaryParam });
         chartResult.push({
           title: "职位薪资分析",

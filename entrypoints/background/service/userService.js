@@ -1,12 +1,12 @@
-import { postSuccessMessage, postErrorMessage } from "../util";
-import { UserDTO } from "../../../common/data/dto/userDTO";
+import { postErrorMessage, postSuccessMessage } from "@/common/extension/background/util";
 import { ConfigApi } from "../../../common/api";
-import { Config } from "../../../common/data/domain/config";
 import {
     BACKGROUND,
 } from "../../../common/api/bridgeCommon";
+import { KEY_GITHUB_USER } from "../../../common/config";
+import { Config } from "../../../common/data/domain/config";
+import { UserDTO } from "../../../common/data/dto/userDTO";
 
-const KEY_GITHUB_USER = "KEY_GITHUB_USER";
 
 export const UserService = {
     /**
@@ -50,7 +50,7 @@ export async function setUser(user) {
     let config = new Config();
     config.key = KEY_GITHUB_USER;
     config.value = JSON.stringify(user);
-    return ConfigApi.addOrUpdateConfig(config, { invokeEnv: BACKGROUND });
+    return ConfigApi.addOrUpdateConfig(config);
 }
 
 /**
@@ -59,7 +59,7 @@ export async function setUser(user) {
  */
 export async function getUser() {
     let userDTO = new UserDTO();
-    let config = await ConfigApi.getConfigByKey(KEY_GITHUB_USER, { invokeEnv: BACKGROUND });
+    let config = await ConfigApi.getConfigByKey(KEY_GITHUB_USER);
     if (config) {
         let value = JSON.parse(config.value);
         if (value) {
@@ -69,6 +69,3 @@ export async function getUser() {
     }
     return null;
 }
-
-
-

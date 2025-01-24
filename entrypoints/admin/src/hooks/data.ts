@@ -19,13 +19,10 @@ import {
 import { genIdFromText } from "@/common/utils";
 export function useData() {
 
-    //10 million
-    const MAX_RECORD_COUNT = 10000000;
-
-    const getJobDataToExcelJsonArray = async () => {
+    const getJobDataToExcelJsonArray = async (pageNum, pageSize) => {
         let searchParam = new SearchJobBO();
-        searchParam.pageNum = 1;
-        searchParam.pageSize = MAX_RECORD_COUNT;
+        searchParam.pageNum = pageNum;
+        searchParam.pageSize = pageSize;
         searchParam.orderByColumn = "updateDatetime";
         searchParam.orderBy = "DESC";
         let data = await JobApi.searchJob(searchParam);
@@ -34,19 +31,27 @@ export function useData() {
         return result;
     }
 
+    const getJobDataTotal = async () => {
+        let searchParam = new SearchJobBO();
+        searchParam.pageNum = 1;
+        searchParam.pageSize = 1;
+        let data = await JobApi.searchJob(searchParam);
+        return data.total;
+    }
+
     const saveJobData = async (data) => {
         let jobList = jobExcelDataToObjectArray(data);
         let targetList = await getMergeDataListForJob(jobList, "jobId", async (ids) => {
             return JobApi.jobGetByIds(ids);
         });
-        await JobApi.batchAddOrUpdateJobWithTransaction(targetList);
+        await JobApi.batchAddOrUpdateJob(targetList);
         return targetList;
     }
 
-    const getCompanyDataToExcelJsonArray = async () => {
+    const getCompanyDataToExcelJsonArray = async (pageNum, pageSize) => {
         let searchParam = new SearchCompanyBO();
-        searchParam.pageNum = 1;
-        searchParam.pageSize = MAX_RECORD_COUNT;
+        searchParam.pageNum = pageNum;
+        searchParam.pageSize = pageSize;
         searchParam.orderByColumn = "updateDatetime";
         searchParam.orderBy = "DESC";
         let data = await CompanyApi.searchCompany(searchParam);
@@ -55,22 +60,43 @@ export function useData() {
         return result;
     }
 
+    const getCompanyDataTotal = async () => {
+        let searchParam = new SearchCompanyBO();
+        searchParam.pageNum = 1;
+        searchParam.pageSize = 1;
+        let data = await CompanyApi.searchCompany(searchParam);
+        return data.total;
+    }
+
     const saveCompanyData = async (data) => {
         let companyBOList = companyExcelDataToObjectArray(data);
         let targetList = await getMergeDataListForCompany(companyBOList, "companyId", async (ids) => {
             return CompanyApi.companyGetByIds(ids);
         });
-        await CompanyApi.batchAddOrUpdateCompanyWithTransaction(targetList);
+        await CompanyApi.batchAddOrUpdateCompany(targetList);
         return targetList;
     }
 
-    const getCompanyTagDataToExcelJsonArray = async () => {
+    const getCompanyTagDataToExcelJsonArray = async (pageNum, pageSize) => {
         let searchParam = new CompanyTagExportBO();
+        searchParam.pageNum = pageNum;
+        searchParam.pageSize = pageSize;
         searchParam.source = "";
         searchParam.isPublic = null;
-        let list = await CompanyApi.companyTagExport(searchParam);
+        let data = await CompanyApi.companyTagExport(searchParam);
+        let list = data.items;
         let result = companyTagDataToExcelJSONArray(list);
         return result;
+    }
+
+    const getCompanyTagDataTotal = async () => {
+        let searchParam = new CompanyTagExportBO();
+        searchParam.pageNum = 1;
+        searchParam.pageSize = 1;
+        searchParam.source = "";
+        searchParam.isPublic = null;
+        let data = await CompanyApi.companyTagExport(searchParam);
+        return data.total;
     }
 
     const saveCompanyTagData = async (data) => {
@@ -82,17 +108,30 @@ export function useData() {
             searchParam.companyIds = companyNames.map(item => genIdFromText(item));
             return await CompanyApi.companyTagExport(searchParam);
         })
-        await CompanyApi.batchAddOrUpdateCompanyTagWithTransaction({ items: targetList, overrideUpdateDatetime: true });
+        await CompanyApi.batchAddOrUpdateCompanyTag({ items: targetList, overrideUpdateDatetime: true });
         return targetList;
     }
 
-    const getJobTagDataToExcelJsonArray = async () => {
+    const getJobTagDataToExcelJsonArray = async (pageNum, pageSize) => {
         let searchParam = new JobTagExportBO();
+        searchParam.pageNum = pageNum;
+        searchParam.pageSize = pageSize;
         searchParam.source = "";
         searchParam.isPublic = null;
-        let list = await JobApi.jobTagExport(searchParam);
+        let data = await JobApi.jobTagExport(searchParam);
+        let list = data.items;
         let result = jobTagDataToExcelJSONArray(list);
         return result;
+    }
+
+    const getJobTagDataTotal = async () => {
+        let searchParam = new JobTagExportBO();
+        searchParam.pageNum = 1;
+        searchParam.pageSize = 1;
+        searchParam.source = "";
+        searchParam.isPublic = null;
+        let data = await JobApi.jobTagExport(searchParam);
+        return data.total;
     }
 
     const saveJobTagData = async (data) => {
@@ -104,14 +143,15 @@ export function useData() {
             searchParam.isPublic = null;
             return await JobApi.jobTagExport(searchParam);
         })
-        await JobApi.jobTagBatchAddOrUpdateWithTransaction({ items: targetList, overrideUpdateDatetime: true });
+        await JobApi.jobTagBatchAddOrUpdate({ items: targetList, overrideUpdateDatetime: true });
         return targetList;
     }
 
     return {
-        getJobDataToExcelJsonArray, saveJobData, getCompanyDataToExcelJsonArray,
-        saveCompanyData, getCompanyTagDataToExcelJsonArray, saveCompanyTagData,
-        getJobTagDataToExcelJsonArray, saveJobTagData,
+        getJobDataToExcelJsonArray, getJobDataTotal, saveJobData,
+        getCompanyDataToExcelJsonArray, getCompanyDataTotal, saveCompanyData,
+        getCompanyTagDataToExcelJsonArray, getCompanyTagDataTotal, saveCompanyTagData,
+        getJobTagDataToExcelJsonArray, getJobTagDataTotal, saveJobTagData,
         JOB_FILE_HEADER, COMPANY_FILE_HEADER, COMPANY_TAG_FILE_HEADER, JOB_TAG_FILE_HEADER,
     }
 }

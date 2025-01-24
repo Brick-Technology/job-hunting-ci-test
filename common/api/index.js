@@ -36,7 +36,6 @@ import { SearchTaskDataUploadDTO } from "../data/dto/searchTaskDataUploadDTO";
 import { SearchTaskDTO } from "../data/dto/searchTaskDTO";
 import { StatisticJobBrowseDTO } from "../data/dto/statisticJobBrowseDTO";
 import { invoke } from "./bridge";
-import { CONTENT_SCRIPT } from "./bridgeCommon";
 
 export const JobApi = {
   /**
@@ -51,26 +50,8 @@ export const JobApi = {
    *
    * @param {Job[]} jobs
    */
-  batchAddOrUpdateJob: async function (jobs, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    return await invoke(this.batchAddOrUpdateJob.name, jobs, {
-      invokeEnv: invokeEnv,
-    });
-  },
-  /**
-     *
-     * @param {Job[]} jobs
-     */
-  batchAddOrUpdateJobWithTransaction: async function (jobs, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    return await invoke(this.batchAddOrUpdateJobWithTransaction.name, jobs, {
-      invokeEnv: invokeEnv,
-    });
-  },
-  /**
-   *
-   * @param {Job} job
-   */
-  addOrUpdateJobBrowse: async function (job) {
-    return await invoke(this.addOrUpdateJobBrowse.name, job);
+  batchAddOrUpdateJob: async function (jobs,) {
+    return await invoke(this.batchAddOrUpdateJob.name, jobs);
   },
 
   /**
@@ -79,10 +60,8 @@ export const JobApi = {
    *
    * @returns SearchJobDTO[]
    */
-  searchJob: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.searchJob.name, param, {
-      invokeEnv: invokeEnv,
-    });
+  searchJob: async function (param) {
+    let result = await invoke(this.searchJob.name, param);
     return result.data;
   },
 
@@ -126,26 +105,16 @@ export const JobApi = {
    *
    * @returns Job
    */
-  getJobByDetailUrl: async function (
-    param,
-    { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }
-  ) {
-    let result = await invoke(this.getJobByDetailUrl.name, param, {
-      invokeEnv: invokeEnv,
-    });
+  getJobByDetailUrl: async function (param) {
+    let result = await invoke(this.getJobByDetailUrl.name, param);
     return result.data;
   },
   /**
    *
    * @param {string} param jobId
    */
-  addJobBrowseDetailHistory: async function (
-    param,
-    { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }
-  ) {
-    return await invoke(this.addJobBrowseDetailHistory.name, param, {
-      invokeEnv: invokeEnv,
-    });
+  addJobBrowseDetailHistory: async function (param) {
+    return await invoke(this.addJobBrowseDetailHistory.name, param);
   },
   /**
    *
@@ -153,13 +122,8 @@ export const JobApi = {
    *
    * @returns Job[]
    */
-  jobGetByIds: async function (
-    param,
-    { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }
-  ) {
-    let result = await invoke(this.jobGetByIds.name, param, {
-      invokeEnv: invokeEnv,
-    });
+  jobGetByIds: async function (param) {
+    let result = await invoke(this.jobGetByIds.name, param);
     return result.data;
   },
 
@@ -168,42 +132,23 @@ export const JobApi = {
     * 
     * @param {JobTagBO} param
     */
-  jobTagAddOrUpdate: async function (param,
-    { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    return invoke(this.jobTagAddOrUpdate.name, param, {
-      invokeEnv: invokeEnv,
-    });
+  jobTagAddOrUpdate: async function (param) {
+    return invoke(this.jobTagAddOrUpdate.name, param);
   },
   /**
      * 
      * @param {JobTagBO[]} param
      */
-  jobTagBatchAddOrUpdate: async function (param,
-    { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    return invoke(this.jobTagBatchAddOrUpdate.name, param, {
-      invokeEnv: invokeEnv,
-    });
-  },
-  /**
-   * 
-   * @param {JobTagBO[]} param
-   */
-  jobTagBatchAddOrUpdateWithTransaction: async function (param,
-    { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    return invoke(this.jobTagBatchAddOrUpdateWithTransaction.name, param, {
-      invokeEnv: invokeEnv,
-    });
+  jobTagBatchAddOrUpdate: async function (param) {
+    return invoke(this.jobTagBatchAddOrUpdate.name, param);
   },
 
   /**
   * 
   * @param {string} param jobId
   */
-  jobTagGetAllDTOByJobId: async function (param,
-    { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.jobTagGetAllDTOByJobId.name, param, {
-      invokeEnv: invokeEnv,
-    });
+  jobTagGetAllDTOByJobId: async function (param) {
+    let result = await invoke(this.jobTagGetAllDTOByJobId.name, param);
     return result.data;
   },
 
@@ -211,11 +156,8 @@ export const JobApi = {
   * 
   * @param {string[]} param jobId
   */
-  jobTagGetAllDTOByJobIds: async function (param,
-    { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.jobTagGetAllDTOByJobIds.name, param, {
-      invokeEnv: invokeEnv,
-    });
+  jobTagGetAllDTOByJobIds: async function (param) {
+    let result = await invoke(this.jobTagGetAllDTOByJobIds.name, param);
     return result.data;
   },
 
@@ -225,10 +167,8 @@ export const JobApi = {
  *
  * @returns JobTagSearchDTO[]
  */
-  jobTagSearch: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.jobTagSearch.name, param, {
-      invokeEnv: invokeEnv,
-    });
+  jobTagSearch: async function (param) {
+    let result = await invoke(this.jobTagSearch.name, param);
     return result.data;
   },
 
@@ -236,23 +176,9 @@ export const JobApi = {
    * 
    * @param {string[]} param ids
    */
-  jobTagDeleteByJobIds: async function (param,
-    { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    return invoke(this.jobTagDeleteByJobIds.name, param, {
-      invokeEnv: invokeEnv,
-    });
+  jobTagDeleteByJobIds: async function (param) {
+    return invoke(this.jobTagDeleteByJobIds.name, param);
   },
-
-  /**
-   * 
-   * @returns JobTagStatisticDTO
-   */
-  jobTagStatistic: async function () {
-    let result = await invoke(this.jobTagStatistic.name, {});
-    return result.data;
-  },
-
-
   /**
    * 
    * @param {JobTagNameStatisticBO} param 
@@ -268,9 +194,8 @@ export const JobApi = {
   * @param {*} param 
   * @returns []
   */
-  jobStatisticGroupByPublishDate: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.jobStatisticGroupByPublishDate
-      .name, param, { invokeEnv: invokeEnv });
+  jobStatisticGroupByPublishDate: async function (param) {
+    let result = await invoke(this.jobStatisticGroupByPublishDate.name, param);
     return result.data;
   },
 
@@ -279,9 +204,8 @@ export const JobApi = {
   * @param {*} param 
   * @returns []
   */
-  jobStatisticGroupByPlatform: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.jobStatisticGroupByPlatform
-      .name, param, { invokeEnv: invokeEnv });
+  jobStatisticGroupByPlatform: async function (param) {
+    let result = await invoke(this.jobStatisticGroupByPlatform.name, param);
     return result.data;
   },
 
@@ -290,8 +214,8 @@ export const JobApi = {
   * @param {JobTagExportBO} param 
   * @returns []
   */
-  jobTagExport: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.jobTagExport.name, param, { invokeEnv: invokeEnv });
+  jobTagExport: async function (param) {
+    let result = await invoke(this.jobTagExport.name, param);
     return result.data;
   },
 
@@ -300,9 +224,8 @@ export const JobApi = {
   * @param {JobStatisticJobCompanyTagGroupByPlatformBO} param 
   * @returns []
   */
-  jobStatisticJobCompanyTagGroupByPlatform: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.jobStatisticJobCompanyTagGroupByPlatform
-      .name, param, { invokeEnv: invokeEnv });
+  jobStatisticJobCompanyTagGroupByPlatform: async function (param) {
+    let result = await invoke(this.jobStatisticJobCompanyTagGroupByPlatform.name, param);
     return result.data;
   },
 
@@ -311,9 +234,8 @@ export const JobApi = {
   * @param {JobStatisticJobCompanyTagGroupByCompanyBO} param 
   * @returns []
   */
-  jobStatisticJobCompanyTagGroupByCompany: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.jobStatisticJobCompanyTagGroupByCompany
-      .name, param, { invokeEnv: invokeEnv });
+  jobStatisticJobCompanyTagGroupByCompany: async function (param) {
+    let result = await invoke(this.jobStatisticJobCompanyTagGroupByCompany.name, param);
     return result.data;
   },
 
@@ -345,13 +267,8 @@ export const CompanyApi = {
    *
    * @returns Company[]
    */
-  companyGetByIds: async function (
-    param,
-    { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }
-  ) {
-    let result = await invoke(this.companyGetByIds.name, param, {
-      invokeEnv: invokeEnv,
-    });
+  companyGetByIds: async function (param) {
+    let result = await invoke(this.companyGetByIds.name, param);
     return result.data;
   },
 
@@ -369,8 +286,8 @@ export const CompanyApi = {
    * @param {SearchCompanyBO} param 
    * @returns SearchCompanyDTO
    */
-  searchCompany: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.searchCompany.name, param, { invokeEnv });
+  searchCompany: async function (param) {
+    let result = await invoke(this.searchCompany.name, param);
     return result.data;
   },
 
@@ -386,16 +303,8 @@ export const CompanyApi = {
    *
    * @param {CompanyBO} param
    */
-  batchAddOrUpdateCompany: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    return await invoke(this.batchAddOrUpdateCompany.name, param, { invokeEnv: invokeEnv });
-  },
-
-  /**
- *
- * @param {CompanyBO} param
- */
-  batchAddOrUpdateCompanyWithTransaction: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    return await invoke(this.batchAddOrUpdateCompanyWithTransaction.name, param, { invokeEnv: invokeEnv });
+  batchAddOrUpdateCompany: async function (param) {
+    return await invoke(this.batchAddOrUpdateCompany.name, param);
   },
 
   /**
@@ -410,16 +319,8 @@ export const CompanyApi = {
   *
   * @param {CompanyTagBatchAddOrUpdateBO} param
   */
-  batchAddOrUpdateCompanyTag: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    return await invoke(this.batchAddOrUpdateCompanyTag.name, param, { invokeEnv: invokeEnv });
-  },
-
-  /**
-  *
-  * @param {CompanyTagBatchAddOrUpdateBO} param
-  */
-  batchAddOrUpdateCompanyTagWithTransaction: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    return await invoke(this.batchAddOrUpdateCompanyTagWithTransaction.name, param, { invokeEnv: invokeEnv });
+  batchAddOrUpdateCompanyTag: async function (param) {
+    return await invoke(this.batchAddOrUpdateCompanyTag.name, param);
   },
   /**
    * 
@@ -436,8 +337,8 @@ export const CompanyApi = {
    * @param {string[]} ids 
    * @returns CompanyTagDTO[]
    */
-  getAllCompanyTagDTOByCompanyIds: async function (ids, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.getAllCompanyTagDTOByCompanyIds.name, ids, { invokeEnv: invokeEnv });
+  getAllCompanyTagDTOByCompanyIds: async function (ids,) {
+    let result = await invoke(this.getAllCompanyTagDTOByCompanyIds.name, ids,);
     return result.data;
   },
 
@@ -446,8 +347,8 @@ export const CompanyApi = {
    * @param {SearchCompanyTagBO} param 
    * @returns SearchCompanyTagDTO
    */
-  searchCompanyTag: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.searchCompanyTag.name, param, { invokeEnv: invokeEnv });
+  searchCompanyTag: async function (param) {
+    let result = await invoke(this.searchCompanyTag.name, param);
     return result.data;
   },
 
@@ -474,9 +375,8 @@ export const CompanyApi = {
   * @param {*} param 
   * @returns []
   */
-  companyStatisticGroupByStartDate: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.companyStatisticGroupByStartDate
-      .name, param, { invokeEnv: invokeEnv });
+  companyStatisticGroupByStartDate: async function (param) {
+    let result = await invoke(this.companyStatisticGroupByStartDate.name, param);
     return result.data;
   },
 
@@ -485,9 +385,8 @@ export const CompanyApi = {
   * @param {*} param 
   * @returns []
   */
-  companyStatisticGroupByInsurance: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.companyStatisticGroupByInsurance
-      .name, param, { invokeEnv: invokeEnv });
+  companyStatisticGroupByInsurance: async function (param) {
+    let result = await invoke(this.companyStatisticGroupByInsurance.name, param);
     return result.data;
   },
 
@@ -496,9 +395,8 @@ export const CompanyApi = {
   * @param {CompanyTagExportBO} param 
   * @returns []
   */
-  companyTagExport: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.companyTagExport
-      .name, param, { invokeEnv: invokeEnv });
+  companyTagExport: async function (param) {
+    let result = await invoke(this.companyTagExport.name, param);
     return result.data;
   },
 };
@@ -548,10 +446,17 @@ export const TagApi = {
    * @param {Tag} param tag
    * 
    */
-  addOrUpdateTag: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    return await invoke(this.addOrUpdateTag.name, param, {
-      invokeEnv: invokeEnv,
-    });
+  addOrUpdateTag: async function (param) {
+    return await invoke(this.addOrUpdateTag.name, param);
+  },
+
+  /**
+     * 
+     * @param {string} param tagName
+     */
+  tagGetByName: async function (param) {
+    let result = await invoke(this.tagGetByName.name, param);
+    return result.data;
   },
 
 }
@@ -622,10 +527,8 @@ export const ConfigApi = {
    * 
    * @returns Config
    */
-  getConfigByKey: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.getConfigByKey.name, param, {
-      invokeEnv: invokeEnv,
-    });
+  getConfigByKey: async function (param) {
+    let result = await invoke(this.getConfigByKey.name, param);
     return result.data;
   },
 
@@ -633,10 +536,8 @@ export const ConfigApi = {
    * 
    * @returns Config[]
    */
-  getAllConfig: async function ({ invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.getAllConfig.name, {}, {
-      invokeEnv: invokeEnv,
-    });
+  getAllConfig: async function () {
+    let result = await invoke(this.getAllConfig.name, {});
     return result.data;
   },
 
@@ -645,10 +546,8 @@ export const ConfigApi = {
    * @param {Config} param config
    * 
    */
-  addOrUpdateConfig: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    return await invoke(this.addOrUpdateConfig.name, param, {
-      invokeEnv: invokeEnv,
-    });
+  addOrUpdateConfig: async function (param) {
+    return await invoke(this.addOrUpdateConfig.name, param);
   },
 
 }
@@ -679,14 +578,6 @@ export const AssistantApi = {
    */
   assistantGetJobFaviousSetting: async function () {
     let result = await invoke(this.assistantGetJobFaviousSetting.name, {});
-    return result.data;
-  },
-  /**
- * 
- * @returns AssistantStatisticDTO
- */
-  assistantStatistic: async function () {
-    let result = await invoke(this.assistantStatistic.name, {});
     return result.data;
   },
 
@@ -832,8 +723,8 @@ export const TaskApi = {
    * @param {SearchTaskBO} param 
    * @returns {SearchTaskDTO}
    */
-  searchTask: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.searchTask.name, param, { invokeEnv: invokeEnv });
+  searchTask: async function (param) {
+    let result = await invoke(this.searchTask.name, param);
     return result.data;
   },
 
@@ -842,8 +733,8 @@ export const TaskApi = {
    * @param {SearchTaskBO} param 
    * @returns {SearchTaskDTO}
    */
-  searchTaskWithDetail: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.searchTaskWithDetail.name, param, { invokeEnv: invokeEnv });
+  searchTaskWithDetail: async function (param) {
+    let result = await invoke(this.searchTaskWithDetail.name, param);
     return result.data;
   },
 
@@ -852,8 +743,8 @@ export const TaskApi = {
    * @param {Task} param 
    * @returns Task
    */
-  taskAddOrUpdate: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.taskAddOrUpdate.name, param, { invokeEnv: invokeEnv });
+  taskAddOrUpdate: async function (param) {
+    let result = await invoke(this.taskAddOrUpdate.name, param);
     return result.data;
   },
 
@@ -862,8 +753,8 @@ export const TaskApi = {
    * @param {string} param id
    * @returns 
    */
-  taskDeleteById: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.taskDeleteById.name, param, { invokeEnv: invokeEnv });
+  taskDeleteById: async function (param) {
+    let result = await invoke(this.taskDeleteById.name, param);
     return result.data;
   },
 
@@ -872,8 +763,8 @@ export const TaskApi = {
  * @param {string[]} param ids
  * @returns 
  */
-  taskDeleteByIds: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.taskDeleteByIds.name, param, { invokeEnv: invokeEnv });
+  taskDeleteByIds: async function (param) {
+    let result = await invoke(this.taskDeleteByIds.name, param);
     return result.data;
   },
   /**
@@ -881,8 +772,8 @@ export const TaskApi = {
    * @param StatisticTaskBO param 
    * @returns StatisticTaskDTO
    */
-  statisticTask: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.statisticTask.name, param, { invokeEnv: invokeEnv });
+  statisticTask: async function (param) {
+    let result = await invoke(this.statisticTask.name, param);
     return result.data;
   },
   /**
@@ -890,8 +781,8 @@ export const TaskApi = {
    * @param TaskStatisticBO param 
    * @returns []
    */
-  taskStatisticUpload: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.taskStatisticUpload.name, param, { invokeEnv: invokeEnv });
+  taskStatisticUpload: async function (param) {
+    let result = await invoke(this.taskStatisticUpload.name, param);
     return result.data;
   },
   /**
@@ -899,8 +790,8 @@ export const TaskApi = {
    * @param TaskStatisticBO param 
    * @returns []
    */
-  taskStatisticDownload: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.taskStatisticDownload.name, param, { invokeEnv: invokeEnv });
+  taskStatisticDownload: async function (param) {
+    let result = await invoke(this.taskStatisticDownload.name, param);
     return result.data;
   },
   /**
@@ -908,8 +799,8 @@ export const TaskApi = {
   * @param TaskStatisticBO param 
   * @returns []
   */
-  taskStatisticMerge: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.taskStatisticMerge.name, param, { invokeEnv: invokeEnv });
+  taskStatisticMerge: async function (param) {
+    let result = await invoke(this.taskStatisticMerge.name, param);
     return result.data;
   },
   /**
@@ -917,8 +808,8 @@ export const TaskApi = {
   * @param TaskStatisticBO param 
   * @returns []
   */
-  taskStatisticStatus: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.taskStatisticStatus.name, param, { invokeEnv: invokeEnv });
+  taskStatisticStatus: async function (param) {
+    let result = await invoke(this.taskStatisticStatus.name, param);
     return result.data;
   },
 
@@ -931,8 +822,8 @@ export const TaskDataUploadApi = {
    * @param {SearchTaskDataUploadBO} param 
    * @returns {SearchTaskDataUploadDTO}
    */
-  searchTaskDataUpload: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.searchTaskDataUpload.name, param, { invokeEnv: invokeEnv });
+  searchTaskDataUpload: async function (param) {
+    let result = await invoke(this.searchTaskDataUpload.name, param);
     return result.data;
   },
 
@@ -941,8 +832,8 @@ export const TaskDataUploadApi = {
    * @param {string} param id 
    * @returns {TaskDataUpload}
    */
-  taskDataUploadGetById: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.taskDataUploadGetById.name, param, { invokeEnv: invokeEnv });
+  taskDataUploadGetById: async function (param) {
+    let result = await invoke(this.taskDataUploadGetById.name, param);
     return result.data;
   },
 
@@ -951,8 +842,8 @@ export const TaskDataUploadApi = {
    * @param {TaskDataUpload} param 
    * @returns TaskDataUpload
    */
-  taskDataUploadAddOrUpdate: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.taskDataUploadAddOrUpdate.name, param, { invokeEnv: invokeEnv });
+  taskDataUploadAddOrUpdate: async function (param) {
+    let result = await invoke(this.taskDataUploadAddOrUpdate.name, param);
     return result.data;
   },
 
@@ -961,8 +852,8 @@ export const TaskDataUploadApi = {
    * @param {string} param id
    * @returns 
    */
-  taskDataUploadDeleteById: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.taskDataUploadDeleteById.name, param, { invokeEnv: invokeEnv });
+  taskDataUploadDeleteById: async function (param) {
+    let result = await invoke(this.taskDataUploadDeleteById.name, param);
     return result.data;
   },
 
@@ -971,8 +862,8 @@ export const TaskDataUploadApi = {
  * @param {string[]} param ids
  * @returns 
  */
-  taskDataUploadDeleteByIds: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.taskDataUploadDeleteByIds.name, param, { invokeEnv: invokeEnv });
+  taskDataUploadDeleteByIds: async function (param) {
+    let result = await invoke(this.taskDataUploadDeleteByIds.name, param);
     return result.data;
   },
 
@@ -981,8 +872,8 @@ export const TaskDataUploadApi = {
   * @param {} param 
   * @returns string
   */
-  taskDataUploadGetMaxEndDatetime: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.taskDataUploadGetMaxEndDatetime.name, param, { invokeEnv: invokeEnv });
+  taskDataUploadGetMaxEndDatetime: async function (param) {
+    let result = await invoke(this.taskDataUploadGetMaxEndDatetime.name, param);
     return result.data;
   },
 
@@ -995,8 +886,8 @@ export const TaskDataDownloadApi = {
    * @param {SearchTaskDataDownloadBO} param 
    * @returns {SearchTaskDataDownloadDTO}
    */
-  searchTaskDataDownload: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.searchTaskDataDownload.name, param, { invokeEnv: invokeEnv });
+  searchTaskDataDownload: async function (param) {
+    let result = await invoke(this.searchTaskDataDownload.name, param);
     return result.data;
   },
 
@@ -1005,8 +896,8 @@ export const TaskDataDownloadApi = {
    * @param {string} param id 
    * @returns {TaskDataDownload}
    */
-  taskDataDownloadGetById: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.taskDataDownloadGetById.name, param, { invokeEnv: invokeEnv });
+  taskDataDownloadGetById: async function (param) {
+    let result = await invoke(this.taskDataDownloadGetById.name, param);
     return result.data;
   },
 
@@ -1015,8 +906,8 @@ export const TaskDataDownloadApi = {
    * @param {TaskDataDownload} param 
    * @returns TaskDataDownload
    */
-  taskDataDownloadAddOrUpdate: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.taskDataDownloadAddOrUpdate.name, param, { invokeEnv: invokeEnv });
+  taskDataDownloadAddOrUpdate: async function (param) {
+    let result = await invoke(this.taskDataDownloadAddOrUpdate.name, param);
     return result.data;
   },
 
@@ -1025,8 +916,8 @@ export const TaskDataDownloadApi = {
    * @param {string} param id
    * @returns 
    */
-  taskDataDownloadDeleteById: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.taskDataDownloadDeleteById.name, param, { invokeEnv: invokeEnv });
+  taskDataDownloadDeleteById: async function (param) {
+    let result = await invoke(this.taskDataDownloadDeleteById.name, param);
     return result.data;
   },
 
@@ -1035,41 +926,8 @@ export const TaskDataDownloadApi = {
  * @param {string[]} param ids
  * @returns 
  */
-  taskDataDownloadDeleteByIds: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.taskDataDownloadDeleteByIds.name, param, { invokeEnv: invokeEnv });
-    return result.data;
-  },
-
-}
-
-export const DBApi = {
-
-  /**
-   * 
-   * @param {} param 
-   * @returns {}
-   */
-  dbBeginTransaction: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.dbBeginTransaction.name, param, { invokeEnv: invokeEnv });
-    return result.data;
-  },
-
-  /**
-   * 
-   * @param {} param 
-   * @returns 
-   */
-  dbCommitTransaction: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.dbCommitTransaction.name, param, { invokeEnv: invokeEnv });
-    return result.data;
-  },
-  /**
-   * 
-   * @param {} param 
-   * @returns 
-   */
-  dbRollbackTransaction: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.dbRollbackTransaction.name, param, { invokeEnv: invokeEnv });
+  taskDataDownloadDeleteByIds: async function (param) {
+    let result = await invoke(this.taskDataDownloadDeleteByIds.name, param);
     return result.data;
   },
 
@@ -1082,8 +940,8 @@ export const FileApi = {
    * @param {SearchFileBO} param 
    * @returns {SearchFileDTO}
    */
-  searchFile: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.searchFile.name, param, { invokeEnv: invokeEnv });
+  searchFile: async function (param) {
+    let result = await invoke(this.searchFile.name, param);
     return result.data;
   },
 
@@ -1092,8 +950,8 @@ export const FileApi = {
    * @param {string} param id 
    * @returns {File}
    */
-  fileGetById: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.fileGetById.name, param, { invokeEnv: invokeEnv });
+  fileGetById: async function (param) {
+    let result = await invoke(this.fileGetById.name, param);
     return result.data;
   },
 
@@ -1102,8 +960,8 @@ export const FileApi = {
    * @param {File} param 
    * @returns File
    */
-  fileAddOrUpdate: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.fileAddOrUpdate.name, param, { invokeEnv: invokeEnv });
+  fileAddOrUpdate: async function (param) {
+    let result = await invoke(this.fileAddOrUpdate.name, param);
     return result.data;
   },
 
@@ -1112,8 +970,8 @@ export const FileApi = {
    * @param {string} param id
    * @returns 
    */
-  fileDeleteById: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.fileDeleteById.name, param, { invokeEnv: invokeEnv });
+  fileDeleteById: async function (param) {
+    let result = await invoke(this.fileDeleteById.name, param);
     return result.data;
   },
 
@@ -1122,8 +980,8 @@ export const FileApi = {
    * @param {string[]} param ids
    * @returns 
    */
-  fileDeleteByIds: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.fileDeleteByIds.name, param, { invokeEnv: invokeEnv });
+  fileDeleteByIds: async function (param) {
+    let result = await invoke(this.fileDeleteByIds.name, param);
     return result.data;
   },
 
@@ -1132,8 +990,8 @@ export const FileApi = {
    * @param {string[]} param ids
    * @returns 
    */
-  fileLogicDeleteByIds: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.fileLogicDeleteByIds.name, param, { invokeEnv: invokeEnv });
+  fileLogicDeleteByIds: async function (param) {
+    let result = await invoke(this.fileLogicDeleteByIds.name, param);
     return result.data;
   },
 
@@ -1142,8 +1000,8 @@ export const FileApi = {
    * @param {void} param 
    * @returns FileDTO[]
    */
-  fileGetAllMergedNotDeleteFile: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.fileGetAllMergedNotDeleteFile.name, param, { invokeEnv: invokeEnv });
+  fileGetAllMergedNotDeleteFile: async function (param) {
+    let result = await invoke(this.fileGetAllMergedNotDeleteFile.name, param);
     return result.data;
   },
 
@@ -1152,8 +1010,8 @@ export const FileApi = {
    * @param {void} param 
    * @returns FileStatisticDTO[]
    */
-  fileStatistic: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.fileStatistic.name, param, { invokeEnv: invokeEnv });
+  fileStatistic: async function (param) {
+    let result = await invoke(this.fileStatistic.name, param);
     return result.data;
   },
 
@@ -1166,8 +1024,8 @@ export const TaskDataMergeApi = {
    * @param {SearchTaskDataMergeBO} param 
    * @returns {SearchTaskDataMergeDTO}
    */
-  searchTaskDataMerge: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.searchTaskDataMerge.name, param, { invokeEnv: invokeEnv });
+  searchTaskDataMerge: async function (param) {
+    let result = await invoke(this.searchTaskDataMerge.name, param);
     return result.data;
   },
 
@@ -1176,8 +1034,8 @@ export const TaskDataMergeApi = {
    * @param {string} param id 
    * @returns {TaskDataMerge}
    */
-  taskDataMergeGetById: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.taskDataMergeGetById.name, param, { invokeEnv: invokeEnv });
+  taskDataMergeGetById: async function (param) {
+    let result = await invoke(this.taskDataMergeGetById.name, param);
     return result.data;
   },
 
@@ -1186,8 +1044,8 @@ export const TaskDataMergeApi = {
    * @param {TaskDataMerge} param 
    * @returns TaskDataMerge
    */
-  taskDataMergeAddOrUpdate: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.taskDataMergeAddOrUpdate.name, param, { invokeEnv: invokeEnv });
+  taskDataMergeAddOrUpdate: async function (param) {
+    let result = await invoke(this.taskDataMergeAddOrUpdate.name, param);
     return result.data;
   },
 
@@ -1196,8 +1054,8 @@ export const TaskDataMergeApi = {
    * @param {string} param id
    * @returns 
    */
-  taskDataMergeDeleteById: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.taskDataMergeDeleteById.name, param, { invokeEnv: invokeEnv });
+  taskDataMergeDeleteById: async function (param) {
+    let result = await invoke(this.taskDataMergeDeleteById.name, param);
     return result.data;
   },
 
@@ -1206,8 +1064,8 @@ export const TaskDataMergeApi = {
  * @param {string[]} param ids
  * @returns 
  */
-  taskDataMergeDeleteByIds: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.taskDataMergeDeleteByIds.name, param, { invokeEnv: invokeEnv });
+  taskDataMergeDeleteByIds: async function (param) {
+    let result = await invoke(this.taskDataMergeDeleteByIds.name, param);
     return result.data;
   },
 
@@ -1220,8 +1078,8 @@ export const DataSharePartnerApi = {
    * @param {SearchDataSharePartnerBO} param 
    * @returns {SearchDataSharePartnerDTO}
    */
-  searchDataSharePartner: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.searchDataSharePartner.name, param, { invokeEnv: invokeEnv });
+  searchDataSharePartner: async function (param) {
+    let result = await invoke(this.searchDataSharePartner.name, param);
     return result.data;
   },
 
@@ -1230,8 +1088,8 @@ export const DataSharePartnerApi = {
    * @param {string} param id 
    * @returns {DataSharePartner}
    */
-  dataSharePartnerGetById: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.dataSharePartnerGetById.name, param, { invokeEnv: invokeEnv });
+  dataSharePartnerGetById: async function (param) {
+    let result = await invoke(this.dataSharePartnerGetById.name, param);
     return result.data;
   },
 
@@ -1240,8 +1098,8 @@ export const DataSharePartnerApi = {
    * @param {DataSharePartner} param 
    * @returns DataSharePartner
    */
-  dataSharePartnerAddOrUpdate: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.dataSharePartnerAddOrUpdate.name, param, { invokeEnv: invokeEnv });
+  dataSharePartnerAddOrUpdate: async function (param) {
+    let result = await invoke(this.dataSharePartnerAddOrUpdate.name, param);
     return result.data;
   },
 
@@ -1250,8 +1108,8 @@ export const DataSharePartnerApi = {
    * @param {DataSharePartner[]} param 
    * @returns DataSharePartner[]
    */
-  dataSharePartnerBatchAddOrUpdate: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.dataSharePartnerBatchAddOrUpdate.name, param, { invokeEnv: invokeEnv });
+  dataSharePartnerBatchAddOrUpdate: async function (param) {
+    let result = await invoke(this.dataSharePartnerBatchAddOrUpdate.name, param);
     return result.data;
   },
 
@@ -1260,8 +1118,8 @@ export const DataSharePartnerApi = {
    * @param {string} param id
    * @returns 
    */
-  dataSharePartnerDeleteById: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.dataSharePartnerDeleteById.name, param, { invokeEnv: invokeEnv });
+  dataSharePartnerDeleteById: async function (param) {
+    let result = await invoke(this.dataSharePartnerDeleteById.name, param);
     return result.data;
   },
 
@@ -1270,8 +1128,8 @@ export const DataSharePartnerApi = {
  * @param {string[]} param ids
  * @returns 
  */
-  dataSharePartnerDeleteByIds: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.dataSharePartnerDeleteByIds.name, param, { invokeEnv: invokeEnv });
+  dataSharePartnerDeleteByIds: async function (param) {
+    let result = await invoke(this.dataSharePartnerDeleteByIds.name, param);
     return result.data;
   },
 
@@ -1280,10 +1138,25 @@ export const DataSharePartnerApi = {
    * @param {} param 
    * @returns StatisticDataSharePartnerDTO
    */
-  statisticDataSharePartner: async function (param, { invokeEnv } = { invokeEnv: CONTENT_SCRIPT }) {
-    let result = await invoke(this.statisticDataSharePartner.name, param, { invokeEnv: invokeEnv });
+  statisticDataSharePartner: async function (param) {
+    let result = await invoke(this.statisticDataSharePartner.name, param);
     return result.data;
   },
 
+}
 
+export const AppApi = {
+
+  appBackgroundTaskRun: async function (param) {
+    let result = await invoke(this.appBackgroundTaskRun.name, param);
+    return result.data;
+  },
+}
+
+export const EmitterApi = {
+
+  emitterEmit: async function (param) {
+    let result = await invoke(this.emitterEmit.name, param);
+    return result.data;
+  },
 }
