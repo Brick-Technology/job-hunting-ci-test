@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## WIP
+## 3.0.0(2025-01-24)
 
 ### ⚠️ Noteworthy
 
