@@ -15,7 +15,9 @@ import { ChangeLogV7 } from './changeLog/changeLogV7';
 import { ChangeLogV8 } from './changeLog/changeLogV8';
 import { ChangeLogV9 } from './changeLog/changeLogV9';
 
+import { isDevEnv } from "@/common";
 import { PGlite } from '@electric-sql/pglite';
+import { auto_explain } from '@electric-sql/pglite/contrib/auto_explain';
 
 const DATA_DIR = "data";
 const JOB_DIR = "job";
@@ -489,7 +491,20 @@ const _dbDelete = async () => {
  * @returns
  */
 const initDb = async function () {
-  db = new PGlite(`opfs-ahp://${JOB_DB_PATH}`);
+  const dataDir = `opfs-ahp://${JOB_DB_PATH}`;
+  if (isDevEnv()) {
+    db = new PGlite(dataDir, {
+      extensions: { auto_explain },
+      debug: 1,
+    });
+    await db.exec(`
+      LOAD 'auto_explain';
+      SET auto_explain.log_min_duration = '0';
+      SET auto_explain.log_analyze = 'true';
+      `);
+  } else {
+    db = new PGlite(dataDir);
+  }
   infoLog("[DB] schema checking...");
   let changelogList = getChangeLogList();
   let oldVersion = 0;
