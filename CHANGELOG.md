@@ -1,4 +1,12 @@
-# CHANGELOG
+## 3.0.1 (2025-01-26)
+
+### 🩹 Fixes
+
+- ci script & docs for nx
+
+### ❤️ Thank You
+
+- lastsunday @lastsunday
 
 ## 3.0.0(2025-01-24)
 
