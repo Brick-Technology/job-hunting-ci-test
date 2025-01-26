@@ -21,8 +21,13 @@ const useSystemStore = create<SystemState>()((set) => {
     }
 
     const checkNewVersion = (versionObject) => {
-        const latestVersion = versionObject.tag_name;
+        const tagName = versionObject.tag_name;
+        const latestVersion = getVersion(tagName);
         return semver.gt(latestVersion, version);
+    }
+
+    const getVersion = (text) => {
+        return text.match(/(?<version>[0-9]*\.[0-9]*\.[0-9]*.*)/).groups.version
     }
 
     const getLatestAssets = (versionObject) => {
@@ -51,7 +56,7 @@ const useSystemStore = create<SystemState>()((set) => {
             set(() => ({
                 versionObject,
                 newVersion: checkNewVersion(versionObject),
-                latestVersion: versionObject.tag_name,
+                latestVersion: getVersion(versionObject.tag_name),
                 latestVersionCreatedAt: dateToStr(versionObject.created_at, "YYYY-MM-DD"),
                 latestChangelogContent: versionObject.body,
             }));
