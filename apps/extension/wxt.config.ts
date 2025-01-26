@@ -15,6 +15,7 @@ export default defineConfig({
     }
   },
   manifest: {
+    name: "job-hunting",
     action: {
       default_title: "Click to open admin page"
     },

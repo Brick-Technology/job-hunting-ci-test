@@ -5,7 +5,9 @@ on:
     branches:
       - dev
     tags:
-      - "*"
+      - "@job-hunting/extension@*"
+env:
+  root_dir: apps/extension/
 
 permissions:
   contents: write
@@ -14,8 +16,15 @@ jobs:
   build-extension:
     runs-on: ubuntu-latest
     steps:
+      - name: Set Version Env
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          echo "VERSION=$(echo '${{  github.ref_name }}' | sed -e 's/\@job-hunting\/extension\@//g')" >> $GITHUB_ENV
+
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
         
       - uses: pnpm/action-setup@v4
         name: Install pnpm
@@ -30,54 +39,55 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
         
       - name: Package
         run: |
           pnpm install
-          pnpm run build
-          pnpm run build:firefox
+          pnpm exec nx run @job-hunting/extension:build
+          pnpm exec nx run @job-hunting/extension:build:firefox
 
       - name: Deploy chrome dist branch
         uses: JamesIves/github-pages-deploy-action@4.1.4
         with:
           branch: dist/chrome-${{  github.ref_name }}
-          folder: .output/chrome-mv3
+          folder: ${{ env.root_dir }}.output/chrome-mv3
 
       - name: Deploy firefox dist branch
         uses: JamesIves/github-pages-deploy-action@4.1.4
         with:
           branch: dist/firefox-${{  github.ref_name }}
-          folder: .output/firefox-mv2
+          folder: ${{ env.root_dir }}.output/firefox-mv2
       
       - name: Gen latest changelog
         if: startsWith(github.ref, 'refs/tags/')
         run: |
-          awk '/^##[^#]/{print NR}' CHANGELOG.md | head -n 2 | xargs | tr ' ' ',' | xargs -I {} sed -n {}p  CHANGELOG.md | sed '$d' > ${{ github.workspace }}-CHANGELOG.txt
+          awk '/^##[^#]/{print NR}' ${{ env.root_dir }}CHANGELOG.md | head -n 2 | xargs | tr ' ' ',' | xargs -I {} sed -n {}p  ${{ env.root_dir }}CHANGELOG.md | sed '$d' > ${{ env.root_dir }}CHANGELOG.txt
 
       - name: Rename dist
         if: startsWith(github.ref, 'refs/tags/')
         run: |
-          mv .output/chrome-mv3 job-hunting-extension-chrome-${{  github.ref_name }}
-          mv .output/firefox-mv2 job-hunting-extension-firefox-${{  github.ref_name }}
+          mv ${{ env.root_dir }}.output/chrome-mv3 job-hunting-extension-chrome
+          mv ${{ env.root_dir }}.output/firefox-mv2 job-hunting-extension-firefox
 
       - name: Zip chrome dist
         uses: montudor/action-zip@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          args: zip -qq -r job-hunting-extension-chrome-${{  github.ref_name }}.zip job-hunting-extension-chrome-${{  github.ref_name }}
+          args: zip -qq -r job-hunting-extension-chrome-${{ env.VERSION }}.zip job-hunting-extension-chrome
 
       - name: Zip firefox dist
         uses: montudor/action-zip@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          args: zip -qq -r job-hunting-extension-firefox-${{  github.ref_name }}.zip job-hunting-extension-firefox-${{  github.ref_name }}
+          args: zip -qq -r job-hunting-extension-firefox-${{ env.VERSION }}.zip job-hunting-extension-firefox
 
       - name: Release
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          body_path: ${{ github.workspace }}-CHANGELOG.txt
+          body_path: ${{ env.root_dir }}CHANGELOG.txt
+          make_latest: true
           files: |
-            job-hunting-extension-chrome-${{  github.ref_name }}.zip
-            job-hunting-extension-firefox-${{  github.ref_name }}.zip
+            job-hunting-extension-chrome-${{ env.VERSION }}.zip
+            job-hunting-extension-firefox-${{ env.VERSION }}.zip

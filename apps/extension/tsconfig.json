@@ -1,0 +1,24 @@
+{
+  "extends": ["../../tsconfig.base.json","./.wxt/tsconfig.json"],
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "jsx": "react-jsx",
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    //https://lit.dev/docs/components/decorators/#decorators-typescript
+    "experimentalDecorators": true,
+    "useDefineForClassFields": false,
+    "strict": false,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "lib": [
+      "DOM",
+      "ESNext",
+      "WebWorker"
+    ]
+  }
+}

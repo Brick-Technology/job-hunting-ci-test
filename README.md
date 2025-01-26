@@ -14,6 +14,16 @@
 
 为了提高使用这些招聘平台找工作的用户体验，项目会对目标平台网站页面进行增强展示；对出现过的职位进行永久存储，以便进行全网职位的个性化快速搜索，职位数据的共享；对职位数据进行多维度的分析，并以可视化的手段呈现；通过内置的讨论区，对职位进行评论，为职位打上标签等方式进行中立的职位交流；
 
+## 插件安装
+
+> 插件的**开发**请跳转到[extension开发目录](https://github.com/lastsunday/job-hunting/tree/dev/apps/extension)
+
+1. 打开 Release 页 或 直接访问 [最新发布](https://github.com/lastsunday/job-hunting/releases/latest)
+2. 点击下载 Assets 下的 job-hunting-extension-chrome-xxx.zip
+3. 解压 zip 文件
+4. 打开 chrome，选择加载已解压的扩展程序，选择解压后 manifest.json 文件所在的目录
+
+
 ## 招聘平台支持列表
 
 | 招聘平台  | 访问地址                            | 备注                   |
@@ -173,101 +183,3 @@
 <div style="margin-top:30px">
     <img src="docs\introduction\sidepanel_admin_setting.png" alt="sidepanel_admin_setting" width="1000px"/>
 </div>
-
-
-## 运行及编译
-
-> 以chrome为例
-
-**直接下载 1（尝鲜版）**
-
-1. 切换到 dist/chrome-dev 分支
-2. 点击右边绿色 code 按钮，选择下拉框中的 Download ZIP 下载
-3. 解压 zip 文件
-4. 打开 chrome，选择加载已解压的扩展程序，选择解压后 manifest.json 文件所在的目录
-
-**直接下载 2**
-
-1. 切换到 dist/chrome-xx.xx.xx 分支
-2. 点击右边绿色 code 按钮，选择下拉框中的 Download ZIP 下载
-3. 解压 zip 文件
-4. 打开 chrome，选择加载已解压的扩展程序，选择解压后 manifest.json 文件所在的目录
-
-**直接下载 3**
-
-1. 打开 Release 页
-2. 找到最新版本的 Assets 页下的 job-hunting-extension-chrome-xxx.zip
-3. 解压 zip 文件
-4. 打开 chrome，选择加载已解压的扩展程序，选择解压后 manifest.json 文件所在的目录
-
-**编译**
-
-1. 安装，编译
-
-```bash
-    pnpm i
-    pnpm run build
-```
-
-2. 打开 chrome，选择加载已解压的扩展程序，选择当前项目的 .output/chrome-mv3 目录
-
-3. 打开页面
-   - boss 直聘： <https://www.zhipin.com/web/geek/job>
-   - 51Job： <https://we.51job.com/pc/search>
-   - 智联招聘： <https://sou.zhaopin.com/>
-   - 拉钩网：<https://www.lagou.com/wn/zhaopin>
-   - 猎聘网： <https://www.liepin.com/zhaopin>
-
-**开发**
-
-1. 安装，编译
-
-   ```bash
-   pnpm i
-   pnpm run dev
-   ```
-
-2. chrome 浏览器打开 chrome://extensions/ 页面
-
-3. 点击`加载已解压的扩展程序`
-
-4. 选择项目中生成的 .output/chrome-mv3 文件夹即可
-
-5. 每次保存都会重新编译，扩展程序需要**_重新点一次刷新按钮_**才生效
-
-## Road Map
-
-- [x] 讨论区
-- [x] 个人助理
-  - [x] 职位偏好
-- [x] 自动浏览职位搜索页（目标：实现自动更新数据）
-  - [x] 招聘平台
-    - [x] BOSS直聘
-    - [x] 前程无忧
-    - [x] 智联招聘
-    - [x] 拉钩网
-    - [x] 猎聘网
-- [ ] 数据共享计划
-  - [ ] 支持的服务端
-    - [ ] <https://github.com/lastsunday/job-hunting-server>
-    - [x] GitHub
-  - [x] 数据
-    - [x] 职位
-    - [x] 公司
-    - [x] 公司标签
-    - [x] 职位标签
-  - [x] 数据共享计划伙伴列表
-    - [x] 增删改查
-    - [x] 寻找伙伴
-
-## Thanks
-
-1. <https://github.com/tangzhiyao/boss-show-time> **_boss 直聘时间展示插件_**
-2. <https://github.com/iibeibei/tampermonkey_scripts> **_BOSS 直聘 跨境黑名单_**
-3. <https://kjxb.org/> **_【跨境小白网】，跨境电商人的职场交流社区，互助网站。_**
-4. <https://maimai.cn/article/detail?fid=1662335089&efid=I0IjMo8A_37C2pHoqU2HjA> **_求职必备技能：教你如何扒了公司的底裤_**
-5. <https://github.com/it-job-blacklist/996ICU.job.blacklist_company> **_主要城市996公司名单，互联网企业黑名单，找工作防止掉坑_**
-6. <http://www.blackdir.com> **_IT黑名单_**
-7. <https://www.reshot.com> **Free Icons & IllustrationsDesign freely with instant downloads and commercial licenses.**
-8. <https://github.com/wxt-dev/wxt> **Next-gen Web Extension Framework**
-9. <https://github.com/ant-design/ant-design> **An enterprise-class UI design language and React UI library**

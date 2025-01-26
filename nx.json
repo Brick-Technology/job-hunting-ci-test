@@ -1,0 +1,42 @@
+{
+  "defaultBase": "dev",
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "namedInputs": {
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "production": ["default"],
+    "sharedGlobals": ["{workspaceRoot}/.github/workflows/ci.yml"]
+  },
+  "nxCloudId": "6795299dd4f9b972b4b2f868",
+  "plugins": [
+    {
+      "plugin": "@nx/js/typescript",
+      "options": {
+        "typecheck": {
+          "targetName": "typecheck"
+        },
+        "build": {
+          "targetName": "build",
+          "configName": "tsconfig.lib.json"
+        }
+      }
+    }
+  ],
+  "release": {
+    "projects": ["*"],
+    "projectsRelationship": "independent",
+    "changelog": {
+      "projectChangelogs": {
+        "renderOptions": {
+          "authors": true,
+          "mapAuthorsToGitHubUsernames": true,
+          "commitReferences": false,
+          "versionTitleDate": true
+        }
+      }
+    },
+    "versionPlans": true,
+    "version":{
+      "conventionalCommits": true
+    }
+  }
+}
