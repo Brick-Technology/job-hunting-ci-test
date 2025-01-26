@@ -37,6 +37,9 @@
     "versionPlans": true,
     "version":{
       "conventionalCommits": true
+    },
+    "git": {
+      "commitMessage": "bump({projectName}): {version}"
     }
   }
 }
