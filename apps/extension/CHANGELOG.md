@@ -1,3 +1,13 @@
+## 3.0.1 (2025-01-26)
+
+### 🩹 Fixes
+
+- change build system to Nx what is a build system for monorepo
+
+### ❤️ Thank You
+
+- lastsunday @lastsunday
+
 ## 3.0.0 (2025-01-24)
 
 ### ⚠️ Noteworthy
