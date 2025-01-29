@@ -1,6 +1,12 @@
 name: build-server
 run-name: ${{ github.actor }} server build
 
+permissions:
+  contents: write
+  packages: write
+  attestations: write
+  id-token: write
+
 on:
   push:
     branches:
@@ -15,8 +21,8 @@ env:
   CARGO_TERM_COLOR: always
   ROOT_DIR: apps/server/
   REGISTRY: ghcr.io
-  USER_NAME: ${{ github.actor }}
-  IMAGE_NAME: ${{ github.repository }}
+  USER_NAME: lastsunday
+  IMAGE_NAME: job-hunting
   BIN_NAME: server
 
 jobs:
@@ -178,7 +184,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
           images: |
             ${{env.USER_NAME}}/${{ env.IMAGE_NAME}}
