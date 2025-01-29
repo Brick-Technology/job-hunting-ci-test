@@ -5,6 +5,7 @@
 # Job Hunting(职位猎人) - 一款协助找工作的浏览器插件
 
 [![build-extension](https://github.com/lastsunday/job-hunting/actions/workflows/build-extension.yml/badge.svg)](https://github.com/lastsunday/job-hunting/actions/workflows/build-extension.yml)
+[![build-server](https://github.com/lastsunday/job-hunting/actions/workflows/build-server.yml/badge.svg)](https://github.com/lastsunday/job-hunting/actions/workflows/build-server.yml)
 
 ## 为什么要做这个项目
 

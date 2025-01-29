@@ -6,7 +6,8 @@
     "production": ["default"],
     "sharedGlobals": ["{workspaceRoot}/.github/workflows/ci.yml"]
   },
-  "nxCloudId": "6795299dd4f9b972b4b2f868",
+  "nxCloudId": "",
+  "neverConnectToCloud": true,
   "plugins": [
     {
       "plugin": "@nx/js/typescript",
@@ -19,7 +20,8 @@
           "configName": "tsconfig.lib.json"
         }
       }
-    }
+    },
+    "@monodon/rust"
   ],
   "release": {
     "projects": ["*"],
@@ -35,7 +37,7 @@
       }
     },
     "versionPlans": true,
-    "version":{
+    "version": {
       "conventionalCommits": true
     },
     "git": {
